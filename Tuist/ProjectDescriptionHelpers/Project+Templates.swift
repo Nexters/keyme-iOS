@@ -7,6 +7,7 @@ import ProjectDescription
 
 extension Project {
     private static let organizationName = "team.humanwave"
+    private static let targetVersion = "16.0"
     
     /// Helper function to create the Project for this ExampleApp
     public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
@@ -20,30 +21,34 @@ extension Project {
     }
 
     // MARK: - Private
-
+    
     /// Helper function to create a framework target and an associated unit test target
     private static func makeFrameworkTargets(name: String, platform: Platform) -> [Target] {
-        let sources = Target(name: name,
-                platform: platform,
-                product: .framework,
-                bundleId: "\(organizationName).\(name)",
-                deploymentTarget: .iOS(targetVersion: "16.0", devices: .iphone),
-                infoPlist: .default,
-                sources: ["Targets/\(name)/Sources/**"],
-                resources: [],
-                dependencies: [])
-        let tests = Target(name: "\(name)Tests",
-                platform: platform,
-                product: .unitTests,
-                bundleId: "\(organizationName).\(name)Tests",
-                deploymentTarget: .iOS(targetVersion: "16.0", devices: .iphone),
-                infoPlist: .default,
-                sources: ["Targets/\(name)/Tests/**"],
-                resources: [],
-                dependencies: [.target(name: name)])
+        let sources = Target(
+            name: name,
+            platform: platform,
+            product: .framework,
+            bundleId: "\(organizationName).\(name)",
+            deploymentTarget: .iOS(targetVersion: self.targetVersion, devices: .iphone),
+            infoPlist: .default,
+            sources: ["Targets/\(name)/Sources/**"],
+            resources: [],
+            dependencies: [])
+        
+        let tests = Target(
+            name: "\(name)Tests",
+            platform: platform,
+            product: .unitTests,
+            bundleId: "\(organizationName).\(name)Tests",
+            deploymentTarget: .iOS(targetVersion: self.targetVersion, devices: .iphone),
+            infoPlist: .default,
+            sources: ["Targets/\(name)/Tests/**"],
+            resources: [],
+            dependencies: [.target(name: name)])
+        
         return [sources, tests]
     }
-
+    
     /// Helper function to create the application target and the unit test target.
     private static func makeAppTargets(name: String, platform: Platform, dependencies: [TargetDependency]) -> [Target] {
         let platform: Platform = platform
@@ -64,6 +69,9 @@ extension Project {
             sources: ["Targets/\(name)/Sources/**"],
             resources: ["Targets/\(name)/Resources/**"],
             dependencies: dependencies
+            settings: .settings(configurations: [
+                .release(name: .)
+            ])
         )
 
         let testTarget = Target(
