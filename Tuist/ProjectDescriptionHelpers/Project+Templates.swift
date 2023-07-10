@@ -68,11 +68,7 @@ extension Project {
             infoPlist: .extendingDefault(with: infoPlist),
             sources: ["Targets/\(name)/Sources/**"],
             resources: ["Targets/\(name)/Resources/**"],
-            dependencies: dependencies
-            settings: .settings(configurations: [
-                .release(name: .)
-            ])
-        )
+            dependencies: dependencies)
 
         let testTarget = Target(
             name: "\(name)Tests",
