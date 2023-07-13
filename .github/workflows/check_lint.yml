@@ -8,17 +8,17 @@ jobs:
   SwiftLint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      - name: 💻 Check out code
         uses: actions/checkout@v3
 
-      - name: Cache SwiftLint
+      - name: 📮 Cache SwiftLint
         uses: actions/cache@v3
         id: cache
         with:
           path: .swiftlint
           key: ${{ runner.os }}-swiftlint-0.52.4
 
-      - name: Install SwiftLint
+      - name: 🗳️ Install SwiftLint
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p .swiftlint
@@ -26,5 +26,5 @@ jobs:
           sudo installer -pkg SwiftLint.pkg -target /
           cp /usr/local/bin/swiftlint .swiftlint/
 
-      - name: Run SwiftLint
+      - name: 🏃‍♂️ Run SwiftLint
         run: .swiftlint/swiftlint
