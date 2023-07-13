@@ -1,4 +1,5 @@
 import ProjectDescription
+import Environment
 
 /// Project helpers are functions that simplify the way you define your project.
 /// Share code to create targets, settings, dependencies,
@@ -6,9 +7,6 @@ import ProjectDescription
 /// See https://docs.tuist.io/guides/helpers/
 
 extension Project {
-    private static let organizationName = "team.humanwave"
-    private static let targetVersion = "16.0"
-    
     /// Helper function to create the Project for this ExampleApp
     public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
         var targets = makeAppTargets(name: name,
@@ -16,7 +14,7 @@ extension Project {
                                      dependencies: additionalTargets.map { TargetDependency.target(name: $0) })
         targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform) })
         return Project(name: name,
-                       organizationName: self.organizationName,
+                       organizationName: Environment.organizationName,
                        targets: targets)
     }
 
@@ -28,8 +26,8 @@ extension Project {
             name: name,
             platform: platform,
             product: .framework,
-            bundleId: "\(organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: self.targetVersion, devices: .iphone),
+            bundleId: "\(Environment.organizationName).\(name)",
+            deploymentTarget: .iOS(targetVersion: Environment.targetVersion, devices: .iphone),
             infoPlist: .default,
             sources: ["Targets/\(name)/Sources/**"],
             resources: [],
@@ -39,8 +37,8 @@ extension Project {
             name: "\(name)Tests",
             platform: platform,
             product: .unitTests,
-            bundleId: "\(organizationName).\(name)Tests",
-            deploymentTarget: .iOS(targetVersion: self.targetVersion, devices: .iphone),
+            bundleId: "\(Environment.organizationName).\(name)Tests",
+            deploymentTarget: .iOS(targetVersion: Environment.targetVersion, devices: .iphone),
             infoPlist: .default,
             sources: ["Targets/\(name)/Tests/**"],
             resources: [],
@@ -63,7 +61,7 @@ extension Project {
             name: name,
             platform: platform,
             product: .app,
-            bundleId: "\(organizationName).\(name)",
+            bundleId: "\(Environment.organizationName).\(name)",
             deploymentTarget: .iOS(targetVersion: "16.0", devices: .iphone),
             infoPlist: .extendingDefault(with: infoPlist),
             sources: ["Targets/\(name)/Sources/**"],
@@ -74,7 +72,7 @@ extension Project {
             name: "\(name)Tests",
             platform: platform,
             product: .unitTests,
-            bundleId: "\(organizationName).\(name)Tests",
+            bundleId: "\(Environment.organizationName).\(name)Tests",
             infoPlist: .default,
             sources: ["Targets/\(name)/Tests/**"],
             dependencies: [
