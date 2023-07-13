@@ -7,4 +7,4 @@
 
 import ProjectDescription
 
-let environmentPlugin = Plugin(name: "EnvironmentPlugin")
+let environmentPlugin = Plugin(name: "Environment")
