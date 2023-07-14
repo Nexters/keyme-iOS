@@ -54,9 +54,15 @@ extension Project {
             "CFBundleShortVersionString": "1.0",
             "CFBundleVersion": "1",
             "UIMainStoryboardFile": "",
-            "UILaunchStoryboardName": "LaunchScreen"
+            "UILaunchStoryboardName": "LaunchScreen",
+            "CFBundleURLTypes": [
+                [
+                    "CFBundleTypeRole": "Editor",
+                    "CFBundleURLSchemes": ["keyme"]
+                ]
             ]
-
+        ]
+        
         let mainTarget = Target(
             name: name,
             platform: platform,
