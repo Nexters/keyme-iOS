@@ -71,6 +71,7 @@ extension Project {
                 name: "Lint codes",
                 basedOnDependencyAnalysis: false)
             ],
+            entitlements: .relativeToRoot("Keyme.entitlements"),
             dependencies: dependencies)
 
         let testTarget = Target(
