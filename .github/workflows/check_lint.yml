@@ -1,0 +1,30 @@
+name: Check lint
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  SwiftLint:
+    runs-on: macOS-latest
+    steps:
+      - name: 💻 Check out code
+        uses: actions/checkout@v3
+
+      - name: 📮 Cache SwiftLint
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .swiftlint
+          key: ${{ runner.os }}-swiftlint-0.52.4
+
+      - name: 🗳️ Install SwiftLint
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .swiftlint
+          curl -OL "https://github.com/realm/SwiftLint/releases/download/0.52.4/SwiftLint.pkg"
+          sudo installer -pkg SwiftLint.pkg -target /
+          cp /usr/local/bin/swiftlint .swiftlint/
+
+      - name: 🏃‍♂️ Run SwiftLint
+        run: .swiftlint/swiftlint

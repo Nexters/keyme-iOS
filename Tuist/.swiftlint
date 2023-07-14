@@ -1,0 +1,36 @@
+disabled_rules:
+  - colon
+  - comma
+  - control_statement
+  - trailing_whitespace
+  - nesting
+  - type_body_length
+  - no_fallthrough_only
+
+analyzer_rules:
+  - explicit_self
+
+included:
+  - Sources
+excluded:
+  - Tests
+
+# If true, SwiftLint will not fail if no lintable files are found.
+allow_zero_lintable_files: false
+
+force_cast: error # implicitly
+force_try:
+  severity: warning # explicitly
+# implicitly
+line_length: 120
+
+type_name:
+  max_length: # warning and error
+    warning: 40
+    error: 50
+  allowed_symbols: ["_"]
+
+identifier_name:
+  allowed_symbols: ["_"]
+
+reporter: "xcode"
