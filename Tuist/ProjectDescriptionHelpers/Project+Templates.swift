@@ -9,9 +9,13 @@ import Environment
 extension Project {
     /// Helper function to create the Project for this ExampleApp
     public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
-        var targets = makeAppTargets(name: name,
-                                     platform: platform,
-                                     dependencies: additionalTargets.map { TargetDependency.target(name: $0) })
+        var dependencies = additionalTargets.map { TargetDependency.target(name: $0) }
+        dependencies.append(.external(name: "FirebaseMessaging"))
+        
+        var targets = makeAppTargets(
+            name: name,
+            platform: platform,
+            dependencies: dependencies)
         targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform) })
         return Project(name: name,
                        organizationName: Environment.organizationName,
@@ -62,7 +66,7 @@ extension Project {
                 ]
             ]
         ]
-        
+
         let mainTarget = Target(
             name: name,
             platform: platform,
@@ -70,16 +74,27 @@ extension Project {
             bundleId: "\(Environment.organizationName).\(name)",
             deploymentTarget: .iOS(targetVersion: "16.0", devices: .iphone),
             infoPlist: .extendingDefault(with: infoPlist),
-            sources: ["Targets/\(name)/Sources/**"],
-            resources: ["Targets/\(name)/Resources/**"],
+            sources: ["Targets/\(name)/Sources/**",],
+            resources: [
+                "Targets/\(name)/Resources/**",
+                "GoogleService-Info.plist"
+            ],
             scripts: [.pre(
                 path: .relativeToRoot("Scripts/lint.sh"),
                 name: "Lint codes",
                 basedOnDependencyAnalysis: false)
             ],
             entitlements: .relativeToRoot("Keyme.entitlements"),
-            dependencies: dependencies)
-
+            dependencies: dependencies,
+            settings: .settings(configurations: [
+                .debug(name: "Debug", settings: [
+                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                ]),
+                .release(name: "Release", settings: [
+                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                ])
+            ]))
+            
         let testTarget = Target(
             name: "\(name)Tests",
             platform: platform,
