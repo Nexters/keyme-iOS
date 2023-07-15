@@ -79,12 +79,12 @@ extension Project {
                 "Targets/\(name)/Resources/**",
                 "GoogleService-Info.plist"
             ],
+            entitlements: .relativeToRoot("Keyme.entitlements"),
             scripts: [.pre(
                 path: .relativeToRoot("Scripts/lint.sh"),
                 name: "Lint codes",
                 basedOnDependencyAnalysis: false)
             ],
-            entitlements: .relativeToRoot("Keyme.entitlements"),
             dependencies: dependencies,
             settings: .settings(configurations: [
                 .debug(name: "Debug", settings: [
