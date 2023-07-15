@@ -11,9 +11,7 @@ analyzer_rules:
   - explicit_self
 
 included:
-  - Sources
-excluded:
-  - Tests
+  - Targets
 
 # If true, SwiftLint will not fail if no lintable files are found.
 allow_zero_lintable_files: false
