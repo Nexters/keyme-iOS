@@ -37,6 +37,31 @@ final class NetworkManagerTests: XCTestCase {
         }
     }
     
+    func testRequestFailure() async {
+        let stubbedError = MoyaError.stringMapping(Response(statusCode: 400, data: Data()))
+        
+        let endpointClosure = { (target: KeymeAPI) -> Endpoint in
+            return Endpoint(url: URL(target: target).absoluteString,
+                            sampleResponseClosure: { .networkError(stubbedError as NSError) },
+                            method: target.method,
+                            task: target.task,
+                            httpHeaderFields: target.headers)
+        }
+        
+        let stubbedProvider = MoyaProvider<KeymeAPI>(
+            endpointClosure: endpointClosure,
+            stubClosure: MoyaProvider.immediatelyStub)
+        networkManager = NetworkManager(provider: stubbedProvider)
+        
+        let testTarget: KeymeAPI = .test
+        do {
+            _ = try await networkManager.request(testTarget)
+            XCTFail("Request should have failed but it succeeded.")
+        } catch {
+            return
+        }
+    }
+    
     func testCombineRequestSuccess() {
         let testTarget: KeymeAPI = .test
         let expectedResponseData = testTarget.sampleData
@@ -57,6 +82,42 @@ final class NetworkManagerTests: XCTestCase {
             }
 
         wait(for: [expectation], timeout: 1)
+        cancellable.cancel()
+    }
+    
+    func testCombineRequestFailure() {
+        let stubbedError = MoyaError.stringMapping(Response(statusCode: 400, data: Data()))
+
+        let endpointClosure = { (target: KeymeAPI) -> Endpoint in
+            return Endpoint(url: URL(target: target).absoluteString,
+                            sampleResponseClosure: { .networkError(stubbedError as NSError) },
+                            method: target.method,
+                            task: target.task,
+                            httpHeaderFields: target.headers)
+        }
+
+        let stubbedProvider = MoyaProvider<KeymeAPI>(
+            endpointClosure: endpointClosure,
+            stubClosure: MoyaProvider.immediatelyStub)
+        networkManager = NetworkManager(provider: stubbedProvider)
+
+        let testTarget: KeymeAPI = .test
+
+        let expectation = XCTestExpectation(description: "Receive response")
+        let cancellable = networkManager.request(testTarget)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    XCTFail("Request should have failed but it succeeded.")
+                case .failure(let error):
+                    break
+                }
+                expectation.fulfill()
+            } receiveValue: { _ in
+                XCTFail("Request should have failed but it received a value.")
+            }
+
+        wait(for: [expectation], timeout: 1.0)
         cancellable.cancel()
     }
 
