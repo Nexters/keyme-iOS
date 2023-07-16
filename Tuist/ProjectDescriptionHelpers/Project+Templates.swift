@@ -10,12 +10,15 @@ extension Project {
     /// Helper function to create the Project for this ExampleApp
     public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
         var dependencies = additionalTargets.map { TargetDependency.target(name: $0) }
-        dependencies.append(.external(name: "FirebaseMessaging"))
+        dependencies += [
+            .external(name: "FirebaseMessaging")
+        ]
         
         var targets = makeAppTargets(
             name: name,
             platform: platform,
             dependencies: dependencies)
+        
         targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform) })
         return Project(name: name,
                        organizationName: Environment.organizationName,
@@ -35,7 +38,10 @@ extension Project {
             infoPlist: .default,
             sources: ["Targets/\(name)/Sources/**"],
             resources: [],
-            dependencies: [])
+            dependencies: [
+                .external(name: "Moya"),
+                .external(name: "CombineMoya")
+            ])
 
         let tests = Target(
             name: "\(name)Tests",
