@@ -11,7 +11,7 @@ import Combine
 import Moya
 import CombineMoya
 
-protocol Networking {
+protocol MoyaNetworking {
     associatedtype APIType: TargetType
     
     /// Swift concurrency 맥락에서 네트워크 요청
@@ -34,7 +34,7 @@ public struct NetworkManager {
     }
 }
 
-extension NetworkManager: Networking {
+extension NetworkManager: MoyaNetworking {
     public func request(_ api: KeymeAPI) async throws -> Response {
         try await withCheckedThrowingContinuation { continuation in
             provider.request(api) { result in
