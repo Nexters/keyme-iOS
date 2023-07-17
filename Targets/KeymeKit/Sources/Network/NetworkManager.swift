@@ -7,9 +7,8 @@
 //
 
 import Combine
-
-import Moya
 import CombineMoya
+import Moya
 
 protocol MoyaNetworking {
     associatedtype APIType: TargetType
