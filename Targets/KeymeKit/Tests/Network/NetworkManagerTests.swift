@@ -6,11 +6,10 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
-import XCTest
+@testable import KeymeKit
 
 import Moya
-
-@testable import KeymeKit
+import XCTest
 
 final class NetworkManagerTests: XCTestCase {
     var networkManager: NetworkManager!
@@ -109,7 +108,7 @@ final class NetworkManagerTests: XCTestCase {
                 switch completion {
                 case .finished:
                     XCTFail("Request should have failed but it succeeded.")
-                case .failure(let error):
+                case .failure:
                     break
                 }
                 expectation.fulfill()
