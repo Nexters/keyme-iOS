@@ -1,0 +1,4 @@
+#!/bin/bash
+
+Scripts/decrypt.sh
+tuist generate
