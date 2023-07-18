@@ -11,36 +11,22 @@ import CombineMoya
 import Moya
 import Foundation
 
-protocol APIRequestable<APIType> {
+public protocol APIRequestable<APIType> {
     associatedtype APIType: TargetType
     
-    var core: CoreNetworkService<APIType> { get set }
-    var decoder: JSONDecoder { get }
-    
-    /// Swift concurrency 맥락에서 네트워크 요청
+    /// Swift concurrency 맥락에서 네트워크 요청. 그런데 디코딩을 곁들인
+    ///
+    /// - Parameters:
+    ///     - object: `받아_볼_타입.self`
     func request<T: Decodable>(_ api: APIType, object: T.Type) async throws -> T
     
-    /// Combine 맥락에서 네트워크 요청
+    /// Combine 맥락에서 네트워크 요청. 그런데 디코딩을 곁들인
+    ///
+    /// - Parameters:
+    ///     - object: `받아_볼_타입.self`
     func request<T: Decodable>(_ api: APIType, object: T.Type) -> AnyPublisher<T, MoyaError>
     
     /// 인증토큰 헤더에 넣어주는 메서드
+    @discardableResult
     mutating func registerAuthorizationToken(_ token: String) -> Self
-}
-
-extension APIRequestable {
-    func request<T: Decodable>(_ api: APIType, object: T.Type) async throws -> T {
-        let response = try await core.request(api)
-        let decoded = try decoder.decode(T.self, from: response.data)
-        
-        return decoded
-    }
-    
-    func request<T: Decodable>(_ api: APIType, object: T.Type) -> AnyPublisher<T, MoyaError> {
-        core.request(api).map(T.self)
-    }
-    
-    mutating func registerAuthorizationToken(_ token: String) -> Self {
-        core.registerAuthorizationToken(token)
-        return self
-    }
 }

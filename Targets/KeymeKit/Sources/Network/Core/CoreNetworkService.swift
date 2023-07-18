@@ -7,13 +7,33 @@
 //
 
 import Moya
+import Combine
 import Foundation
 
-struct CoreNetworkService<APIType: TargetType>: CoreNetworking {
-    private(set) var provider: MoyaProvider<APIType>
+struct CoreNetworkService<APIType: TargetType> {
+    public private(set) var provider: MoyaProvider<APIType>
     
     init(provider: MoyaProvider<APIType> = .init()) {
         self.provider = provider
+    }
+}
+
+extension CoreNetworkService: CoreNetworking {
+    func request(_ api: APIType) async throws -> Response {
+        try await withCheckedThrowingContinuation { continuation in
+            provider.request(api) { result in
+                switch result {
+                case let .success(response):
+                    continuation.resume(returning: response)
+                case let .failure(error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    func request(_ api: APIType) -> AnyPublisher<Response, MoyaError> {
+        provider.requestPublisher(api)
     }
     
     @discardableResult
