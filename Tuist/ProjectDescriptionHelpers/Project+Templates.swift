@@ -82,14 +82,16 @@ extension Project {
             infoPlist: .extendingDefault(with: infoPlist),
             sources: ["Targets/\(name)/Sources/**",],
             resources: [
-                "Targets/\(name)/Resources/**",
-                "GoogleService-Info.plist"
+                "Targets/\(name)/Resources/**"
             ],
             entitlements: .relativeToRoot("Keyme.entitlements"),
-            scripts: [.pre(
-                path: .relativeToRoot("Scripts/lint.sh"),
-                name: "Lint codes",
-                basedOnDependencyAnalysis: false)
+            scripts: [
+                .pre(
+                    path: .relativeToRoot("Scripts/lint.sh"),
+                    name: "Lint codes",
+                    basedOnDependencyAnalysis: false),
+                .post(path: .relativeToRoot("Scripts/encrypt.sh"),
+                      name: "Encrypt the secret files")
             ],
             dependencies: dependencies,
             settings: .settings(configurations: [

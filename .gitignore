@@ -68,5 +68,9 @@ Derived/
 
 ### Tuist managed dependencies ###
 Tuist/Dependencies
-
 Tuist/master.key
+
+Targets/Keyme/Resources/Secrets/*
+!Targets/Keyme/Resources/Secrets/.gitkeep
+
+Targets/Keyme/Encrypted/.DS_Store.encrypted
