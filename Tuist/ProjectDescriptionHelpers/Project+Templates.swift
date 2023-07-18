@@ -70,7 +70,8 @@ extension Project {
                     "CFBundleTypeRole": "Editor",
                     "CFBundleURLSchemes": ["keyme"]
                 ]
-            ]
+            ],
+            "API_BASE_URL": "$(API_BASE_URL)",
         ]
 
         let mainTarget = Target(
@@ -92,15 +93,26 @@ extension Project {
                 basedOnDependencyAnalysis: false)
             ],
             dependencies: dependencies,
-            settings: .settings(configurations: [
-                .debug(name: "Debug", settings: [
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                ]),
-                .release(name: "Release", settings: [
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                ])
-            ]))
-            
+            settings: .settings(
+                base: [
+                    "API_BASE_URL": .string("$(inherited)"),
+                ],
+                configurations: [
+                    .debug(
+                        name: "Debug", settings: [
+                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                        ],
+                        xcconfig: .relativeToRoot("Config.xcconfig")
+                    ),
+                    .release(
+                        name: "Release", settings: [
+                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                        ],
+                        xcconfig: .relativeToRoot("Config.xcconfig")
+                    )
+                ]
+            ))
+        
         let testTarget = Target(
             name: "\(name)Tests",
             platform: platform,
