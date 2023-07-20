@@ -10,12 +10,15 @@ extension Project {
     /// Helper function to create the Project for this ExampleApp
     public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
         var dependencies = additionalTargets.map { TargetDependency.target(name: $0) }
-        dependencies.append(.external(name: "FirebaseMessaging"))
+        dependencies += [
+            .external(name: "FirebaseMessaging")
+        ]
         
         var targets = makeAppTargets(
             name: name,
             platform: platform,
             dependencies: dependencies)
+        
         targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform) })
         return Project(name: name,
                        organizationName: Environment.organizationName,
@@ -35,7 +38,10 @@ extension Project {
             infoPlist: .default,
             sources: ["Targets/\(name)/Sources/**"],
             resources: [],
-            dependencies: [])
+            dependencies: [
+                .external(name: "Moya"),
+                .external(name: "CombineMoya")
+            ])
 
         let tests = Target(
             name: "\(name)Tests",
@@ -64,7 +70,8 @@ extension Project {
                     "CFBundleTypeRole": "Editor",
                     "CFBundleURLSchemes": ["keyme"]
                 ]
-            ]
+            ],
+            "API_BASE_URL": "$(API_BASE_URL)",
         ]
 
         let mainTarget = Target(
@@ -88,15 +95,26 @@ extension Project {
                       name: "Encrypt the secret files")
             ],
             dependencies: dependencies,
-            settings: .settings(configurations: [
-                .debug(name: "Debug", settings: [
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                ]),
-                .release(name: "Release", settings: [
-                    "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                ])
-            ]))
-            
+            settings: .settings(
+                base: [
+                    "API_BASE_URL": .string("$(inherited)"),
+                ],
+                configurations: [
+                    .debug(
+                        name: "Debug", settings: [
+                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                        ],
+                        xcconfig: .relativeToRoot("Config.xcconfig")
+                    ),
+                    .release(
+                        name: "Release", settings: [
+                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
+                        ],
+                        xcconfig: .relativeToRoot("Config.xcconfig")
+                    )
+                ]
+            ))
+        
         let testTarget = Target(
             name: "\(name)Tests",
             platform: platform,
