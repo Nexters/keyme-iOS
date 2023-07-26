@@ -9,6 +9,5 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project.makeModule(
-    name: "Util",
-    isDynamicFramework: true
+    name: "Util"
 )

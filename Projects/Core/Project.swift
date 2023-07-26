@@ -14,5 +14,6 @@ let project = Project.makeModule(
         .Util,
         .ThirdPartyLib
     ],
+    isDynamicFramework: true,
     hasTestTarget: false
 )
