@@ -70,7 +70,13 @@ Derived/
 Tuist/Dependencies
 Tuist/master.key
 
-Targets/Keyme/Resources/Secrets/*
-!Targets/Keyme/Resources/Secrets/.gitkeep
+Projects/Keyme/Resources/Secrets/*
+!Projects/Keyme/Resources/Secrets/.gitkeep
+
+Secrets/*
+Secrets/.gitkeep
 
 Targets/Keyme/Encrypted/.DS_Store.encrypted
+
+XCConfig/*
+!*/.gitkeep
