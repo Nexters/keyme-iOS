@@ -19,7 +19,7 @@ public extension Project {
             product: isDynamicFramework ? .framework : .staticFramework,
             bundleId: "\(Environment.organizationName).\(name)",
             deploymentTarget: Environment.deploymentTarget,
-            infoPlist: .default,
+            infoPlist: .extendingDefault(with: Project.baseUrlInfoPlist),
             sources: ["Sources/**"],
             resources: [],
             dependencies: internalDependencies + externalDependencies,
