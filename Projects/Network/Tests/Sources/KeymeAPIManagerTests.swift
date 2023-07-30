@@ -13,12 +13,12 @@ import XCTest
 
 // 조금 더 정확히 표현하면 APIRequestable에 대한 테스트
 final class KeymeAPIManagerTests: XCTestCase {
-    private var mockCoreNetworkService: CoreNetworkService<KeymeAPI>!
-    private var keymeAPIManager: KeymeAPIManager!
+    private var mockCoreNetworkService: CoreNetworkService<TestAPI>!
+    private var keymeAPIManager: KeymeAPIManager<TestAPI>!
     
     override func setUpWithError() throws {
-        let provider = MoyaProvider<KeymeAPI>(stubClosure: MoyaProvider.immediatelyStub)
-        mockCoreNetworkService = CoreNetworkService<KeymeAPI>(provider: provider)
+        let provider = MoyaProvider<TestAPI>(stubClosure: MoyaProvider.immediatelyStub)
+        mockCoreNetworkService = CoreNetworkService<TestAPI>(provider: provider)
         keymeAPIManager = KeymeAPIManager(core: mockCoreNetworkService)
     }
     
@@ -31,7 +31,7 @@ final class KeymeAPIManagerTests: XCTestCase {
 // MARK: 성공 케이스
 extension KeymeAPIManagerTests {
     func testRequest_returnsCorrectItem() async throws {
-        let api = KeymeAPI.test
+        let api = TestAPI.hello
         let item = try await keymeAPIManager.request(api, object: TestItem.self)
         
         XCTAssertEqual(item.id, 1)
@@ -41,7 +41,7 @@ extension KeymeAPIManagerTests {
     func testRequestWithPublisher_returnsCorrectItem() throws {
         let expectation = expectation(description: "Publisher completes and returns an item.")
         
-        let api = KeymeAPI.test
+        let api = TestAPI.hello
         _ = keymeAPIManager.request(api, object: TestItem.self)
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -66,7 +66,7 @@ extension KeymeAPIManagerTests {
         
         do {
             // Use an endpoint that will cause a failure
-            _ = try await keymeAPIManager.request(.test, object: TestItem.self)
+            _ = try await keymeAPIManager.request(.hello, object: TestItem.self)
             XCTFail("Request should have failed but didn't")
         } catch {
             return
@@ -77,7 +77,7 @@ extension KeymeAPIManagerTests {
         setUpErrorStub()
         
         let expectation = XCTestExpectation()
-        _ = keymeAPIManager.request(.test, object: TestItem.self)
+        _ = keymeAPIManager.request(.hello, object: TestItem.self)
             .sink(
                 receiveCompletion: { completion in
                     switch completion {
@@ -104,7 +104,7 @@ extension KeymeAPIManagerTests {
                             httpHeaderFields: target.headers)
         }
         
-        let stubbedProvider = MoyaProvider<KeymeAPI>(
+        let stubbedProvider = MoyaProvider<TestAPI>(
             endpointClosure: endpointClosure,
             stubClosure: MoyaProvider.immediatelyStub)
         mockCoreNetworkService = CoreNetworkService(provider: stubbedProvider)

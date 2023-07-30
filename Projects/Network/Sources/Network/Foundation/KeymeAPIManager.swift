@@ -12,13 +12,13 @@ import Combine
 import CombineMoya
 import Moya
 
-public struct KeymeAPIManager {
-    public typealias APIType = KeymeAPI
+public struct KeymeAPIManager<APIType: TargetType> {
+    public typealias APIType = APIType
     
-    private var core: CoreNetworkService<KeymeAPI>
+    private var core: CoreNetworkService<APIType>
     private let decoder = JSONDecoder()
     
-    init(core: CoreNetworkService<KeymeAPI>) {
+    init(core: CoreNetworkService<APIType>) {
         self.core = core
     }
     
@@ -30,28 +30,30 @@ public struct KeymeAPIManager {
 }
 
 extension KeymeAPIManager: CoreNetworking {
-    public func request(_ api: KeymeAPI) async throws -> Response {
+    public func request(_ api: APIType) async throws -> Response {
         try await core.request(api)
     }
     
-    public func request(_ api: KeymeAPI) -> AnyPublisher<Response, MoyaError> {
+    public func request(_ api: APIType) -> AnyPublisher<Response, MoyaError> {
         core.request(api)
     }
 }
 
 extension KeymeAPIManager: APIRequestable {
-    public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) async throws -> T {
+    public func request<T: Decodable>(_ api: APIType, object: T.Type) async throws -> T {
         let response = try await core.request(api)
         let decoded = try decoder.decode(T.self, from: response.data)
         
         return decoded
     }
     
-    public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) -> AnyPublisher<T, MoyaError> {
+    public func request<T: Decodable>(_ api: APIType, object: T.Type) -> AnyPublisher<T, MoyaError> {
         core.request(api).map(T.self)
     }
 }
 
 public extension KeymeAPIManager {
-    static let shared = KeymeAPIManager(core: .init())
+    static var shared: KeymeAPIManager<APIType> {
+        return KeymeAPIManager<APIType>(core: .init())
+    }
 }

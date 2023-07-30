@@ -6,11 +6,12 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
-import Moya
 import Combine
 import Foundation
 
-struct CoreNetworkService<APIType: TargetType> {
+import Moya
+
+public struct CoreNetworkService<APIType: TargetType> {
     public private(set) var provider: MoyaProvider<APIType>
     
     init(provider: MoyaProvider<APIType> = .init()) {
