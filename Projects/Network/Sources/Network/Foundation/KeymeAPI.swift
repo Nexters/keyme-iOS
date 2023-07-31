@@ -32,9 +32,3 @@ extension KeymeAPI {
             .data(using: .utf8)!
     }
 }
-
-// TODO: 나중에 어디로 옮기기
-struct TestItem: Decodable {
-    let id: Int
-    let name: String
-}
