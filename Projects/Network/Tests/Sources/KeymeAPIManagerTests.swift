@@ -31,7 +31,7 @@ final class KeymeAPIManagerTests: XCTestCase {
 // MARK: 성공 케이스
 extension KeymeAPIManagerTests {
     func testRequest_returnsCorrectItem() async throws {
-        let api = TestAPI.hello
+        let api: TestAPI = .test
         let item = try await keymeAPIManager.request(api, object: TestItem.self)
         
         XCTAssertEqual(item.id, 1)
@@ -41,7 +41,7 @@ extension KeymeAPIManagerTests {
     func testRequestWithPublisher_returnsCorrectItem() throws {
         let expectation = expectation(description: "Publisher completes and returns an item.")
         
-        let api = TestAPI.hello
+        let api: TestAPI = .test
         _ = keymeAPIManager.request(api, object: TestItem.self)
             .sink(receiveCompletion: { completion in
                 switch completion {
@@ -66,7 +66,7 @@ extension KeymeAPIManagerTests {
         
         do {
             // Use an endpoint that will cause a failure
-            _ = try await keymeAPIManager.request(.hello, object: TestItem.self)
+            _ = try await keymeAPIManager.request(.test, object: TestItem.self)
             XCTFail("Request should have failed but didn't")
         } catch {
             return
@@ -77,7 +77,7 @@ extension KeymeAPIManagerTests {
         setUpErrorStub()
         
         let expectation = XCTestExpectation()
-        _ = keymeAPIManager.request(.hello, object: TestItem.self)
+        _ = keymeAPIManager.request(.test, object: TestItem.self)
             .sink(
                 receiveCompletion: { completion in
                     switch completion {
@@ -96,7 +96,7 @@ extension KeymeAPIManagerTests {
     private func setUpErrorStub() {
         let stubbedError = MoyaError.stringMapping(Response(statusCode: 400, data: Data()))
         
-        let endpointClosure = { (target: KeymeAPI) -> Endpoint in
+        let endpointClosure = { (target: TestAPI) -> Endpoint in
             return Endpoint(url: URL(target: target).absoluteString,
                             sampleResponseClosure: { .networkError(stubbedError as NSError) },
                             method: target.method,
@@ -109,5 +109,46 @@ extension KeymeAPIManagerTests {
             stubClosure: MoyaProvider.immediatelyStub)
         mockCoreNetworkService = CoreNetworkService(provider: stubbedProvider)
         keymeAPIManager = KeymeAPIManager(core: mockCoreNetworkService)
+    }
+}
+
+// MARK: Data for tests
+extension KeymeAPIManagerTests {
+    enum TestAPI: TargetType {
+        case test
+        
+        var baseURL: URL {
+            URL(string: "www.naver.com")!
+        }
+        
+        var path: String {
+            "path"
+        }
+        
+        var method: Moya.Method {
+            .get
+        }
+        
+        var task: Moya.Task {
+            .requestPlain
+        }
+        
+        var headers: [String : String]? {
+            [:]
+        }
+        
+        var sampleData: Data {
+                """
+                {
+                    "id": 1,
+                    "name": "Test Item"
+                }
+                """.data(using: .utf8)!
+        }
+    }
+    
+    struct TestItem: Decodable {
+        let id: Int
+        let name: String
     }
 }
