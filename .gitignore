@@ -76,6 +76,7 @@ Secrets/*
 
 Targets/Keyme/Encrypted/.DS_Store.encrypted
 
-XCConfig/*
+XCConfig/App/*
+XCConfig/Target/*
 
 !*/.gitkeep
