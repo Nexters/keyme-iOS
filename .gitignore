@@ -71,12 +71,15 @@ Tuist/Dependencies
 Tuist/master.key
 
 Projects/Keyme/Resources/Secrets/*
+!Projects/Keyme/Resources/Secrets/.gitkeep
 
 Secrets/*
+!Secrets/.gitkeep
 
 Targets/Keyme/Encrypted/.DS_Store.encrypted
 
 XCConfig/App/*
 XCConfig/Target/*
 
-!*/.gitkeep
+!XCConfig/App/.gitkeep
+!XCConfig/Target/.gitkeep
