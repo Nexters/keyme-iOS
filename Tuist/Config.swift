@@ -2,6 +2,8 @@ import ProjectDescription
 
 let config = Config(
     plugins: [
-        .local(path: .relativeToManifest("../../Plugins/Environment"))
+        .local(path: .relativeToRoot("Plugins/ConfigPlugin")),
+        .local(path: .relativeToRoot("Plugins/DependencyPlugin")),
+        .local(path: .relativeToRoot("Plugins/EnvPlugin"))
     ]
 )

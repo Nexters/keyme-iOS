@@ -1,130 +1,69 @@
 import ProjectDescription
-import Environment
 
-/// Project helpers are functions that simplify the way you define your project.
-/// Share code to create targets, settings, dependencies,
-/// Create your own conventions, e.g: a func that makes sure all shared targets are "static frameworks"
-/// See https://docs.tuist.io/guides/helpers/
+import ConfigPlugin
+import DependencyPlugin
+import EnvPlugin
 
-extension Project {
-    /// Helper function to create the Project for this ExampleApp
-    public static func app(name: String, platform: Platform, additionalTargets: [String]) -> Project {
-        var dependencies = additionalTargets.map { TargetDependency.target(name: $0) }
-        dependencies += [
-            .external(name: "FirebaseMessaging")
-        ]
+public extension Project {
+    static func makeModule(name: String,
+                           internalDependencies: [TargetDependency] = [],
+                           externalDependencies: [TargetDependency] = [],
+                           isDynamicFramework: Bool = false,
+                           hasTestTarget: Bool = true
+    ) -> Project {
+        var targets: [Target] = [ ]
         
-        var targets = makeAppTargets(
+        let target = Target(
             name: name,
-            platform: platform,
-            dependencies: dependencies)
+            platform: Environment.platform,
+            product: isDynamicFramework ? .framework : .staticFramework,
+            bundleId: "\(Environment.organizationName).\(name)",
+            deploymentTarget: Environment.deploymentTarget,
+            infoPlist: .default,
+            sources: ["Sources/**"],
+            resources: [],
+            dependencies: internalDependencies + externalDependencies,
+            settings: .settings(base: .baseSettings, configurations: XCConfig.framework)
+
+        )
+        targets.append(target)
         
-        targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform) })
+        if hasTestTarget {
+            let testTarget = Target(
+                name: "\(name)Tests",
+                platform: Environment.platform,
+                product: .unitTests,
+                bundleId: "\(Environment.organizationName).\(name)Tests",
+                infoPlist: .default,
+                sources: ["Tests/Sources/**"],
+                resources: [.glob(pattern: "Tests/Resources/**", excluding: [])],
+                dependencies: [.target(name: name)],
+                settings: .settings(base: .baseSettings, configurations: XCConfig.tests)
+
+            )
+            targets.append(testTarget)
+        }
+        
         return Project(name: name,
                        organizationName: Environment.organizationName,
-                       targets: targets)
+                       settings: .settings(configurations: XCConfig.project),
+                       targets: targets,
+                       schemes: [Scheme.makeScheme(configs: "DEV", name: "\(name)"),
+                                 Scheme.makeScheme(configs: "PROD", name: "\(name)")])
     }
+}
 
-    // MARK: - Private
-
-    /// Helper function to create a framework target and an associated unit test target
-    private static func makeFrameworkTargets(name: String, platform: Platform) -> [Target] {
-        let sources = Target(
-            name: name,
-            platform: platform,
-            product: .framework,
-            bundleId: "\(Environment.organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: Environment.targetVersion, devices: .iphone),
-            infoPlist: .default,
-            sources: ["Targets/\(name)/Sources/**"],
-            resources: [],
-            dependencies: [
-                .external(name: "Moya"),
-                .external(name: "CombineMoya")
-            ])
-
-        let tests = Target(
-            name: "\(name)Tests",
-            platform: platform,
-            product: .unitTests,
-            bundleId: "\(Environment.organizationName).\(name)Tests",
-            deploymentTarget: .iOS(targetVersion: Environment.targetVersion, devices: .iphone),
-            infoPlist: .default,
-            sources: ["Targets/\(name)/Tests/**"],
-            resources: [],
-            dependencies: [.target(name: name)])
-
-        return [sources, tests]
-    }
-
-    /// Helper function to create the application target and the unit test target.
-    private static func makeAppTargets(name: String, platform: Platform, dependencies: [TargetDependency]) -> [Target] {
-        let platform: Platform = platform
-        let infoPlist: [String: InfoPlist.Value] = [
-            "CFBundleShortVersionString": "1.0",
-            "CFBundleVersion": "1",
-            "UIMainStoryboardFile": "",
-            "UILaunchStoryboardName": "LaunchScreen",
-            "CFBundleURLTypes": [
-                [
-                    "CFBundleTypeRole": "Editor",
-                    "CFBundleURLSchemes": ["keyme"]
-                ]
-            ],
-            "API_BASE_URL": "$(API_BASE_URL)",
-        ]
-
-        let mainTarget = Target(
-            name: name,
-            platform: platform,
-            product: .app,
-            bundleId: "\(Environment.organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: "16.0", devices: .iphone),
-            infoPlist: .extendingDefault(with: infoPlist),
-            sources: ["Targets/\(name)/Sources/**",],
-            resources: [
-                "Targets/\(name)/Resources/**"
-            ],
-            entitlements: .relativeToRoot("Keyme.entitlements"),
-            scripts: [
-                .pre(
-                    path: .relativeToRoot("Scripts/lint.sh"),
-                    name: "Lint codes",
-                    basedOnDependencyAnalysis: false),
-                .post(path: .relativeToRoot("Scripts/encrypt.sh"),
-                      name: "Encrypt the secret files")
-            ],
-            dependencies: dependencies,
-            settings: .settings(
-                base: [
-                    "API_BASE_URL": .string("$(inherited)"),
-                ],
-                configurations: [
-                    .debug(
-                        name: "Debug", settings: [
-                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                        ],
-                        xcconfig: .relativeToRoot("Config.xcconfig")
-                    ),
-                    .release(
-                        name: "Release", settings: [
-                            "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"]
-                        ],
-                        xcconfig: .relativeToRoot("Config.xcconfig")
-                    )
-                ]
-            ))
-        
-        let testTarget = Target(
-            name: "\(name)Tests",
-            platform: platform,
-            product: .unitTests,
-            bundleId: "\(Environment.organizationName).\(name)Tests",
-            infoPlist: .default,
-            sources: ["Targets/\(name)/Tests/**"],
-            dependencies: [
-                .target(name: "\(name)")
-        ])
-        return [mainTarget, testTarget]
+extension Scheme {
+    static func makeScheme(configs: ConfigurationName, name: String) -> Scheme {
+        return Scheme(name: name,
+                      buildAction: .buildAction(targets: ["\(name)"]),
+                      testAction: .targets(["\(name)Tests"],
+                                           configuration: configs,
+                                           options: .options(coverage: true, codeCoverageTargets: ["\(name)"])),
+                      runAction: .runAction(configuration: configs),
+                      archiveAction: .archiveAction(configuration: configs),
+                      profileAction: .profileAction(configuration: configs),
+                      analyzeAction: .analyzeAction(configuration: configs)
+        )
     }
 }
