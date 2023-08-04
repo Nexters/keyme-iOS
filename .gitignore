@@ -74,9 +74,12 @@ Projects/Keyme/Resources/Secrets/*
 !Projects/Keyme/Resources/Secrets/.gitkeep
 
 Secrets/*
-Secrets/.gitkeep
+!Secrets/.gitkeep
 
 Targets/Keyme/Encrypted/.DS_Store.encrypted
 
-XCConfig/*
-!*/.gitkeep
+XCConfig/App/*
+XCConfig/Target/*
+
+!XCConfig/App/.gitkeep
+!XCConfig/Target/.gitkeep
