@@ -14,7 +14,7 @@ public enum TestAPI {
     case hello
 }
 
-extension TestAPI: KeymeAPI {
+extension TestAPI: BaseAPI {
     public var path: String {
         return "/hello"
     }
