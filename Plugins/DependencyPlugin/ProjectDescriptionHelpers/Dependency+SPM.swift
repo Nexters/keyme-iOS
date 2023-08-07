@@ -14,4 +14,5 @@ public extension TargetDependency {
     static let ComposableArchitecture = TargetDependency.external(name: "ComposableArchitecture")
     static let Kingfisher = TargetDependency.external(name: "Kingfisher")
     static let KakaoSDK = TargetDependency.external(name: "KakaoSDK")
+    static let SwiftUIIntrospect = TargetDependency.external(name: "SwiftUIIntrospect")
 }

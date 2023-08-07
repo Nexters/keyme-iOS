@@ -15,7 +15,8 @@ let project = Project.makeModule(
         .CombineMoya,
         .ComposableArchitecture,
         .Kingfisher,
-        .KakaoSDK
+        .KakaoSDK,
+        .SwiftUIIntrospect
     ],
     isDynamicFramework: true,
     hasTestTarget: false
