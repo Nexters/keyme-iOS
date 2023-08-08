@@ -10,12 +10,35 @@ import Features
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+    @AppStorage("isNewbie") private var isNewbie = true
+    @State private var selectedTab = 0
+
     var body: some Scene {
         WindowGroup {
-            TestView(store: Store(
-                initialState: TestStore.State(),
-                reducer: TestStore()))
+            if isNewbie {
+                Toggle(isOn: $isNewbie) {
+                    Text("뉴비세요?")
+                }
+                .frame(width: 150)
+            } else {
+                TabView(selection: $selectedTab) {
+                    TestView(store: Store(
+                        initialState: TestStore.State(),
+                        reducer: TestStore()))
+                    .tabItem {
+                        Image(systemName: "1.square.fill")
+                        Text("Tab 1")
+                    }
+                    .tag(0)
+                    
+                    Text("Tab 2 Content")
+                        .tabItem {
+                            Image(systemName: "2.square.fill")
+                            Text("Tab 2")
+                        }
+                        .tag(1)
+                }
+            }
         }
     }
 }
