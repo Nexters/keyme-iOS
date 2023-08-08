@@ -1,19 +1,20 @@
 //
 //  KeymeAPI.swift
-//  Keyme
+//  Network
 //
-//  Created by Young Bin on 2023/07/16.
+//  Created by 김영인 on 2023/08/07.
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
 import Foundation
+
 import Moya
 
 public enum KeymeAPI {
     case test
 }
 
-extension KeymeAPI: TargetType {
+extension KeymeAPI: BaseAPI {
     // TODO: 임시 - 서버 도메인 확정되면 변경할 것
     public var baseURL: URL {
         return URL(string: "https://randomuser.me")!
@@ -44,7 +45,7 @@ extension KeymeAPI: TargetType {
     public var headers: [String: String]? {
         return ["Content-type": "application/json"]
     }
-    
+
     public var sampleData: Data {
         """
         {
@@ -54,10 +55,4 @@ extension KeymeAPI: TargetType {
         """
             .data(using: .utf8)!
     }
-}
-
-// TODO: 나중에 어디로 옮기기
-struct TestItem: Decodable {
-    let id: Int
-    let name: String
 }

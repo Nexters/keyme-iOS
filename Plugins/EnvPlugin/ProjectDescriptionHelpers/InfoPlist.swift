@@ -21,4 +21,8 @@ public extension Project {
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
     ]
+    
+    static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [
+        "API_BASE_URL": "$(API_BASE_URL)",
+    ]
 }

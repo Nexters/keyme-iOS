@@ -1,13 +1,15 @@
 #!/bin/bash
 
-KEY_PATH="Tuist/master.key"
+KEY_PATH="../../Tuist/master.key"
 
-ENCRYPTED_DIR="Encrypted"
+ENCRYPTED_DIR="../../Encrypted"
 SECRET_DIR="Secrets"
+XCCONFIG_APP_SECRET_DIR="XCConfig/App"
+XCCONFIG_TARGET_SECRET_DIR="XCConfig/Target"
 
-OUTPUT_DIR="Projects/Keyme/Resources/Secrets"
-XCCONFIG_APP_DIR="XCConfig/App"
-XCCONFIG_TARGET_DIR="XCConfig/Target"
+OUTPUT_DIR="Resources/Secrets"
+XCCONFIG_APP_DIR="../../XCConfig/App"
+XCCONFIG_TARGET_DIR="../../XCConfig/Target"
 
 # Find all non-hidden files in the secrets directory that don't have the .encrypted extension
 files=($(find ${OUTPUT_DIR} -type f ! -name ".*" ! -name "*.encrypted"))
@@ -23,9 +25,9 @@ do
    filename=$(basename $file)
 
    if [[ $file == *"$XCCONFIG_APP_DIR"* ]]; then
-        out_dir="${XCCONFIG_APP_DIR}"
+        out_dir="${XCCONFIG_APP_SECRET_DIR}"
    elif [[ $file == *"$XCCONFIG_TARGET_DIR"* ]]; then
-        out_dir="${XCCONFIG_TARGET_DIR}"
+        out_dir="${XCCONFIG_TARGET_SECRET_DIR}"
    else
         out_dir="${SECRET_DIR}"
    fi

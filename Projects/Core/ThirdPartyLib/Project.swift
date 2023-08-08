@@ -12,7 +12,11 @@ let project = Project.makeModule(
     name: "ThirdPartyLib",
     externalDependencies: [
         .Moya,
-        .CombineMoya
+        .CombineMoya,
+        .ComposableArchitecture,
+        .Kingfisher,
+        .KakaoSDK,
+        .SwiftUIIntrospect
     ],
     isDynamicFramework: true,
     hasTestTarget: false

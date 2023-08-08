@@ -1,10 +1,11 @@
 import SwiftUI
 import UserNotifications
 
+import ComposableArchitecture
 import FirebaseCore
 import FirebaseMessaging
 
-import Network
+import Features
 
 @main
 struct KeymeApp: App {
@@ -12,7 +13,9 @@ struct KeymeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TestView(store: Store(
+                initialState: TestStore.State(),
+                reducer: TestStore()))
         }
     }
 }
