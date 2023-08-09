@@ -17,25 +17,27 @@ struct KeymeApp: App {
     var body: some Scene {
         WindowGroup {
             if isNewbie {
+                // 온보딩은 여기에
                 Toggle(isOn: $isNewbie) {
                     Text("뉴비세요?")
                 }
                 .frame(width: 150)
             } else {
+                // 온보딩 끝난 후 메인페이지 진입
                 TabView(selection: $selectedTab) {
                     TestView(store: Store(
                         initialState: TestStore.State(),
                         reducer: TestStore()))
                     .tabItem {
                         Image(systemName: "1.square.fill")
-                        Text("Tab 1")
+                        Text("Home")
                     }
                     .tag(0)
                     
                     Text("Tab 2 Content")
                         .tabItem {
                             Image(systemName: "2.square.fill")
-                            Text("Tab 2")
+                            Text("My page")
                         }
                         .tag(1)
                 }
@@ -45,7 +47,6 @@ struct KeymeApp: App {
                     let barAppearance = UITabBarAppearance()
                     barAppearance.configureWithOpaqueBackground()
                     barAppearance.backgroundColor = .black
-                    barAppearance.selectionIndicatorTintColor = .white
                     
                     let itemAppearance = UITabBarItemAppearance()
                     itemAppearance.selected.iconColor = .white
