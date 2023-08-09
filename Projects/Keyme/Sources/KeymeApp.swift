@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftUIIntrospect
 import UserNotifications
 
 import ComposableArchitecture
@@ -37,6 +38,26 @@ struct KeymeApp: App {
                             Text("Tab 2")
                         }
                         .tag(1)
+                }
+                .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
+                    let tabBar = tabViewController.tabBar
+                    
+                    let barAppearance = UITabBarAppearance()
+                    barAppearance.configureWithOpaqueBackground()
+                    barAppearance.backgroundColor = .black
+                    barAppearance.selectionIndicatorTintColor = .white
+                    
+                    let itemAppearance = UITabBarItemAppearance()
+                    itemAppearance.selected.iconColor = .white
+                    itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
+                    itemAppearance.normal.iconColor = .gray
+                    itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+                    
+                    tabBar.standardAppearance = barAppearance
+                    tabBar.standardAppearance.inlineLayoutAppearance = itemAppearance
+                    tabBar.standardAppearance.stackedLayoutAppearance = itemAppearance
+                    tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
+                    tabBar.scrollEdgeAppearance = tabBar.standardAppearance
                 }
             }
         }
