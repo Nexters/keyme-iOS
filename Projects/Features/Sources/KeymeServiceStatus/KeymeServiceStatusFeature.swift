@@ -13,11 +13,9 @@ import Network
 import ComposableArchitecture
 
 public struct KeymeServiceStatusFeature: Reducer {
-    private let localStorage: LocalStorage
+    @Dependency(\.localStorage) private var localStorage
     
-    public init(localStorage: LocalStorage = .shared) {
-        self.localStorage = localStorage
-    }
+    public init() {}
     
     public struct State: Equatable {
         @PresentationState public var logInStatus: SignInFeature.State?
@@ -43,31 +41,52 @@ public struct KeymeServiceStatusFeature: Reducer {
         case onboarding(PresentationAction<OnboardingFeature.Action>)
         case mainPage(MainPageFeature.Action)
         
-        case checkOnboardingStatus
-        case checkLoginStatus
         case onboardingChecked(TaskResult<Bool>)
         case logInChecked(Bool)
+        
+        case checkOnboardingStatus
+        case checkLoginStatus
     }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .login(.presented(.succeeded)):
-                localStorage.set(true, forKey: .isLoggedIn)
-                state.logInStatus = .loggedIn
+            case .login(.presented(let result)):
+                switch result {
+                case .succeeded:
+                    localStorage.set(true, forKey: .isLoggedIn)
+                    state.logInStatus = .loggedIn
+                case .failed:
+                    localStorage.set(false, forKey: .isLoggedIn)
+                    state.logInStatus = .loggedOut
+                }
                 return .none
                 
-            case .login(.presented(.failed)):
-                localStorage.set(false, forKey: .isLoggedIn)
-                state.logInStatus = .loggedOut
+            case .onboarding(.presented(let result)):
+                switch result {
+                case .succeeded:
+                    state.onboardingStatus = .completed
+                case .failed:
+                    state.onboardingStatus = .needsOnboarding
+                }
                 return .none
                 
-            case .onboarding(.presented(.succeeded)):
-                state.onboardingStatus = .completed
+            case .logInChecked(let result):
+                switch result {
+                case true:
+                    state.logInStatus = .loggedIn
+                case false:
+                    state.logInStatus = .loggedOut
+                }
                 return .none
                 
-            case .onboarding(.presented(.failed)):
-                state.onboardingStatus = .needsOnboarding
+            case .onboardingChecked(.success(let result)):
+                switch result {
+                case true:
+                    state.onboardingStatus = .completed
+                case false:
+                    state.onboardingStatus = .needsOnboarding
+                }
                 return .none
                 
             case .checkLoginStatus:
@@ -87,20 +106,6 @@ public struct KeymeServiceStatusFeature: Reducer {
                         }
                     ))
                 }
-                
-            case .logInChecked(true):
-                state.logInStatus = .loggedIn
-                // logInChecked 결과가 false인 경우는 따로 관리하지 않음
-                // 왜냐하면 아무것도 안 건드렸을 때 디폴트가 false이므로
-                return .none
-            
-            case .onboardingChecked(.success(true)):
-                state.onboardingStatus = .completed
-                return .none
-                
-            case .onboardingChecked(.success(false)):
-                state.onboardingStatus = .needsOnboarding
-                return .none
                 
             default:
                 return .none
