@@ -19,7 +19,6 @@ public struct TestView: View {
     
     public var body: some View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
-            
             VStack(spacing: 50) {
                 Text(viewStore.text ?? "")
                 

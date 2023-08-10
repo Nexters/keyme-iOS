@@ -14,7 +14,10 @@ public protocol BaseAPI: TargetType { }
 
 extension BaseAPI {
     public var baseURL: URL {
-        let baseURL = Bundle.main.infoDictionary?["API_BASE_URL"] as! String
+        guard let baseURL = Bundle.main.infoDictionary?["API_BASE_URL"] as? String else {
+            return URL(string: "dummy")!
+        }
+        
         return URL(string: baseURL)!
     }
     

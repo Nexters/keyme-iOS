@@ -8,12 +8,15 @@
 import ProjectDescription
 
 public extension Project {
-    static let script: [ProjectDescription.TargetScript] = [
+    static let lintScript: [ProjectDescription.TargetScript] = [
         .pre(
             path: .relativeToRoot("Scripts/lint.sh"),
             name: "Lint codes",
             basedOnDependencyAnalysis: false,
-            runForInstallBuildsOnly: true),
+            runForInstallBuildsOnly: false)
+    ]
+    
+    static let encryptionScript: [ProjectDescription.TargetScript] = [
         .post(path: .relativeToRoot("Scripts/encrypt.sh"),
               name: "Encrypt the secret files")
     ]
