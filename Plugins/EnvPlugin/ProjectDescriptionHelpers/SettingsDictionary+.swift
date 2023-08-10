@@ -10,7 +10,7 @@ import ProjectDescription
 public extension SettingsDictionary {
     static let baseSettings: Self = [
         "OTHER_LDFLAGS" : [
-            "$(inherited)"
+            "$(inherited) -ObjC"
         ]
     ]
 }
