@@ -90,7 +90,8 @@ public struct KeymeServiceStatusFeature: Reducer {
                 
             case .logInChecked(true):
                 state.logInStatus = .loggedIn
-                // 결과가 `false`인 경우는 디폴트가 false이므로 따로 관리하지 않음(아직은)
+                // logInChecked 결과가 false인 경우는 따로 관리하지 않음
+                // 왜냐하면 아무것도 안 건드렸을 때 디폴트가 false이므로
                 return .none
             
             case .onboardingChecked(.success(true)):

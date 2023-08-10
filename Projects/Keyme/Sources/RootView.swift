@@ -9,7 +9,6 @@
 import SwiftUI
 
 import ComposableArchitecture
-import Domain
 import Features
 
 struct RootView: View {
