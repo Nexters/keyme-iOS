@@ -10,7 +10,7 @@ import Features
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+    
     var body: some Scene {
         WindowGroup {
             TestView(store: Store(

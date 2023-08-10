@@ -33,7 +33,7 @@ public struct TestStore: ReducerProtocol {
             switch action {
             case let .testResponse(.success(textModel)):
                 state.text = textModel.hello
-            case .testResponse(.failure(_)):
+            case .testResponse(.failure):
                 state.text = nil
             case .buttonDidTap:
                 return .run { send in
