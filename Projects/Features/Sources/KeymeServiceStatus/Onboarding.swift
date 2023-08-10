@@ -11,6 +11,7 @@ import ComposableArchitecture
 
 public struct OnboardingFeature: Reducer {
     public enum State: Equatable {
+        case notDetermined
         case completed
         case needsOnboarding
     }

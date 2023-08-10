@@ -9,16 +9,27 @@
 import SwiftUI
 
 import ComposableArchitecture
+import Domain
 import Features
 
 struct RootView: View {
-    private let store = Store(
-        initialState: KeymeServiceStatusFeature.State(),
-        reducer: { KeymeServiceStatusFeature()._printChanges() })
+    private let store: StoreOf<KeymeServiceStatusFeature>
+    
+    init() {
+        self.store = Store(initialState: KeymeServiceStatusFeature.State()) {
+            KeymeServiceStatusFeature()._printChanges()
+        }
+        
+        store.send(.checkLoginStatus)
+        store.send(.checkOnboardingStatus) // For 디버깅, 의도적으로 3초 딜레이
+    }
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            if viewStore.logInStatus == .loggedOut {
+            if viewStore.logInStatus == .notDetermined {
+                // 여기 걸리면 에러임. 조심하셈.
+                EmptyView()
+            } else if viewStore.logInStatus == .loggedOut {
                 // 회원가입을 하지 않았거나 로그인을 하지 않은 유저
                 let loginStore = store.scope(
                     state: \.$logInStatus,
@@ -27,9 +38,11 @@ struct RootView: View {
                 IfLetStore(loginStore) { store in
                     LoginView(store: store)
                 }
+            } else if viewStore.onboardingStatus == .notDetermined {
+                // 온보딩 상태를 로딩 중
+                ProgressView()
             } else if viewStore.onboardingStatus == .needsOnboarding {
                 // 가입했지만 온보딩을 하지 않고 종료했던 유저
-                // 회원가입을 하지 않았거나 로그인을 하지 않은 유저
                 let onboardingStore = store.scope(
                     state: \.$onboardingStatus,
                     action: KeymeServiceStatusFeature.Action.onboarding)
@@ -45,8 +58,8 @@ struct RootView: View {
     }
 }
 
-struct RootView_Previews: PreviewProvider {
+ struct RootView_Previews: PreviewProvider {
     static var previews: some View {
         RootView()
     }
-}
+ }
