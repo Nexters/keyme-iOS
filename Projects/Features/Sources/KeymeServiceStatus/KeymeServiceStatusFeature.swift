@@ -7,22 +7,26 @@
 //
 
 import Foundation
+import Domain
 import ComposableArchitecture
 
 public struct KeymeServiceStatusFeature: Reducer {
-    public init() {}
+    private let localStorage: LocalStorage
+    
+    public init(localStorage: LocalStorage = .shared) {
+        self.localStorage = localStorage
+    }
     
     public struct State: Equatable {
         @PresentationState public var logInStatus: SignInFeature.State?
         @PresentationState public var onboardingStatus: OnboardingFeature.State?
         
         public init() {
-            // FIXME: 나중에 얘는 어떻게 뺄 것
-            let needsSignIn = UserDefaults.standard.object(forKey: "needsSignIn") as? Bool ?? true
-            logInStatus = needsSignIn ? .loggedOut : .loggedIn
+            let isLoggedIn = LocalStorage.shared.get(.isLoggedIn) as? Bool ?? false
+            logInStatus = isLoggedIn ? .loggedIn : .loggedOut
             
-            let needsOnboardling = UserDefaults.standard.object(forKey: "needsOnboardling") as? Bool ?? true
-            onboardingStatus = needsOnboardling ? .needsOnboarding : .completed
+            let doneOnboarding = LocalStorage.shared.get(.doneOnboarding) as? Bool ?? false
+            onboardingStatus = doneOnboarding ? .completed : .needsOnboarding
         }
     }
     
@@ -36,22 +40,22 @@ public struct KeymeServiceStatusFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .login(.presented(.succeeded)):
-                UserDefaults.standard.set(false, forKey: "needsSignIn")
+                localStorage.set(false, forKey: .isLoggedIn)
                 state.logInStatus = .loggedIn
                 return .none
                 
             case .login(.presented(.failed)):
-                UserDefaults.standard.set(true, forKey: "needsSignIn")
+                localStorage.set(true, forKey: .isLoggedIn)
                 state.logInStatus = .loggedOut
                 return .none
                 
             case .onboarding(.presented(.succeeded)):
-                UserDefaults.standard.set(false, forKey: "needsOnboardling")
+                localStorage.set(false, forKey: .doneOnboarding)
                 state.onboardingStatus = .completed
                 return .none
                 
             case .onboarding(.presented(.failed)):
-                UserDefaults.standard.set(true, forKey: "needsOnboardling")
+                localStorage.set(true, forKey: .doneOnboarding)
                 state.onboardingStatus = .needsOnboarding
                 return .none
                 
