@@ -11,6 +11,7 @@ import ComposableArchitecture
 
 public struct SignInFeature: Reducer {
     public enum State: Equatable {
+        case notDetermined
         case loggedIn
         case loggedOut
     }

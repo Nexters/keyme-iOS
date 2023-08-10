@@ -12,12 +12,11 @@ import Foundation
 public struct LocalStorage {
     public enum Key: String {
         case isLoggedIn
-        case doneOnboarding
         case visitCount
         
         var valueType: Any.Type {
             switch self {
-            case .isLoggedIn, .doneOnboarding:
+            case .isLoggedIn:
                 return Bool.self
             case .visitCount:
                 return Int.self
@@ -34,7 +33,7 @@ public struct LocalStorage {
     /// 알아서 파싱해서 쓰시길.. 더 빡세게 잡으려면 우리가 귀찮아짐
     public func get(_ key: Key) -> Any? {
         switch key {
-        case .isLoggedIn, .doneOnboarding:
+        case .isLoggedIn:
             return storage.bool(forKey: key.rawValue)
         case .visitCount:
             return storage.integer(forKey: key.rawValue)
