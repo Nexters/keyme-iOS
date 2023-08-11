@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-extension View {
+public extension View {
     /// 코너에 R 값을 주는데 어디 줄 건지 모서리를 정할 수 있게 해줘요
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape( RoundedCorner(radius: radius, corners: corners) )
