@@ -20,7 +20,10 @@ public struct BackgroundBlurringView: UIViewRepresentable {
         UIVisualEffectView(effect: UIBlurEffect(style: style))
     }
 
-    public func updateUIView(_ uiView: UIVisualEffectView, context: UIViewRepresentableContext<BackgroundBlurringView>) {
+    public func updateUIView(
+        _ uiView: UIVisualEffectView,
+        context: UIViewRepresentableContext<BackgroundBlurringView>
+    ) {
         uiView.effect = UIBlurEffect(style: style)
     }
 }
