@@ -10,15 +10,6 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public extension View {
-    /// 화면을 꼬집어서 늘였다 줄였다 해보세요
-    ///
-    /// 왜냐면 for fun. ``PinchZoomView`` 참고
-    func pinchZooming() -> some View {
-        self.modifier(PinchToZoomViewModifier())
-    }
-}
-
 class PinchZoomView: UIView {
     weak var delegate: PinchZoomViewDelgate?
 

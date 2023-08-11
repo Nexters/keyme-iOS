@@ -9,6 +9,15 @@
 import Foundation
 import SwiftUI
 
+public extension View {
+    /// 화면을 꼬집어서 늘였다 줄였다 해보세요
+    ///
+    /// 왜냐면 for fun. ``PinchZoomView`` 참고
+    func pinchZooming() -> some View {
+        self.modifier(PinchToZoomViewModifier())
+    }
+}
+
 struct PinchToZoomViewModifier: ViewModifier {
     @State var scale: CGFloat = 1.0
     @State var anchor: UnitPoint = .center
@@ -20,7 +29,7 @@ struct PinchToZoomViewModifier: ViewModifier {
             .scaleEffect(scale, anchor: anchor)
             .offset(offset)
             .overlay(
-                PinchZoom(
+                PinchZoomViewRepresentable(
                     scale: $scale,
                     anchor: $anchor,
                     offset: $offset,
