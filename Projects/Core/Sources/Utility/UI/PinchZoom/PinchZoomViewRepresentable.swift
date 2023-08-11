@@ -16,7 +16,7 @@ protocol PinchZoomViewDelgate: AnyObject {
     func pinchZoomView(_ pinchZoomView: PinchZoomView, didChangeOffset offset: CGSize)
 }
 
-struct PinchZoom: UIViewRepresentable {
+struct PinchZoomViewRepresentable: UIViewRepresentable {
     @Binding var scale: CGFloat
     @Binding var anchor: UnitPoint
     @Binding var offset: CGSize
@@ -35,9 +35,9 @@ struct PinchZoom: UIViewRepresentable {
     func updateUIView(_ pageControl: PinchZoomView, context: Context) { }
 
     class Coordinator: NSObject, PinchZoomViewDelgate {
-        var pinchZoom: PinchZoom
+        var pinchZoom: PinchZoomViewRepresentable
 
-        init(_ pinchZoom: PinchZoom) {
+        init(_ pinchZoom: PinchZoomViewRepresentable) {
             self.pinchZoom = pinchZoom
         }
 
