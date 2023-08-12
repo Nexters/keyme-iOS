@@ -10,6 +10,8 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import DSKit
+
 public struct TestView: View {
     public let store: StoreOf<TestStore>
     
@@ -21,6 +23,11 @@ public struct TestView: View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
             VStack(spacing: 50) {
                 Text(viewStore.text ?? "")
+                    .font(Font.Keyme.body2)
+                    .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                
+                DSKitAsset.Image.camera.swiftUIImage
+                    .frame(width: 40, height: 40)
                 
                 Button("테스트 서버 호출하기") {
                     viewStore.send(.buttonDidTap)
