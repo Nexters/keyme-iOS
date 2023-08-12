@@ -20,6 +20,7 @@ public extension Project {
             ]
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
+        "UIUserInterfaceStyle": "Light"
     ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [
