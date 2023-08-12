@@ -6,6 +6,9 @@ import FirebaseMessaging
 
 import Features
 
+import DSKit
+import Core
+
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -13,6 +16,16 @@ struct KeymeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+            
+//            ZStack {
+//                KeymeLottieView(asset: AnimationAsset.background)
+//
+//                BackgroundBlurringView(style: .systemMaterialDark)
+//
+//                KeymeLottieView(asset: AnimationAsset.onboardingOne,
+//                                loopMode: .playOnce)
+//            }
+//            .ignoresSafeArea()
         }
     }
 }
@@ -24,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
-
+        
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
             guard granted else { return }
             
