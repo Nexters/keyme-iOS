@@ -16,10 +16,10 @@ import PhotosUI
 struct SettingPrivacyView: View {
     // 닉네임 관련 프로퍼티
     @State private var nickname = "" // 사용자가 새롭게 입력한 닉네임
-    @State private var beforeNickname = "" // 기존에 입력한 닉네임
-    @State private var isValidNickname = false
-    @State private var isShake = false // TextField를 좌, 우로 Shake
-    @State private var isToggle = false // 다음 페이지로 넘어가기 위한 버튼
+    @State private var beforeNickname = "" // 기존에 입력했던 닉네임
+    @State private var isValidNickname = false // 사용 가능한 닉네임인지?
+    @State private var isShake = false // 최대 글자 수를 넘긴 경우 좌, 우로 떨리는 애니메이션
+    @State private var isToggle = false // 다음 페이지로 넘어가기
     
     // 프로필 이미지 관련 프로퍼티들
     @State private var selectedImage: PhotosPickerItem? = nil // 사용자 프로필 이미지
