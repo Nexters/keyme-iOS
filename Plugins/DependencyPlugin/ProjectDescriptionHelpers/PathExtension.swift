@@ -24,6 +24,10 @@ public extension ProjectDescription.Path {
         return .relativeToRoot("Projects/Network")
     }
     
+    static var dskit: Self {
+        return .relativeToRoot("Projects/DSKit")
+    }
+    
     static var core: Self {
         return .relativeToRoot("Projects/Core")
     }

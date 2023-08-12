@@ -9,6 +9,7 @@ public extension Project {
                            internalDependencies: [TargetDependency] = [],
                            externalDependencies: [TargetDependency] = [],
                            isDynamicFramework: Bool = false,
+                           hasResource: Bool = false,
                            hasTestTarget: Bool = true
     ) -> Project {
         var targets: [Target] = [ ]
@@ -21,10 +22,9 @@ public extension Project {
             deploymentTarget: Environment.deploymentTarget,
             infoPlist: .extendingDefault(with: Project.baseUrlInfoPlist),
             sources: ["Sources/**"],
-            resources: [],
+            resources: hasResource ? [.glob(pattern: "Resources/**", excluding: [])] : [],
             dependencies: internalDependencies + externalDependencies,
             settings: .settings(base: .baseSettings, configurations: XCConfig.framework)
-
         )
         targets.append(target)
         

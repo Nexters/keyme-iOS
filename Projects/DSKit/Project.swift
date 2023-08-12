@@ -2,16 +2,16 @@
 //  Project.swift
 //  ProjectDescriptionHelpers
 //
-//  Created by 김영인 on 2023/07/26.
+//  Created by 김영인 on 2023/08/12.
 //
 
 import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project.makeModule(
-    name: "Features",
+    name: "DSKit",
     internalDependencies: [
-        .Domain,
-        .DSKit
-    ]
+        .Core
+    ],
+    hasResource: true
 )
