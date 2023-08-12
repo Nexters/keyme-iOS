@@ -17,7 +17,7 @@ public struct KeymeLottieView: UIViewRepresentable {
     public init(
         asset: AnimationAsset,
         loopMode: LottieLoopMode = .loop,
-        contentMode: UIView.ContentMode = .scaleAspectFit
+        contentMode: UIView.ContentMode = .scaleToFill
     ) {
         self.asset = asset
         self.loopMode = loopMode
