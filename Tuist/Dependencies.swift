@@ -18,7 +18,8 @@ let dependencies = Dependencies(
             .remote(url: "https://github.com/pointfreeco/swift-composable-architecture", requirement: .upToNextMajor(from: "0.57.0")),
             .remote(url: "https://github.com/onevcat/Kingfisher", requirement: .upToNextMajor(from: "7.9.0")),
             .remote(url: "https://github.com/kakao/kakao-ios-sdk", requirement: .upToNextMajor(from: "2.16.0")),
-            .remote(url: "https://github.com/siteline/SwiftUI-Introspect", requirement: .upToNextMajor(from: "0.10.0"))
+            .remote(url: "https://github.com/siteline/SwiftUI-Introspect", requirement: .upToNextMajor(from: "0.10.0")),
+            .remote(url: "https://github.com/airbnb/lottie-ios", requirement: .upToNextMajor(from: "4.2.0"))
         ],
         baseSettings: .settings(configurations: XCConfig.framework)
     )

@@ -16,7 +16,8 @@ let project = Project.makeModule(
         .ComposableArchitecture,
         .Kingfisher,
         .KakaoSDK,
-        .SwiftUIIntrospect
+        .SwiftUIIntrospect,
+        .Lottie
     ],
     isDynamicFramework: true,
     hasTestTarget: false

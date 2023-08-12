@@ -15,4 +15,5 @@ public extension TargetDependency {
     static let Kingfisher = TargetDependency.external(name: "Kingfisher")
     static let KakaoSDK = TargetDependency.external(name: "KakaoSDK")
     static let SwiftUIIntrospect = TargetDependency.external(name: "SwiftUIIntrospect")
+    static let Lottie = TargetDependency.external(name: "Lottie")
 }
