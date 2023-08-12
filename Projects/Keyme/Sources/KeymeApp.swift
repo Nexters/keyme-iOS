@@ -4,6 +4,8 @@ import UserNotifications
 import FirebaseCore
 import FirebaseMessaging
 
+import Features
+
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

@@ -7,18 +7,17 @@
 //
 
 import SwiftUI
-import Features
 import ComposableArchitecture
 
 // FIXME: Temp
-struct LoginView: View {
+public struct SignIninView: View {
     private let store: StoreOf<SignInFeature>
     
-    init(store: StoreOf<SignInFeature>) {
+    public init(store: StoreOf<SignInFeature>) {
         self.store = store
     }
     
-    var body: some View {
+    public var body: some View {
         Button(action: { store.send(.succeeded) }) {
             Text("로그인?")
         }

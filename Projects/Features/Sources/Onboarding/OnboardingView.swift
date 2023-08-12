@@ -7,18 +7,17 @@
 //
 
 import SwiftUI
-import Features
 import ComposableArchitecture
 
 // FIXME: Temp
-struct OnboardingView: View {
+public struct OnboardingView: View {
     private let store: StoreOf<OnboardingFeature>
     
-    init(store: StoreOf<OnboardingFeature>) {
+    public init(store: StoreOf<OnboardingFeature>) {
         self.store = store
     }
     
-    var body: some View {
+    public var body: some View {
         Button(action: { store.send(.succeeded) }) {
             Text("온보딩?")
         }
