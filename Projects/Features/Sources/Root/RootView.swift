@@ -7,23 +7,21 @@
 //
 
 import SwiftUI
-
 import ComposableArchitecture
-import Features
 
-struct RootView: View {
-    private let store: StoreOf<KeymeServiceStatusFeature>
+public struct RootView: View {
+    private let store: StoreOf<RootFeature>
     
-    init() {
-        self.store = Store(initialState: KeymeServiceStatusFeature.State()) {
-            KeymeServiceStatusFeature()._printChanges()
+    public init() {
+        self.store = Store(initialState: RootFeature.State()) {
+            RootFeature()._printChanges()
         }
         
         store.send(.checkLoginStatus)
         store.send(.checkOnboardingStatus) // For 디버깅, 의도적으로 3초 딜레이
     }
     
-    var body: some View {
+    public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             if viewStore.logInStatus == .notDetermined {
                 // 여기 걸리면 에러임. 조심하셈.
@@ -32,10 +30,10 @@ struct RootView: View {
                 // 회원가입을 하지 않았거나 로그인을 하지 않은 유저
                 let loginStore = store.scope(
                     state: \.$logInStatus,
-                    action: KeymeServiceStatusFeature.Action.login)
+                    action: RootFeature.Action.login)
                 
                 IfLetStore(loginStore) { store in
-                    LoginView(store: store)
+                    SignIninView(store: store)
                 }
             } else if viewStore.onboardingStatus == .notDetermined {
                 // 온보딩 상태를 로딩 중
@@ -44,7 +42,7 @@ struct RootView: View {
                 // 가입했지만 온보딩을 하지 않고 종료했던 유저
                 let onboardingStore = store.scope(
                     state: \.$onboardingStatus,
-                    action: KeymeServiceStatusFeature.Action.onboarding)
+                    action: RootFeature.Action.onboarding)
                 
                 IfLetStore(onboardingStore) { store in
                     OnboardingView(store: store)

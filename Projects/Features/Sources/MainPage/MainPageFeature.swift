@@ -1,5 +1,5 @@
 //
-//  MainPage.swift
+//  MainPageFeature.swift
 //  Features
 //
 //  Created by 이영빈 on 2023/08/10.

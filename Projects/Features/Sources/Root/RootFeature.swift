@@ -1,5 +1,5 @@
 //
-//  KeymeServiceStatusFeature.swift
+//  RootFeature.swift
 //  Features
 //
 //  Created by 이영빈 on 2023/08/10.
@@ -12,7 +12,7 @@ import Domain
 import Network
 import ComposableArchitecture
 
-public struct KeymeServiceStatusFeature: Reducer {
+public struct RootFeature: Reducer {
     @Dependency(\.localStorage) private var localStorage
     
     public init() {}
