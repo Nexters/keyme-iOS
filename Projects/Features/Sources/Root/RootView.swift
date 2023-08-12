@@ -33,7 +33,7 @@ public struct RootView: View {
                     action: RootFeature.Action.login)
                 
                 IfLetStore(loginStore) { store in
-                    SignIninView(store: store)
+                    SignInView(store: store)
                 }
             } else if viewStore.onboardingStatus == .notDetermined {
                 // 온보딩 상태를 로딩 중

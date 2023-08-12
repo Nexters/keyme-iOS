@@ -1,5 +1,5 @@
 //
-//  LoginView.swift
+//  SignInView.swift
 //  Keyme
 //
 //  Created by 이영빈 on 2023/08/10.
@@ -10,7 +10,7 @@ import SwiftUI
 import ComposableArchitecture
 
 // FIXME: Temp
-public struct SignIninView: View {
+public struct SignInView: View {
     private let store: StoreOf<SignInFeature>
     
     public init(store: StoreOf<SignInFeature>) {
