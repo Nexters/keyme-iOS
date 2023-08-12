@@ -15,17 +15,23 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+//            RootView()
             
-//            ZStack {
-//                KeymeLottieView(asset: AnimationAsset.background)
-//
-//                BackgroundBlurringView(style: .systemMaterialDark)
-//
-//                KeymeLottieView(asset: AnimationAsset.onboardingOne,
+            ZStack {
+                KeymeLottieView(asset: AnimationAsset.background)
+
+                BackgroundBlurringView(style: .systemMaterialDark)
+
+//                KeymeLottieView(asset: AnimationAsset.onboardingFirst,
 //                                loopMode: .playOnce)
-//            }
-//            .ignoresSafeArea()
+                
+//                KeymeLottieView(asset: AnimationAsset.onboardingSecond,
+//                                loopMode: .playOnce)
+                
+                KeymeLottieView(asset: AnimationAsset.onboardingThird,
+                                loopMode: .playOnce)
+            }
+            .ignoresSafeArea()
         }
     }
 }
