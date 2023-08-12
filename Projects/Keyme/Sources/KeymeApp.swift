@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 
+import ComposableArchitecture
 import FirebaseCore
 import FirebaseMessaging
 
@@ -12,7 +13,11 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+//            RootView()
+            KeymeTestsStartView(store: Store(
+                initialState: KeymeTestsStartFeature.State(isOnboarding: true),
+                reducer: KeymeTestsStartFeature()
+            ))
         }
     }
 }
