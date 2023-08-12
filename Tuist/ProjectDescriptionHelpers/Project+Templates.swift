@@ -10,7 +10,8 @@ public extension Project {
                            externalDependencies: [TargetDependency] = [],
                            isDynamicFramework: Bool = false,
                            hasResource: Bool = false,
-                           hasTestTarget: Bool = true
+                           hasTestTarget: Bool = true,
+                           resourceSynthesizers: [ResourceSynthesizer] = []
     ) -> Project {
         var targets: [Target] = [ ]
         
@@ -39,7 +40,7 @@ public extension Project {
                 resources: [.glob(pattern: "Tests/Resources/**", excluding: [])],
                 dependencies: [.target(name: name)],
                 settings: .settings(base: .baseSettings, configurations: XCConfig.tests)
-
+                
             )
             targets.append(testTarget)
         }
@@ -49,7 +50,8 @@ public extension Project {
                        settings: .settings(configurations: XCConfig.project),
                        targets: targets,
                        schemes: [Scheme.makeScheme(configs: "DEV", name: "\(name)"),
-                                 Scheme.makeScheme(configs: "PROD", name: "\(name)")])
+                                 Scheme.makeScheme(configs: "PROD", name: "\(name)")],
+                       resourceSynthesizers: resourceSynthesizers)
     }
 }
 
