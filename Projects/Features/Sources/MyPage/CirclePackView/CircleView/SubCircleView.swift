@@ -43,9 +43,9 @@ struct SubCircleView: View {
     var body: some View {
         ZStack {
             ZStack {
-                designedCircle
+                designedCircleShape
                 
-                contentView
+                circleContentView
                     .frame(width: 75, height: 75)
                     .zIndex(1)
             }
@@ -71,10 +71,11 @@ extension SubCircleView: GeometryAnimatableCircle {
         "인싸력"
     }
     
-    var designedCircle: some View {
+    var designedCircleShape: some View {
         Circle()
             .fill(circleData.color)
             .overlay {
+                // 아웃라인 이펙트를 위한 안보이는 원
                 Circle()
                     .fill(.clear)
                     .matchedGeometryEffect(
@@ -88,7 +89,7 @@ extension SubCircleView: GeometryAnimatableCircle {
                 anchor: .center)
     }
     
-    var contentView: some View {
+    var circleContentView: some View {
         VStack {
             icon
                 .foregroundColor(isPressed ? .white : .black.opacity(0.4))
