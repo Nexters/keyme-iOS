@@ -28,9 +28,14 @@ final class FocusedCircleOverlayViewAction {
 }
 
 final class FocusedCircleOverlayViewOption {
+    var showXmark: Bool
     var backgroundColor: Color
     
-    init(backgroundColor: Color = DSKitAsset.Color.keymeBottom.swiftUIColor) {
+    init(
+        showXmark: Bool = false,
+        backgroundColor: Color = DSKitAsset.Color.keymeBottom.swiftUIColor
+    ) {
+        self.showXmark = showXmark
         self.backgroundColor = backgroundColor
     }
 }
@@ -70,6 +75,10 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
     
     var body: some View {
         VStack(alignment: .center) {
+            topBar
+                .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                .padding(.horizontal, 17)
+            
             FocusedCircleView(
                 namespace: namespace,
                 shrinkageDistance: currentSheetOffset,
@@ -80,8 +89,7 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
             .onDragChanged(self.onDragChanged)
             .onDragEnded(self.onDragEnded)
             .padding(.top, 20)
-            .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
-            
+
             VStack {
                 BottomSheetWrapperView {
                     detailViewBuilder(CircleData(color: .blue, xPoint: 0, yPoint: 0, radius: 0.9))
@@ -126,6 +134,26 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
     }
 }
 
+extension FocusedCircleOverlayView {
+    var topBar: some View {
+        ZStack(alignment: .center) {
+            Text("내 성격 더 보기")
+                .font(.Keyme.body3Semibold)
+            
+            HStack {
+                Spacer()
+                
+                Button(action: action.onDismiss) {
+                    Image(systemName: "xmark")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .scaledToFit()
+                }
+            }
+        }
+    }
+}
+
 private extension FocusedCircleOverlayView {
     func onDragChanged(_ value: DragGesture.Value) {
         doneDragging = false
@@ -159,6 +187,11 @@ private extension FocusedCircleOverlayView {
 }
 
 extension FocusedCircleOverlayView {
+    func showXmark(_ show: Bool) -> FocusedCircleOverlayView {
+        self.option.showXmark = show
+        return self
+    }
+    
     func backgroundColor(_ color: Color) -> FocusedCircleOverlayView {
         self.option.backgroundColor = color
         return self

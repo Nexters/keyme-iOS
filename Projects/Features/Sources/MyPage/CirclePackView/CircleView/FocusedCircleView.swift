@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Core
+import DSKit
 import Domain
 import Foundation
 
@@ -70,21 +71,25 @@ struct FocusedCircleView: View {
     
     var body: some View {
         ZStack(alignment: .center) {
-            outlineCircleView
-            
-            innerCircleView
-                .opacity(blinkCircle ? animatedOpacity : 1)
-                .opacity(isPressed ? 0.5 : 1)
-            
-            if isPressed {
-                overlayingCircleView
-                    .frame(width: 100)
-                    .zIndex(1)
+            if circleData.isEmptyCircle {
+                emptyCircleView
+            } else {
+                outlineCircleView
+                
+                innerCircleView(with: circleData)
+                    .opacity(blinkCircle ? animatedOpacity : 1)
+                    .opacity(isPressed ? 0.5 : 1)
+                
+                if isPressed {
+                    overlayingCircleView
+                        .frame(width: 100)
+                        .zIndex(1)
+                }
+                
+                circleContentView
+                    .frame(width: 75, height: 75)
+                    .zIndex(1.5)
             }
-            
-            contentView
-                .frame(width: 75, height: 75)
-                .zIndex(1.5)
         }
         .gesture(
             LongPressGesture(minimumDuration: 0.15)
@@ -158,16 +163,37 @@ extension FocusedCircleView: GeometryAnimatableCircle {
         }
     }
     
-    var innerCircleView: some View {
+    var emptyCircleView: some View {
+        // 데이터 안 줬으면 그냥 기본 원(반창고 모양) 그리기
+        ZStack {
+            Circle()
+                .fill(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3))
+                .overlay {
+                    Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
+                }
+                .frame(width: calculatedInnerCircleRaduis(
+                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9)))
+            
+            Circle()
+                .fill(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3))
+                .overlay {
+                    Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
+                }
+                .frame(width: calculatedInnerCircleRaduis(
+                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9 * 0.6)))
+        }
+    }
+    
+    func innerCircleView(with data: CircleData) -> some View {
         Circle()
-            .fill(circleData.color)
+            .fill(data.color)
             .matchedGeometryEffect(
                 id: innerCircleEffectID,
                 in: namespace,
                 anchor: .center)
             .frame(
-                width: calculatedInnerCircleRaduis,
-                height: calculatedInnerCircleRaduis)
+                width: calculatedInnerCircleRaduis(with: data),
+                height: calculatedInnerCircleRaduis(with: data))
             .offset(x: 0, y: 0)
     }
     
@@ -196,7 +222,7 @@ extension FocusedCircleView: GeometryAnimatableCircle {
             .transition(.scale.combined(with: .opacity))
     }
     
-    var contentView: some View {
+    var circleContentView: some View {
         VStack {
             Image(systemName: "person.fill")
                 .foregroundColor(isPressed ? .white : .black.opacity(0.4))
@@ -218,9 +244,9 @@ extension FocusedCircleView: GeometryAnimatableCircle {
         id + "outline"
     }
     
-    var calculatedInnerCircleRaduis: CGFloat {
+    func calculatedInnerCircleRaduis(with data: CircleData) -> CGFloat {
         calculatedCircleRaduis(
-            initialValue: circleData.radius * outboundLength,
+            initialValue: data.radius * outboundLength,
             targetValue: 120) // TODO: 나중에 데이터 받으면 고치기
     }
     

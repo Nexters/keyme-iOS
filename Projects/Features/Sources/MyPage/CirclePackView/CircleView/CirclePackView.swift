@@ -223,12 +223,15 @@ public struct CirclePackView<DetailView: View>: View {
         }
         .fullScreenCover(isPresented: $showMoreCharacteristicSheet) {
             FocusedCircleOverlayView(
-                focusedCircle: CircleData(color: .blue, xPoint: 0, yPoint: 0, radius: 0.5),
+                focusedCircle: CircleData.emptyCircle,
                 maxShrinkageDistance: maxSheetOffset,
                 detailViewBuilder: { data in
                     Text(data.id.uuidString)
                 })
             .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            .onDismiss {
+                self.showMoreCharacteristicSheet = false
+            }
         }
     }
 }
