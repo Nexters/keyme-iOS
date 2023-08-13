@@ -28,14 +28,14 @@ final class FocusedCircleOverlayViewAction {
 }
 
 final class FocusedCircleOverlayViewOption {
-    var showXmark: Bool
+    var showTopBar: Bool
     var backgroundColor: Color
     
     init(
-        showXmark: Bool = false,
+        showTopBar: Bool = false,
         backgroundColor: Color = DSKitAsset.Color.keymeBottom.swiftUIColor
     ) {
-        self.showXmark = showXmark
+        self.showTopBar = showTopBar
         self.backgroundColor = backgroundColor
     }
 }
@@ -75,9 +75,11 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            topBar
-                .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-                .padding(.horizontal, 17)
+            if option.showTopBar {
+                topBar
+                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                    .padding(.horizontal, 17)
+            }
             
             FocusedCircleView(
                 namespace: namespace,
@@ -100,8 +102,7 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
             .frame(
                 minWidth: UIScreen.main.bounds.width,
                 maxWidth: UIScreen.main.bounds.width,
-                idealHeight: idealSheetHeight
-            )
+                idealHeight: idealSheetHeight)
             .cornerRadius(16, corners: [.topLeft, .topRight])
         }
         .frame(width: UIScreen.main.bounds.width)
@@ -187,8 +188,8 @@ private extension FocusedCircleOverlayView {
 }
 
 extension FocusedCircleOverlayView {
-    func showXmark(_ show: Bool) -> FocusedCircleOverlayView {
-        self.option.showXmark = show
+    func showTopBar(_ show: Bool) -> FocusedCircleOverlayView {
+        self.option.showTopBar = show
         return self
     }
     

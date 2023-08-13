@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Core
+import ComposableArchitecture
 import Domain
 import DSKit
 import Foundation
@@ -75,7 +76,7 @@ public struct CirclePackView<DetailView: View>: View {
     
     @State private var animationEnded: Bool = true
     
-    @State private var showMoreCharacteristicSheet: Bool = false
+    @State private var showMorePersonalitySheet: Bool = false
     @State private var focusedCircleData: CircleData?
     
     private let circleData: [CircleData]
@@ -177,7 +178,7 @@ public struct CirclePackView<DetailView: View>: View {
                     Spacer()
                     
                     Button(action: {
-                        showMoreCharacteristicSheet = true
+                        showMorePersonalitySheet = true
                         print("Tapped")
                     }) {
                         VStack {
@@ -221,16 +222,20 @@ public struct CirclePackView<DetailView: View>: View {
                 self.animationEnded = true
             }
         }
-        .fullScreenCover(isPresented: $showMoreCharacteristicSheet) {
+        .fullScreenCover(isPresented: $showMorePersonalitySheet) {
             FocusedCircleOverlayView(
                 focusedCircle: CircleData.emptyCircle,
                 maxShrinkageDistance: maxSheetOffset,
-                detailViewBuilder: { data in
-                    Text(data.id.uuidString)
+                detailViewBuilder: { circleData in
+                    MorePersonalityView(
+                        store: Store(initialState: MorePersonalityFeature.State()) {
+                            MorePersonalityFeature()
+                        })
                 })
             .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            .showTopBar(true)
             .onDismiss {
-                self.showMoreCharacteristicSheet = false
+                self.showMorePersonalitySheet = false
             }
         }
     }
