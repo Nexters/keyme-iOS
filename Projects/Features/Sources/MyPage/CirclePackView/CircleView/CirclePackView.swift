@@ -24,15 +24,12 @@ public class CirclePackViewOption<DetailView: View> {
     /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
     var magnifiedCircleRatio: CGFloat
     
-    var detailViewBuilder: (CircleData) -> DetailView
-    
     var onCircleTappedHandler: (CircleData) -> Void
     var onCircleDismissedHandler: (CircleData) -> Void
     
     public init(
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in },
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
         activateCircleBlink = true
         background = .white
@@ -42,7 +39,6 @@ public class CirclePackViewOption<DetailView: View> {
         magnifiedCircleRatio =  0.9
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
-        self.detailViewBuilder = detailViewBuilder
     }
     
     public init(
@@ -53,8 +49,7 @@ public class CirclePackViewOption<DetailView: View> {
         rotationAngle: Angle,
         magnifiedCircleRatio: CGFloat,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in },
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
         self.activateCircleBlink = activateCircleBlink
         self.background = background
@@ -64,7 +59,6 @@ public class CirclePackViewOption<DetailView: View> {
         self.magnifiedCircleRatio = magnifiedCircleRatio
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
-        self.detailViewBuilder = detailViewBuilder
     }
 }
 
@@ -93,7 +87,7 @@ public struct CirclePackView<DetailView: View>: View {
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
         self.circleData = data
-        self.option = .init(detailViewBuilder: detailViewBuilder)
+        self.option = .init()
         
         self.detailViewBuilder = detailViewBuilder
     }
@@ -228,14 +222,13 @@ public struct CirclePackView<DetailView: View>: View {
             }
         }
         .fullScreenCover(isPresented: $showMoreCharacteristicSheet) {
-//            FocusedCircleOverlayView(
-//                namespace: <#T##Namespace.ID#>,
-//                focusedCircle: <#T##CircleData#>,
-//                maxShrinkageDistance: <#T##CGFloat#>,
-//                onDismiss: <#T##() -> Bool#>,
-//                option: <#T##CirclePackViewOption<View>#>,
-//                detailViewBuilder: <#T##(CircleData) -> View#>)
-            Text("Full")
+            FocusedCircleOverlayView(
+                focusedCircle: CircleData(color: .blue, xPoint: 0, yPoint: 0, radius: 0.5),
+                maxShrinkageDistance: maxSheetOffset,
+                detailViewBuilder: { data in
+                    Text(data.id.uuidString)
+                })
+            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
         }
     }
 }
@@ -309,12 +302,6 @@ private extension CirclePackView {
 extension CirclePackView {
     func activateCircleBlink(_ activated: Bool) -> CirclePackView {
         self.option.activateCircleBlink = activated
-        return self
-    }
-    
-    /// 원을 누르면 나올 바텀시트의 콘텐츠를 그리기
-    func drawDetailView(@ViewBuilder content: @escaping (CircleData) -> DetailView) -> CirclePackView {
-        self.option.detailViewBuilder = content
         return self
     }
     
