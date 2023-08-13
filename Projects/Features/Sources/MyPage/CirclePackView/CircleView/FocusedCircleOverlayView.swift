@@ -76,7 +76,7 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
                 maxShrinkageDistance: maxShrinkageDistance,
                 outboundLength: UIScreen.main.bounds.width * magnifiedCircleRatio,
                 blinkCircle: false,
-                circleData: CircleData(color: .blue, xPoint: 0, yPoint: 0, radius: 0.5))
+                circleData: focusedCircle)
             .onDragChanged(self.onDragChanged)
             .onDragEnded(self.onDragEnded)
             .padding(.top, 20)

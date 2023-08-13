@@ -126,45 +126,6 @@ public struct CirclePackView<DetailView: View>: View {
             }
             .zIndex(1)
             
-            // 성격 더보기
-            VStack(alignment: .center) {
-                Spacer()
-                
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        showMoreCharacteristicSheet = true
-                        print("Tapped")
-                    }) {
-                        VStack {
-                            Text("내 성격 더보기")
-                                .font(.Keyme.body3Semibold)
-                            
-                            UpArrowButton()
-                                .frame(width: 24, height: 24)
-                        }
-                        .frame(height: 52)
-                        .foregroundColor(.white)
-                    }
-                    .frame(width: 135, height: 75)
-                    .padding(.bottom, 18)
-                    .contentShape(Rectangle())
-                    
-                    Spacer()
-                }
-            }
-            .fullFrame()
-            .background(
-                // 위에서 약 3/4 지점에서 시작하는 그래디언트
-                LinearGradient(
-                    colors: [.clear, .black],
-                    startPoint: .init(x: 0, y: 0.7),
-                    endPoint: .init(x: 0, y: 1))
-                .opacity(focusedCircleData == nil ? 1 : 0)
-                .allowsHitTesting(false))
-            .zIndex(1.25)
-            
             // 아래에 깔린 뷰 블러시키는 특수 뷰
             // `opacity`를 이용해서 visibility 조절함
             BackgroundBlurringView(style: .dark)
@@ -207,6 +168,45 @@ public struct CirclePackView<DetailView: View>: View {
             .frame(width: UIScreen.main.bounds.width)
             .ignoresSafeArea(edges: [.bottom])
             .zIndex(2)
+            
+            // 성격 더보기
+            VStack(alignment: .center) {
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        showMoreCharacteristicSheet = true
+                        print("Tapped")
+                    }) {
+                        VStack {
+                            Text("내 성격 더보기")
+                                .font(.Keyme.body3Semibold)
+                            
+                            UpArrowButton()
+                                .frame(width: 24, height: 24)
+                        }
+                        .frame(height: 52)
+                        .foregroundColor(.white)
+                    }
+                    .frame(width: 135, height: 75)
+                    .padding(.bottom, 18)
+                    .contentShape(Rectangle())
+                    
+                    Spacer()
+                }
+            }
+            .fullFrame()
+            .background(
+                // 위에서 약 3/4 지점에서 시작하는 그래디언트
+                LinearGradient(
+                    colors: [.clear, .black],
+                    startPoint: .init(x: 0, y: 0.7),
+                    endPoint: .init(x: 0, y: 1))
+                .allowsHitTesting(false))
+            .zIndex(2.5)
+            .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
             customInteractiveSpringAnimation,
@@ -236,7 +236,7 @@ public struct CirclePackView<DetailView: View>: View {
 private extension CirclePackView {
     // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
     var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5)
+        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // 0.5
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
