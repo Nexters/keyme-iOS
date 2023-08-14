@@ -15,23 +15,7 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            RootView()
-            
-            ZStack {
-                KeymeLottieView(asset: AnimationAsset.background)
-
-                BackgroundBlurringView(style: .systemMaterialDark)
-
-//                KeymeLottieView(asset: AnimationAsset.onboardingFirst,
-//                                loopMode: .playOnce)
-                
-//                KeymeLottieView(asset: AnimationAsset.onboardingSecond,
-//                                loopMode: .playOnce)
-                
-                KeymeLottieView(asset: AnimationAsset.onboardingThird,
-                                loopMode: .playOnce)
-            }
-            .ignoresSafeArea()
+            RootView()
         }
     }
 }

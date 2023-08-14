@@ -12,16 +12,10 @@ import Lottie
 public struct KeymeLottieView: UIViewRepresentable {
     public let asset: AnimationAsset
     public let loopMode: LottieLoopMode
-    public let contentMode: UIView.ContentMode
     
-    public init(
-        asset: AnimationAsset,
-        loopMode: LottieLoopMode = .loop,
-        contentMode: UIView.ContentMode = .scaleToFill
-    ) {
+    public init(asset: AnimationAsset,loopMode: LottieLoopMode = .loop) {
         self.asset = asset
         self.loopMode = loopMode
-        self.contentMode = contentMode
     }
     
     public func makeUIView(context: Context) -> some UIView {
@@ -29,7 +23,7 @@ public struct KeymeLottieView: UIViewRepresentable {
         
         lottieView.translatesAutoresizingMaskIntoConstraints = false
         lottieView.loopMode = loopMode
-        lottieView.contentMode = contentMode
+        lottieView.contentMode = .scaleToFill
         lottieView.play()
         
         let containerView = UIView(frame: .zero)
@@ -41,5 +35,7 @@ public struct KeymeLottieView: UIViewRepresentable {
         return containerView
     }
     
-    public func updateUIView(_ uiView: UIViewType, context: Context) {}
+    public func updateUIView(_ uiView: UIViewType, context: Context) {
+        
+    }
 }
