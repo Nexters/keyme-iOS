@@ -83,7 +83,7 @@ public struct CirclePackView<DetailView: View>: View {
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
     
-    private let store = Store(initialState: MorePersonalityFeature.State()) {
+    private let morePersonalitystore = Store(initialState: MorePersonalityFeature.State()) {
         MorePersonalityFeature()
     }
 
@@ -94,7 +94,7 @@ public struct CirclePackView<DetailView: View>: View {
         self.circleData = data
         self.option = .init()
         
-        self.store.send(.loadPersonality)
+        self.morePersonalitystore.send(.loadPersonality)
         self.detailViewBuilder = detailViewBuilder
     }
         
@@ -198,7 +198,7 @@ public struct CirclePackView<DetailView: View>: View {
                 focusedCircle: CircleData.emptyCircle,
                 maxShrinkageDistance: maxSheetOffset,
                 detailViewBuilder: {
-                    MorePersonalityView(store: store)
+                    MorePersonalityView(store: morePersonalitystore)
                 })
             .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .showTopBar(true)
