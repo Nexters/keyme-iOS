@@ -6,13 +6,27 @@ import FirebaseMessaging
 
 import Features
 
+import KakaoSDKAuth
+import KakaoSDKCommon
+
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
+    let KAKAO_PRIVATE_KEY = "" // 🚨 SECRET 🚨 
+    
+    init() {
+        KakaoSDK.initSDK(appKey: KAKAO_PRIVATE_KEY)
+    }
+    
     var body: some Scene {
         WindowGroup {
             RootView()
+                .onOpenURL(perform: { url in
+                    if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                        AuthController.handleOpenUrl(url: url)
+                    }
+                })
         }
     }
 }
