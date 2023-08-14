@@ -56,14 +56,14 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
     private var option: FocusedCircleOverlayViewOption
 
     private let maxShrinkageDistance: CGFloat
-    var detailViewBuilder: (CircleData) -> DetailView
+    var detailViewBuilder: () -> DetailView
     
     internal init(
         focusedCircle: CircleData,
         maxShrinkageDistance: CGFloat,
         option: FocusedCircleOverlayViewOption = .init(),
         action: FocusedCircleOverlayViewAction = .init(),
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        @ViewBuilder detailViewBuilder: @escaping () -> DetailView
     ) {
         self.focusedCircle = focusedCircle
         self.action = action
@@ -94,7 +94,7 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
 
             VStack {
                 BottomSheetWrapperView {
-                    detailViewBuilder(CircleData(color: .blue, xPoint: 0, yPoint: 0, radius: 0.9))
+                    detailViewBuilder()
                 }
                 .onDragChanged(self.onDragChanged)
                 .onDragEnded(self.onDragEnded)

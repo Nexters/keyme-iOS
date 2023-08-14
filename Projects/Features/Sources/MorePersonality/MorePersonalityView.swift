@@ -48,7 +48,7 @@ struct MorePersonalityFeature: Reducer {
                 }
                 
             case .savePersonality(let data):
-                state.personalities = data
+                state.personalities.append(contentsOf: data)
             }
             return .none
         }
@@ -93,6 +93,14 @@ struct MorePersonalityView: View {
                         .frame(maxWidth: .infinity, minHeight: 85, maxHeight: 85)
                         .background(keymeWhite.opacity(0.05))
                         .cornerRadius(14)
+                        .onAppear {
+                            if
+                                let thirdToLast = viewStore.state.dropLast(2).last,
+                                thirdToLast == personality
+                            {
+                                viewStore.send(.loadPersonality)
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal, 17)

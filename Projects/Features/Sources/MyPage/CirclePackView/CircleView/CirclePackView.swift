@@ -82,6 +82,10 @@ public struct CirclePackView<DetailView: View>: View {
     private let circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
+    
+    private let store = Store(initialState: MorePersonalityFeature.State()) {
+        MorePersonalityFeature()
+    }
 
     public init(
         data: [CircleData],
@@ -90,6 +94,7 @@ public struct CirclePackView<DetailView: View>: View {
         self.circleData = data
         self.option = .init()
         
+        self.store.send(.loadPersonality)
         self.detailViewBuilder = detailViewBuilder
     }
         
@@ -171,7 +176,7 @@ public struct CirclePackView<DetailView: View>: View {
             .zIndex(2)
             
             // 성격 더보기
-            morePersonalities
+            morePersonalityButton
                 .zIndex(2.5)
                 .opacity(focusedCircleData == nil ? 1 : 0)
         }
@@ -192,14 +197,8 @@ public struct CirclePackView<DetailView: View>: View {
             FocusedCircleOverlayView(
                 focusedCircle: CircleData.emptyCircle,
                 maxShrinkageDistance: maxSheetOffset,
-                detailViewBuilder: { circleData in
-//                    let store = Store(initialState: MorePersonalityFeature.State()) {
-//                        MorePersonalityFeature()
-//                    }
-//
-//                    MorePersonalityView(store: store).onAppear {
-//                        store.send(.loadPersonality)
-//                    }
+                detailViewBuilder: {
+                    MorePersonalityView(store: store)
                 })
             .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .showTopBar(true)
@@ -212,7 +211,7 @@ public struct CirclePackView<DetailView: View>: View {
 
 private extension CirclePackView {
     /// 성격 더보기
-    var morePersonalities: some View {
+    var morePersonalityButton: some View {
         VStack(alignment: .center) {
             Spacer()
             
