@@ -171,43 +171,9 @@ public struct CirclePackView<DetailView: View>: View {
             .zIndex(2)
             
             // 성격 더보기
-            VStack(alignment: .center) {
-                Spacer()
-                
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        showMorePersonalitySheet = true
-                        print("Tapped")
-                    }) {
-                        VStack {
-                            Text("내 성격 더보기")
-                                .font(.Keyme.body3Semibold)
-                            
-                            UpArrowButton()
-                                .frame(width: 24, height: 24)
-                        }
-                        .frame(height: 52)
-                        .foregroundColor(.white)
-                    }
-                    .frame(width: 135, height: 75)
-                    .padding(.bottom, 18)
-                    .contentShape(Rectangle())
-                    
-                    Spacer()
-                }
-            }
-            .fullFrame()
-            .background(
-                // 위에서 약 3/4 지점에서 시작하는 그래디언트
-                LinearGradient(
-                    colors: [.clear, .black],
-                    startPoint: .init(x: 0, y: 0.7),
-                    endPoint: .init(x: 0, y: 1))
-                .allowsHitTesting(false))
-            .zIndex(2.5)
-            .opacity(focusedCircleData == nil ? 1 : 0)
+            morePersonalities
+                .zIndex(2.5)
+                .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
             customInteractiveSpringAnimation,
@@ -227,10 +193,13 @@ public struct CirclePackView<DetailView: View>: View {
                 focusedCircle: CircleData.emptyCircle,
                 maxShrinkageDistance: maxSheetOffset,
                 detailViewBuilder: { circleData in
-                    MorePersonalityView(
-                        store: Store(initialState: MorePersonalityFeature.State()) {
-                            MorePersonalityFeature()
-                        })
+//                    let store = Store(initialState: MorePersonalityFeature.State()) {
+//                        MorePersonalityFeature()
+//                    }
+//
+//                    MorePersonalityView(store: store).onAppear {
+//                        store.send(.loadPersonality)
+//                    }
                 })
             .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .showTopBar(true)
@@ -238,6 +207,47 @@ public struct CirclePackView<DetailView: View>: View {
                 self.showMorePersonalitySheet = false
             }
         }
+    }
+}
+
+private extension CirclePackView {
+    /// 성격 더보기
+    var morePersonalities: some View {
+        VStack(alignment: .center) {
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    showMorePersonalitySheet = true
+                    print("Tapped")
+                }) {
+                    VStack {
+                        Text("내 성격 더보기")
+                            .font(.Keyme.body3Semibold)
+                        
+                        UpArrowButton()
+                            .frame(width: 24, height: 24)
+                    }
+                    .frame(height: 52)
+                    .foregroundColor(.white)
+                }
+                .frame(width: 135, height: 75)
+                .padding(.bottom, 18)
+                .contentShape(Rectangle())
+                
+                Spacer()
+            }
+        }
+        .fullFrame()
+        .background(
+            // 위에서 약 3/4 지점에서 시작하는 그래디언트
+            LinearGradient(
+                colors: [.clear, .black],
+                startPoint: .init(x: 0, y: 0.7),
+                endPoint: .init(x: 0, y: 1))
+            .allowsHitTesting(false))
     }
 }
 

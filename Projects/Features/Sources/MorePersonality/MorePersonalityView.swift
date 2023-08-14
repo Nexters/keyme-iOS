@@ -22,7 +22,9 @@ struct MorePersonalityFeature: Reducer {
         var personalities: [Personality]
         
         public init() {
-            self.personalities = []
+            self.personalities = [
+                Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5)
+            ]
         }
     }
     public enum Action: Equatable {
@@ -58,7 +60,6 @@ struct MorePersonalityView: View {
     
     init(store: StoreOf<MorePersonalityFeature>) {
         self.store = store
-        store.send(.loadPersonality)
     }
     
     var body: some View {
