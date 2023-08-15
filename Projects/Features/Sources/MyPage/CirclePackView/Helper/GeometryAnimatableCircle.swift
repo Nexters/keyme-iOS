@@ -10,8 +10,6 @@ import Domain
 import SwiftUI
 
 protocol GeometryAnimatableCircle {
-    var icon: Image { get }
-    var character: String { get }
     var circleData: CircleData { get }
 }
 

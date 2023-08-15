@@ -195,7 +195,7 @@ public struct CirclePackView<DetailView: View>: View {
         }
         .fullScreenCover(isPresented: $showMorePersonalitySheet) {
             FocusedCircleOverlayView(
-                focusedCircle: CircleData.emptyCircle,
+                focusedCircle: CircleData.emptyCircle(radius: 0.9),
                 maxShrinkageDistance: maxSheetOffset,
                 detailViewBuilder: {
                     MorePersonalityView(store: morePersonalitystore)
@@ -366,16 +366,36 @@ struct CirclePackView_Previews: PreviewProvider {
     static var previews: some View {
         CirclePackView(
             data: [
-                CircleData(color: .blue, xPoint: 0.2068919881427701,
-                           yPoint: 0.7022698911578201, radius: 0.14644660940672627),
-                CircleData(color: .red, xPoint: -0.20710678118654763,
-                           yPoint: -0.4925857155047088, radius: 0.20710678118654754),
-                CircleData(color: .gray, xPoint: -0.2218254069479773,
-                           yPoint: 0.6062444788590935, radius: 0.29289321881345254),
-                CircleData(color: .cyan, xPoint: -0.5857864376269051,
-                           yPoint: 0.0, radius: 0.4142135623730951),
-                CircleData(color: .mint, xPoint: 0.4142135623730951,
-                           yPoint: 0.0, radius: 0.5857864376269051)
+                CircleData(
+                    color: .blue,
+                    xPoint: 0.2068919881427701,
+                    yPoint: 0.7022698911578201,
+                    radius: 0.14644660940672627,
+                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                CircleData(
+                    color: .red,
+                    xPoint: -0.20710678118654763,
+                    yPoint: -0.4925857155047088,
+                    radius: 0.20710678118654754,
+                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                CircleData(
+                    color: .gray,
+                    xPoint: -0.2218254069479773,
+                    yPoint: 0.6062444788590935,
+                    radius: 0.29289321881345254,
+                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                CircleData(
+                    color: .cyan,
+                    xPoint: -0.5857864376269051,
+                    yPoint: 0.0,
+                    radius: 0.4142135623730951,
+                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                CircleData(
+                    color: .mint,
+                    xPoint: 0.4142135623730951,
+                    yPoint: 0.0,
+                    radius: 0.5857864376269051,
+                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2))
             ],
             detailViewBuilder: { _ in
                 let scores = [

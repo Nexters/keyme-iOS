@@ -18,29 +18,37 @@ public struct CircleData: Identifiable {
     public let yPoint: CGFloat
     public let radius: CGFloat
     
-    static public var emptyCircle: CircleData {
-        self.init()
-    }
+    public let metadata: CircleMetadata
     
-    private init() {
-        self.isEmptyCircle = true
-        self.color = .clear
-        self.xPoint = 0
-        self.yPoint = 0
-        self.radius = 0.9
+    static public func emptyCircle(radius: CGFloat) -> CircleData {
+        self.init(isEmptyCircle: true, color: .clear, xPoint: 0, yPoint: 0, radius: radius, metadata: CircleMetadata.emptyData)
     }
     
     public init(
         color: Color,
         xPoint: CGFloat,
         yPoint: CGFloat,
-        radius: CGFloat
+        radius: CGFloat,
+        metadata: CircleMetadata
     ) {
-        self.isEmptyCircle = false
+        self.init(
+            isEmptyCircle: false, color: color, xPoint: xPoint, yPoint: yPoint, radius: radius, metadata: metadata)
+    }
+    
+    private init(
+        isEmptyCircle: Bool,
+        color: Color,
+        xPoint: CGFloat,
+        yPoint: CGFloat,
+        radius: CGFloat,
+        metadata: CircleMetadata
+    ) {
+        self.isEmptyCircle = isEmptyCircle
         self.color = color
         self.xPoint = xPoint
         self.yPoint = yPoint
         self.radius = radius
+        self.metadata = metadata
     }
 }
 
