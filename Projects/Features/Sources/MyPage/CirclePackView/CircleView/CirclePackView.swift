@@ -153,7 +153,8 @@ public struct CirclePackView<DetailView: View>: View {
                     .onDragChanged(self.onDragChanged)
                     .onDragEnded(self.onDragEnded)
                     .padding(.top, 20)
-                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
+                    .transition(.offset(x: 1, y: 1).combined(with: .opacity))
+//                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
                     
                     VStack {
                         BottomSheetWrapperView {
@@ -252,7 +253,7 @@ private extension CirclePackView {
 private extension CirclePackView {
     // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
     var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 3) // 0.5
+        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // default: 0.5
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
