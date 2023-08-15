@@ -8,8 +8,10 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
-import SwiftUI
+import AuthenticationServices
 import ComposableArchitecture
+import SwiftUI
+import Network
 
 public struct SignInView: View {
     private let store: StoreOf<SignInFeature>
@@ -53,13 +55,37 @@ public struct SignInView: View {
         let store: StoreOf<SignInFeature>
         
         var body: some View {
-            Button(action: {
-                store.send(.signInWithApple)
-            }) { // FIXME: API 추가
-                Image("apple_login_white")
-                    .resizable()
-                    .scaledToFill()
-            }
+            SignInWithAppleButton(
+                onRequest: { request in
+                    request.requestedScopes = [.fullName, .email]
+                },
+                onCompletion: { completion in
+                    switch completion {
+                    case .success(let response):
+                        switch response.credential{
+                        case let appleIDCredential as ASAuthorizationAppleIDCredential:
+                            let user = appleIDCredential.user
+                            let fullName = appleIDCredential.fullName
+                            let name =  (fullName?.familyName ?? "") + (fullName?.givenName ?? "")
+                            let email = appleIDCredential.email
+                            let identifyToken = String(data: appleIDCredential.identityToken!, encoding: .utf8)
+                            let authorizationCode = String(data: appleIDCredential.authorizationCode!, encoding: .utf8)
+                            let appleOAuth = AppleOAuthResponse(user: user,
+                                                        fullName: fullName,
+                                                        name: name,
+                                                        email: email,
+                                                        identifyToken: identifyToken,
+                                                        authorizationCode: authorizationCode)
+                            store.send(.signInWithApple(appleOAuth))
+                        default:
+                            store.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
+                        }
+                    case .failure:
+                        store.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
+                    }
+                    
+                })
+            .signInWithAppleButtonStyle(.white)
             .frame(width: 312, height: 48)
             .cornerRadius(6)
             .padding(.vertical)

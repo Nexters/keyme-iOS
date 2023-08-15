@@ -9,19 +9,20 @@
 //
 
 import AuthenticationServices
+import Combine
 import ComposableArchitecture
 import Foundation
 import KakaoSDKUser
 import Network
 
+public enum SignInError: Error {
+    case noSignIn
+}
+
 public struct SignInFeature: Reducer {
     @Dependency(\.localStorage) private var localStorage
     
-    private let signInWithAppleDelegate = SignInWithAppleDelegate()
-    
-    public enum SignInError: Error {
-        case noSignIn
-    }
+    private var cancellables = Set<AnyCancellable>()
     
     public enum State: Equatable {
         case notDetermined
@@ -33,7 +34,7 @@ public struct SignInFeature: Reducer {
         case signInWithKakao
         case signInWithKakaoResponse(TaskResult<Bool>)
         
-        case signInWithApple
+        case signInWithApple(AppleOAuthResponse)
         case signInWithAppleResponse(TaskResult<Bool>)
         //        case succeeded
         //        case failed
@@ -60,13 +61,13 @@ public struct SignInFeature: Reducer {
                 state = .loggedOut
                 return .none
                 
-            case .signInWithApple:
-                signInWithApple()
-                
-                if signInWithAppleDelegate.isLoggedIn {
-                    return Effect.send(.signInWithAppleResponse(.success(true)))
-                } else {
-                    return Effect.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
+            case .signInWithApple(let appleOAuth):
+                return .run { send in
+                    await send(.signInWithAppleResponse(
+                        TaskResult {
+                            await signInWithApple(appleOAuth)
+                        }
+                    ))
                 }
                 
             case .signInWithAppleResponse(.success(true)): // 애플 로그인 성공
@@ -111,9 +112,9 @@ extension SignInFeature {
                             let parsedData = try JSONDecoder().decode(KakaoOAuthResponse.self, from: jsonData)
                             
                             // 2. Keyme API로 사용자 토큰 확인하기
-                            let auth = KeymeOAuthRequest(oauthType: "KAKAO", token: parsedData.accessToken)
                             Task {
                                 do {
+                                    let auth = KeymeOAuthRequest(oauthType: "KAKAO", token: parsedData.accessToken)
                                     let result = try await KeymeAPIManager.shared.request(.auth(param: auth), object: KeymeOAuthResponse.self)
                                     
                                     if result.code == 200 {
@@ -134,12 +135,18 @@ extension SignInFeature {
         }
     }
     
-    private func signInWithApple() {
-        let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.email, .fullName]
-        
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = signInWithAppleDelegate
-        controller.performRequests()
+    private func signInWithApple(_ appleOAuth: AppleOAuthResponse) async -> Bool {
+        do {
+            let auth = KeymeOAuthRequest(oauthType: "APPLE", token: appleOAuth.identifyToken!) // FIXME: 강제 언래핑
+            let result = try await KeymeAPIManager.shared.request(.auth(param: auth), object: KeymeOAuthResponse.self)
+            
+            if result.code == 200 {
+                return true
+            } else {
+                return false
+            }
+        } catch {
+            return false
+        }
     }
 }
