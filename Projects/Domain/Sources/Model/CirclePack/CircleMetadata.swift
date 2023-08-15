@@ -13,15 +13,17 @@ public struct CircleMetadata {
     public let id = UUID()
     public let icon: Image
     public let keyword: String
-    public let score: Float
+    public let averageScore: Float
+    public let myScore: Float
     
-    public init(icon: Image, keyword: String, score: Float) {
+    public init(icon: Image, keyword: String, averageScore: Float, myScore: Float) {
         self.icon = icon
         self.keyword = keyword
-        self.score = score
+        self.averageScore = averageScore
+        self.myScore = myScore
     }
     
     public static var emptyData: CircleMetadata {
-        return  CircleMetadata(icon: Image(""), keyword: "", score: 0.0)
+        return  CircleMetadata(icon: Image(""), keyword: "", averageScore: 0.0, myScore: 0.0)
     }
 }

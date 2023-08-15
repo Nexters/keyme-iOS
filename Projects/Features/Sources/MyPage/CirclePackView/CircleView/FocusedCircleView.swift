@@ -14,15 +14,18 @@ import Foundation
 
 final class FocusedCircleViewOption {
     typealias LongPressGestureValue = SequenceGesture<LongPressGesture, DragGesture>.Value
+    var onLongPressStarted: (LongPressGestureValue) -> Void
     var onLongPressEnded: (LongPressGestureValue) -> Void
     var onDragChanged: (DragGesture.Value) -> Void
     var onDragEnded: (DragGesture.Value) -> Void
     
     init(
+        onLongPressStarted: @escaping (LongPressGestureValue) -> Void = { _ in },
         onLongPressEnded: @escaping (LongPressGestureValue) -> Void = { _ in },
         onDragChanged: @escaping (DragGesture.Value) -> Void = { _ in },
         onDragEnded: @escaping (DragGesture.Value) -> Void = { _ in }
     ) {
+        self.onLongPressStarted = onLongPressStarted
         self.onLongPressEnded = onLongPressEnded
         self.onDragChanged = onDragChanged
         self.onDragEnded = onDragEnded
@@ -71,21 +74,24 @@ struct FocusedCircleView: View {
             if circleData.isEmptyCircle {
                 emptyCircleView
             } else {
-                outlineCircleView
-                
-                innerCircleView(with: circleData)
-                    .opacity(blinkCircle ? animatedOpacity : 1)
-                    .opacity(isPressed ? 0.5 : 1)
-                
-                if isPressed {
-                    overlayingCircleView
-                        .frame(width: 100)
-                        .zIndex(1)
+                // 원
+                ZStack(alignment: .center) {
+                    outlineCircleView
+                    
+                    innerCircleView(with: circleData)
+                        .opacity(blinkCircle ? animatedOpacity : 1)
+                        .opacity(isPressed ? 0.5 : 1)
+                    
+                    if isPressed {
+                        overlayingCircleView
+                            .frame(width: 100)
+                            .zIndex(1)
+                    }
+                    
+                    circleContentView
+                        .frame(width: 75, height: 75)
+                        .zIndex(1.5)
                 }
-                
-                circleContentView
-                    .frame(width: 75, height: 75)
-                    .zIndex(1.5)
             }
         }
         .gesture(
@@ -95,14 +101,15 @@ struct FocusedCircleView: View {
                     switch value {
                     case .second(true, nil):
                         HapticManager.shared.homeButtonTouchDown()
+                        option.onLongPressStarted(value)
                         state = true
                     default:
                         break
                     }
                 }
-                .onEnded { _ in
+                .onEnded { value in
                     HapticManager.shared.homeButtonTouchUp()
-                    
+                    option.onLongPressEnded(value)
                 }
                 .simultaneously(
                     with: DragGesture(minimumDistance: 0, coordinateSpace: .global)
@@ -117,8 +124,8 @@ struct FocusedCircleView: View {
         .frame(
             width: calculatedOutlineCircleRaduis,
             height: calculatedOutlineCircleRaduis)
-        .animation(customAnimation, value: showComponents)
-        .animation(.spring(), value: isPressed)
+        .animation(Animation.customInteractiveSpring(), value: showComponents)
+        .animation(Animation.customInteractiveSpring(), value: isPressed)
         .onAppear {
             startAnimation()
         }
@@ -215,11 +222,6 @@ extension FocusedCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-//        circleData.metadata.icon
-//            .resizable()
-//            .frame(width: 100, height: 100)
-//            .foregroundColor(.white)
-//            .scaledToFit()
         CircleContentView(namespace: namespace, metadata: circleData.metadata, showSubText: false)
             .matchedGeometryEffect(
                 id: contentEffectID,
@@ -274,6 +276,11 @@ extension FocusedCircleView {
     
     func onDragEnded(_ action: @escaping (DragGesture.Value) -> Void) -> FocusedCircleView {
         option.onDragEnded = action
+        return self
+    }
+    
+    func onLongPressStarted(_ action: @escaping (LongPressGestureValue) -> Void) -> FocusedCircleView {
+        option.onLongPressStarted = action
         return self
     }
     

@@ -39,7 +39,7 @@ public struct CircleContentView: View {
                     Text(metadata.keyword)
                         .font(.Keyme.body3Semibold)
                     
-                    Text(String(format: "%.1f", metadata.score))
+                    Text(String(format: "%.1f", metadata.averageScore))
                         .font(.Score.mypage)
                 }
                 .matchedGeometryEffect(id: contentTextEffectID, in: namespace)

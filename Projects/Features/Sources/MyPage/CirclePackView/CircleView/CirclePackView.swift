@@ -78,6 +78,7 @@ public struct CirclePackView<DetailView: View>: View {
     
     @State private var showMorePersonalitySheet: Bool = false
     @State private var focusedCircleData: CircleData?
+    @State private var isPersonalityCirclePressed = false
     
     private let circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
@@ -141,8 +142,20 @@ public struct CirclePackView<DetailView: View>: View {
                 .onTapGesture(perform: onDismiss)
             
             // 개별보기
-            VStack(alignment: .center) {
+            VStack(alignment: .center, spacing: 0) {
                 if let focusedCircleData {
+                    Group {
+                        if isPersonalityCirclePressed {
+                            ScoreAndPersonalityView(
+                                title: "나의 점수",
+                                score: focusedCircleData.metadata.myScore)
+                        } else {
+                            ScoreAndPersonalityView(
+                                circleData: focusedCircleData)
+                        }
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                            
                     FocusedCircleView(
                         namespace: namespace,
                         shrinkageDistance: currentSheetOffset,
@@ -152,8 +165,14 @@ public struct CirclePackView<DetailView: View>: View {
                         circleData: focusedCircleData)
                     .onDragChanged(self.onDragChanged)
                     .onDragEnded(self.onDragEnded)
-                    .padding(.top, 20)
+                    .onLongPressStarted { _ in
+                        isPersonalityCirclePressed = true
+                    }
+                    .onLongPressEnded { _ in
+                        isPersonalityCirclePressed = false
+                    }
                     .transition(.offset(x: 1, y: 1).combined(with: .opacity))
+                    .padding(.vertical, 12)
 //                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
                     
                     VStack {
@@ -182,10 +201,13 @@ public struct CirclePackView<DetailView: View>: View {
                 .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
-            customInteractiveSpringAnimation,
+            Animation.customInteractiveSpring(),
+            value: isPersonalityCirclePressed)
+        .animation(
+            Animation.customInteractiveSpring(),
             value: focusedCircleData)
         .animation(
-            customInteractiveSpringAnimation,
+            Animation.customInteractiveSpring(),
             value: doneDragging)
         .onChange(of: focusedCircleData) { _ in
             animationEnded = false
@@ -251,11 +273,6 @@ private extension CirclePackView {
 }
 
 private extension CirclePackView {
-    // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
-    var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // default: 0.5
-    }
-    
     func onDragChanged(_ value: DragGesture.Value) {
         doneDragging = false
         currentSheetOffset =
@@ -372,31 +389,51 @@ struct CirclePackView_Previews: PreviewProvider {
                     xPoint: 0.2068919881427701,
                     yPoint: 0.7022698911578201,
                     radius: 0.14644660940672627,
-                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                    metadata: CircleMetadata(
+                        icon: Image(systemName: "person.fill"),
+                        keyword: "표현력",
+                        averageScore: 4.2,
+                        myScore: 4.2)),
                 CircleData(
                     color: .red,
                     xPoint: -0.20710678118654763,
                     yPoint: -0.4925857155047088,
                     radius: 0.20710678118654754,
-                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                    metadata: CircleMetadata(
+                        icon: Image(systemName: "person.fill"),
+                        keyword: "표현력",
+                        averageScore: 4.2,
+                        myScore: 3.5)),
                 CircleData(
                     color: .gray,
                     xPoint: -0.2218254069479773,
                     yPoint: 0.6062444788590935,
                     radius: 0.29289321881345254,
-                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                    metadata: CircleMetadata(
+                        icon: Image(systemName: "person.fill"),
+                        keyword: "표현력",
+                        averageScore: 4.2,
+                        myScore: 3.5)),
                 CircleData(
                     color: .cyan,
                     xPoint: -0.5857864376269051,
                     yPoint: 0.0,
                     radius: 0.4142135623730951,
-                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2)),
+                    metadata: CircleMetadata(
+                        icon: Image(systemName: "person.fill"),
+                        keyword: "표현력",
+                        averageScore: 4.2,
+                        myScore: 3.5)),
                 CircleData(
                     color: .mint,
                     xPoint: 0.4142135623730951,
                     yPoint: 0.0,
                     radius: 0.5857864376269051,
-                    metadata: CircleMetadata(icon: Image(systemName: "person.fill"), keyword: "표현력", score: 4.2))
+                    metadata: CircleMetadata(
+                        icon: Image(systemName: "person.fill"),
+                        keyword: "표현력",
+                        averageScore: 4.2,
+                        myScore: 3.5)),
             ],
             detailViewBuilder: { _ in
                 let scores = [
