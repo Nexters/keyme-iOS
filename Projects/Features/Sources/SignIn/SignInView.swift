@@ -24,7 +24,7 @@ public struct SignInView: View {
             
             KakaoLoginButton(store: store)
             
-            AppleLoginButton()
+            AppleLoginButton(store: store)
             
             GuideMessageView()
         }
@@ -37,7 +37,7 @@ public struct SignInView: View {
         
         var body: some View {
             Button(action: {
-                store.send(.signIn)
+                store.send(.signInWithKakao)
             }) {
                 Image("kakao_login")
                     .resizable()
@@ -50,8 +50,12 @@ public struct SignInView: View {
     
     // 애플 로그인 버튼
     struct AppleLoginButton: View {
+        let store: StoreOf<SignInFeature>
+        
         var body: some View {
-            Button(action: { }) { // FIXME: API 추가
+            Button(action: {
+                store.send(.signInWithApple)
+            }) { // FIXME: API 추가
                 Image("apple_login_white")
                     .resizable()
                     .scaledToFill()
