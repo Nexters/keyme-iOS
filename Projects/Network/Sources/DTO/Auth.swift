@@ -16,7 +16,12 @@ public struct KakaoOAuthResponse: Codable { // 카카오 API Response 관련 Mod
     public let expiresIn: Int
     public let scope: String
     
-    public init(refreshTokenExpiresIn: Int, tokenType: String, refreshToken: String, accessToken: String, expiresIn: Int, scope: String) {
+    public init(refreshTokenExpiresIn: Int,
+                tokenType: String,
+                refreshToken: String,
+                accessToken: String,
+                expiresIn: Int,
+                scope: String) {
         self.refreshTokenExpiresIn = refreshTokenExpiresIn
         self.tokenType = tokenType
         self.refreshToken = refreshToken
@@ -53,7 +58,8 @@ public struct KeymeOAuthRequest: Codable { // KeyMe API Request 관련 Model
     public let oauthType: String
     public let token: String
     
-    public init(oauthType: String, token: String) {
+    public init(oauthType: String,
+                token: String) {
         self.oauthType = oauthType
         self.token = token
     }
