@@ -34,7 +34,6 @@ struct FocusedCircleView: View {
     private let option: FocusedCircleViewOption
     
     private let namespace: Namespace.ID
-    private let id: String
     
     private let shrinkageDistance: CGFloat
     private let maxShrinkageDistance: CGFloat
@@ -57,9 +56,7 @@ struct FocusedCircleView: View {
         circleData: CircleData
     ) {
         self.option = option
-        
         self.namespace = namespace
-        self.id = circleData.id.uuidString
         
         self.shrinkageDistance = shrinkageDistance
         self.maxShrinkageDistance = maxShrinkageDistance
@@ -129,12 +126,8 @@ struct FocusedCircleView: View {
 }
 
 extension FocusedCircleView: GeometryAnimatableCircle {
-    var icon: Image {
-        Image("")
-    }
-    
-    var character: String {
-        "RRR"
+    var id: String {
+        circleData.id.uuidString
     }
     
     func startAnimation() {
@@ -222,17 +215,16 @@ extension FocusedCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        VStack {
-            Image(systemName: "person.fill")
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-            Text("인싸력")
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-                .font(.system(size: 14))
-        }
-        .matchedGeometryEffect(
-            id: contentEffectID,
-            in: namespace,
-            anchor: .center)
+//        circleData.metadata.icon
+//            .resizable()
+//            .frame(width: 100, height: 100)
+//            .foregroundColor(.white)
+//            .scaledToFit()
+        CircleContentView(namespace: namespace, metadata: circleData.metadata, showSubText: false)
+            .matchedGeometryEffect(
+                id: contentEffectID,
+                in: namespace,
+                anchor: .center)
     }
     
     var innerCircleEffectID: String {

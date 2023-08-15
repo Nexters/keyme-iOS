@@ -252,7 +252,7 @@ private extension CirclePackView {
 private extension CirclePackView {
     // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
     var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // 0.5
+        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 3) // 0.5
     }
     
     func onDragChanged(_ value: DragGesture.Value) {

@@ -14,7 +14,6 @@ import Foundation
 /// 마이페이지 들어가자 마자 나오는 CirclePack 그래프를 이루는 원을 만들 때 쓰는 뷰
 struct SubCircleView: View {
     private let namespace: Namespace.ID
-    private let id: String
     
     private let outboundLength: CGFloat
     let circleData: CircleData
@@ -31,7 +30,6 @@ struct SubCircleView: View {
         onTapGesture: @escaping () -> Void
     ) {
         self.namespace = namespace
-        self.id = circleData.id.uuidString
         
         self.outboundLength = outboundLength
         self.circleData = circleData
@@ -61,6 +59,10 @@ struct SubCircleView: View {
 }
 
 extension SubCircleView: GeometryAnimatableCircle {
+    var id: String {
+        circleData.id.uuidString
+    }
+    
     var designedCircleShape: some View {
         Circle()
             .fill(circleData.color)
@@ -80,7 +82,7 @@ extension SubCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        CircleContentView(metadata: circleData.metadata)
+        CircleContentView(namespace: namespace, metadata: circleData.metadata)
             .matchedGeometryEffect(
                 id: contentEffectID,
                 in: namespace,

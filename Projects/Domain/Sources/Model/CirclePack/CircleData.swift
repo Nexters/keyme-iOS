@@ -9,10 +9,9 @@
 import SwiftUI
 import Foundation
 
-public struct CircleData: Identifiable {
+public struct CircleData {
     public let isEmptyCircle: Bool
     
-    public let id = UUID()
     public let color: Color
     public let xPoint: CGFloat
     public let yPoint: CGFloat
@@ -55,5 +54,11 @@ public struct CircleData: Identifiable {
 extension CircleData: Equatable {
     public static func == (lhs: CircleData, rhs: CircleData) -> Bool {
         lhs.id == rhs.id
+    }
+}
+
+extension CircleData: Identifiable {
+    public var id: UUID {
+        metadata.id
     }
 }

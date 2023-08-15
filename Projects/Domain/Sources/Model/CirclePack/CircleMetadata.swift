@@ -10,6 +10,7 @@ import SwiftUI
 import Foundation
 
 public struct CircleMetadata {
+    public let id = UUID()
     public let icon: Image
     public let keyword: String
     public let score: Float

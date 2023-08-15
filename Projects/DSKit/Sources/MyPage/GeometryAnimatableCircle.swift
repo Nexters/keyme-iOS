@@ -6,18 +6,13 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
-import Domain
 import SwiftUI
 
-protocol GeometryAnimatableCircle {
-    var circleData: CircleData { get }
+public protocol GeometryAnimatableCircle {
+    var id: String { get }
 }
 
-extension GeometryAnimatableCircle {
-    var id: String {
-        circleData.id.uuidString
-    }
-    
+public extension GeometryAnimatableCircle {
     var innerCircleEffectID: String {
         id + "innerCircle"
     }
@@ -28,5 +23,13 @@ extension GeometryAnimatableCircle {
     
     var contentEffectID: String {
         id + "content"
+    }
+    
+    var contentIconEffectID: String {
+        id + "contentIcon"
+    }
+    
+    var contentTextEffectID: String {
+        id + "contentText"
     }
 }
