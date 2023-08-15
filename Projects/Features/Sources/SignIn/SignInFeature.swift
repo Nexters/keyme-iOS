@@ -9,7 +9,6 @@
 //
 
 import AuthenticationServices
-import Combine
 import ComposableArchitecture
 import Foundation
 import KakaoSDKUser
@@ -21,8 +20,6 @@ public enum SignInError: Error {
 
 public struct SignInFeature: Reducer {
     @Dependency(\.localStorage) private var localStorage
-    
-    private var cancellables = Set<AnyCancellable>()
     
     public enum State: Equatable {
         case notDetermined
