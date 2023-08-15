@@ -433,7 +433,7 @@ struct CirclePackView_Previews: PreviewProvider {
                         icon: Image(systemName: "person.fill"),
                         keyword: "표현력",
                         averageScore: 4.2,
-                        myScore: 3.5)),
+                        myScore: 3.5))
             ],
             detailViewBuilder: { _ in
                 let scores = [

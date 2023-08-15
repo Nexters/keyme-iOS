@@ -12,10 +12,16 @@ import SwiftUI
 
 struct MyPageView: View {
     private let store: StoreOf<MyPageFeature>
+    private let scoreListStore: StoreOf<ScoreListFeature>
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
+        self.scoreListStore = Store(initialState: ScoreListFeature.State(), reducer: {
+            ScoreListFeature()
+        })
+        
         store.send(.loadCircle)
+        scoreListStore.send(.loadScores)
     }
     
     public var body: some View {
@@ -23,7 +29,7 @@ struct MyPageView: View {
             CirclePackView(
                 data: viewStore.state.circleDataList,
                 detailViewBuilder: { data in
-                    Text(data.id.uuidString)
+                    ScoreListView(nickname: "ninkname", keyword: data.metadata.keyword, store: scoreListStore) // TODO: Change nickname
                 })
             .graphBackgroundColor(.hex("232323"))
             .activateCircleBlink(viewStore.state.shownFirstTime)
