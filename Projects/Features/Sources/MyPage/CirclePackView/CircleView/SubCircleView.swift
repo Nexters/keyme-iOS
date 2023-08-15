@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Domain
+import DSKit
 import Foundation
 
 /// 마이페이지 들어가자 마자 나오는 CirclePack 그래프를 이루는 원을 만들 때 쓰는 뷰
@@ -19,8 +20,6 @@ struct SubCircleView: View {
     let circleData: CircleData
     
     private let onTapGesture: () -> Void
-    
-    @State private var isPressed = false
     
     // outboundLength는 총 그래프 크기
     // circleData.radius는 총 그래프 크기에 대한 반지름 비율
@@ -57,20 +56,11 @@ struct SubCircleView: View {
                 y: -circleData.yPoint * outboundLength / 2)
             
             .onTapGesture(perform: onTapGesture)
-            .animation(.spring(), value: isPressed)
         }
     }
 }
 
 extension SubCircleView: GeometryAnimatableCircle {
-    var icon: Image {
-        Image(systemName: "person.fill")
-    }
-    
-    var character: String {
-        "인싸력"
-    }
-    
     var designedCircleShape: some View {
         Circle()
             .fill(circleData.color)
@@ -90,16 +80,10 @@ extension SubCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        VStack {
-            icon
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-            Text(character)
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-                .font(.system(size: 14))
-        }
-        .matchedGeometryEffect(
-            id: contentEffectID,
-            in: namespace,
-            anchor: .center)
+        CircleContentView(metadata: circleData.metadata)
+            .matchedGeometryEffect(
+                id: contentEffectID,
+                in: namespace,
+                anchor: .center)
     }
 }

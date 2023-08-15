@@ -171,8 +171,7 @@ extension FocusedCircleView: GeometryAnimatableCircle {
                 .overlay {
                     Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
                 }
-                .frame(width: calculatedInnerCircleRaduis(
-                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9)))
+                .frame(width: calculatedInnerCircleRaduis(with: CircleData.emptyCircle(radius: 0.9)))
             
             Circle()
                 .fill(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3))
@@ -180,7 +179,7 @@ extension FocusedCircleView: GeometryAnimatableCircle {
                     Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
                 }
                 .frame(width: calculatedInnerCircleRaduis(
-                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9 * 0.6)))
+                    with: CircleData.emptyCircle(radius: 0.9 * 0.6)))
         }
     }
     
