@@ -10,27 +10,30 @@ import Foundation
 
 public struct KeymeTestsDTO: Codable {
     public let data: DataDTO
-    let message, state: String
+    let message: String
+    let code: Int
 }
 
 public struct DataDTO: Codable {
-    public let presenterProfile: PresenterProfileDTO
+    public let owner: PresenterProfileDTO
     public let questions: [QuestionDTO]
-    let solvedCount, testId, testResultId: Int
+    let solvedCount, testId: Int
+    let testResultId: Int
     let title: String
 }
 
 public struct PresenterProfileDTO: Codable {
-    let memberId: Int
-    public let nickname, thumbnailUrl: String
+    let id: Int
+    public let nickname: String?
+    let profileThumbnail: String
 }
 
 public struct QuestionDTO: Codable {
     public let category: CategoryDTO
-    let description, keyword: String
+    let title, keyword: String
     let questionId: Int
 }
 
 public struct CategoryDTO: Codable {
-    public let color, imageUrl, name: String
+    public let color, iconUrl, name: String
 }
