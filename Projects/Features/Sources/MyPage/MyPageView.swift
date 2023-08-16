@@ -26,16 +26,48 @@ struct MyPageView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            CirclePackView(
-                data: viewStore.state.circleDataList,
-                detailViewBuilder: { data in
-                    ScoreListView(nickname: "ninkname", keyword: data.metadata.keyword, store: scoreListStore) // TODO: Change nickname
-                })
-            .graphBackgroundColor(.hex("232323"))
-            .activateCircleBlink(viewStore.state.shownFirstTime)
-            .onCircleDismissed { _ in
-                viewStore.send(.markViewAsShown)
+            ZStack(alignment: .topLeading) {
+                CirclePackView(
+                    data: viewStore.state.circleDataList,
+                    detailViewBuilder: { data in
+                        ScoreListView(
+                            nickname: "ninkname",
+                            keyword: data.metadata.keyword,
+                            store: scoreListStore) // TODO: Change nickname
+                    })
+                .graphBackgroundColor(.hex("232323"))
+                .activateCircleBlink(viewStore.state.shownFirstTime)
+                .onCircleTapped { _ in
+                    viewStore.send(.circleTapped)
+                }
+                .onCircleDismissed { _ in
+                    withAnimation {
+                        viewStore.send(.markViewAsShown)
+                        viewStore.send(.circleDismissed)
+                    }
+                }
+
+                if !viewStore.state.circleShown {
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 4) {
+                            Spacer()
+                            Text.keyme("마이", font: .body3Semibold)
+                            Image(systemName: "info.circle")
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                                .scaledToFit()
+                            Spacer()
+                        }
+                        .padding(.top, 10)
+                        
+                        Text.keyme("친구들이 생각하는\nnickname님의 성격은?", font: .heading1) // TODO: Change nickname
+                            .padding(17)
+                            .transition(.opacity)
+                    }
+                    .foregroundColor(.white)
+                }
             }
+            
         }
     }
 }

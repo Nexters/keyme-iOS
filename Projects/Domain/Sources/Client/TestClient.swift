@@ -24,11 +24,12 @@ extension DependencyValues {
 extension TestClient: DependencyKey {
     public static var liveValue = TestClient(
         fetchTest: {
-            let api = TestAPI.hello
-            let response = try await TestAPIManager.shared.request(api)
-            let decoded = String(data: response.data, encoding: .utf8)!
-            
-            return TestDTO(hello: decoded).toModel()
+//            let api = TestAPI.hello
+//            let response = try await TestAPIManager.shared.request(api)
+//            let decoded = String(data: response.data, encoding: .utf8)!
+//
+//            return TestDTO(hello: decoded).toModel()
+            return .init(hello: "")
         }
     )
 }

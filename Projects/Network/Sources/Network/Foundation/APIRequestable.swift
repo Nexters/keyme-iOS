@@ -27,6 +27,5 @@ public protocol APIRequestable<APIType> {
     func request<T: Decodable>(_ api: APIType, object: T.Type) -> AnyPublisher<T, MoyaError>
     
     /// 인증토큰 헤더에 넣어주는 메서드
-    @discardableResult
-    mutating func registerAuthorizationToken(_ token: String) -> Self
+    func registerAuthorizationToken(_ token: String)
 }

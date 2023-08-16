@@ -95,12 +95,14 @@ struct ScoreListView: View {
                             
                             HStack {
                                 Spacer()
-                                Text.keyme("\(formatter.localizedString(for: scoreData.date, relativeTo: Date()))", font: .caption1)
-                                    .foregroundColor(.white.opacity(0.3))
+                                Text.keyme(
+                                    "\(formatter.localizedString(for: scoreData.date, relativeTo: Date()))",
+                                    font: .caption1)
+                                .foregroundColor(.white.opacity(0.3))
                             }
                         }
                         .padding(.horizontal, 12)
-                        .frame(maxWidth: .infinity, minHeight: 85, maxHeight: 85)
+                        .frame(maxWidth: .infinity, minHeight: 56, maxHeight: 56)
                         .background(keymeWhite.opacity(0.05))
                         .cornerRadius(16)
                         .onAppear {

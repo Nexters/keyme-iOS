@@ -12,25 +12,32 @@ import Moya
 
 public enum KeymeAPI {
     case test
+    case myPage(MyPage)
+}
+
+public enum MyPage {
+    case statistics(Int)
 }
 
 extension KeymeAPI: BaseAPI {
-    // TODO: 임시 - 서버 도메인 확정되면 변경할 것
     public var baseURL: URL {
-        return URL(string: "https://randomuser.me")!
+        return URL(string: "https://api.keyme.space")!
     }
 
-    // TODO: 임시 - API 추가될 떄마다 변경
     public var path: String {
         switch self {
         case .test:
             return "/api"
+        case .myPage(.statistics(let id)):
+            return "/members/\(id)/statistics"
         }
     }
 
     public var method: Moya.Method {
         switch self {
         case .test:
+            return .get
+        case .myPage(.statistics):
             return .get
         }
     }
@@ -39,6 +46,9 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .test:
             return .requestPlain
+        case .myPage(.statistics):
+            return .requestPlain
+            
         }
     }
 
