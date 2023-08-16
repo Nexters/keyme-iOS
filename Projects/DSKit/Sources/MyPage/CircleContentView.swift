@@ -13,25 +13,26 @@ public struct CircleContentView: View {
     var showSubText: Bool
     private let namespace: Namespace.ID
     private let metadata: CircleMetadata
+    private let imageSize: CGFloat
     
-    public init(namespace: Namespace.ID, metadata: CircleMetadata, showSubText: Bool) {
+    public init(namespace: Namespace.ID, metadata: CircleMetadata, imageSize: CGFloat) {
+        self.init(namespace: namespace, metadata: metadata, showSubText: true, imageSize: imageSize)
+    }
+    
+    public init(namespace: Namespace.ID, metadata: CircleMetadata, showSubText: Bool, imageSize: CGFloat) {
         self.namespace = namespace
         self.metadata = metadata
         self.showSubText = showSubText
-    }
-    
-    public init(namespace: Namespace.ID, metadata: CircleMetadata) {
-        self.namespace = namespace
-        self.metadata = metadata
-        self.showSubText = true
+        self.imageSize = imageSize
     }
     
     public var body: some View {
-        VStack(spacing: 13) {
+        VStack(spacing: imageSize / 4) {
             metadata.icon
                 .resizable()
-                .frame(width: 48, height: 48)
+                .frame(width: imageSize, height: imageSize)
                 .scaledToFit()
+                .opacity(showSubText ? 0.6 : 1)
                 .matchedGeometryEffect(id: contentIconEffectID, in: namespace)
             
             if showSubText {

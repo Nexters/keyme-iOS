@@ -222,7 +222,11 @@ extension FocusedCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        CircleContentView(namespace: namespace, metadata: circleData.metadata, showSubText: false)
+        CircleContentView(
+            namespace: namespace,
+            metadata: circleData.metadata,
+            showSubText: false,
+            imageSize: 48)
             .matchedGeometryEffect(
                 id: contentEffectID,
                 in: namespace,

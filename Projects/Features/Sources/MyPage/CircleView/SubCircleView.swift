@@ -43,12 +43,9 @@ struct SubCircleView: View {
                 designedCircleShape
                 
                 circleContentView
-                    .frame(width: 75, height: 75)
                     .zIndex(1)
             }
-            .frame(
-                width: circleData.radius * outboundLength,
-                height: circleData.radius * outboundLength)
+            .frame(width: radius, height: radius)
             .offset(
                 x: circleData.xPoint * outboundLength / 2,
                 y: -circleData.yPoint * outboundLength / 2)
@@ -61,6 +58,10 @@ struct SubCircleView: View {
 extension SubCircleView: GeometryAnimatableCircle {
     var id: String {
         circleData.id.uuidString
+    }
+    
+    var radius: CGFloat {
+        circleData.radius * outboundLength
     }
     
     var designedCircleShape: some View {
@@ -82,10 +83,39 @@ extension SubCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        CircleContentView(namespace: namespace, metadata: circleData.metadata)
+        CircleContentView(
+            namespace: namespace,
+            metadata: circleData.metadata,
+            imageSize: min(48, radius * 0.2))
             .matchedGeometryEffect(
                 id: contentEffectID,
                 in: namespace,
                 anchor: .center)
     }
+    
+    struct PixelMapper {
+        private let circleToPx: [Int: Int] = [
+            5: 320,
+            4: 280,
+            3: 200,
+            2: 160,
+            1: 100
+        ]
+
+        private let graphicToPx: [Int: Int] = [
+            5: 48,
+            4: 48,
+            3: 40,
+            2: 36,
+            1: 24
+        ]
+
+        func graphicPx(for circlePx: Int) -> Int? {
+            guard let point = circleToPx.first(where: { $0.value == circlePx })?.key else {
+                return nil
+            }
+            return graphicToPx[point]
+        }
+    }
+
 }
