@@ -13,11 +13,7 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            RootView()
-            KeymeTestsStartView(store: Store(
-                initialState: KeymeTestsStartFeature.State(isOnboarding: true),
-                reducer: KeymeTestsStartFeature()
-            ))
+            RootView()
         }
     }
 }
