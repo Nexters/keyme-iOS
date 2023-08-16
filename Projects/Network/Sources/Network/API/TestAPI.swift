@@ -26,4 +26,8 @@ extension TestAPI: BaseAPI {
     public var task: Moya.Task {
         return .requestPlain
     }
+    
+    public var headers: [String: String]? {
+        return ["Content-type": "application/json"]
+    }
 }
