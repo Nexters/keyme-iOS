@@ -24,12 +24,7 @@ public struct KeymeTestsStartView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
                 Spacer()
-                    .frame(height: 10)
-                
-                logoImage()
-                
-                Spacer()
-                    .frame(height: 35)
+                    .frame(height: 75)
                 
                 welcomeText(viewStore)
                 
@@ -46,13 +41,6 @@ public struct KeymeTestsStartView: View {
             }
             .background(Color(DSKitAsset.Color.keymeBlack.color.cgColor))
         }
-    }
-    
-    func logoImage() -> some View {
-        // TODO: 로고로 이미지 변경 필요
-        return Image(systemName: "eyes.inverse")
-            .frame(width: 30, height: 30)
-            .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
     }
     
     func welcomeText(_ viewStore: ViewStore<KeymeTestsStartFeature.State, KeymeTestsStartFeature.Action>) -> some View {
