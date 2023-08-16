@@ -11,11 +11,12 @@ import ComposableArchitecture
 import Domain
 
 public struct KeymeTestsStartFeature: Reducer {
-
+    
     public struct State: Equatable {
+        public var isAnimating: Bool = false
         public var isOnboarding: Bool
         public var nickname: String?
-        public var icons: [IconModel] = []
+        public var icon: IconModel = .EMPTY
         
         public init(isOnboarding: Bool) {
             self.isOnboarding = isOnboarding
@@ -27,8 +28,10 @@ public struct KeymeTestsStartFeature: Reducer {
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case fetchDailyTests(TaskResult<KeymeTestsModel>)
         case startTests
+        case setIcon(IconModel)
     }
     
+    @Dependency(\.continuousClock) var clock
     @Dependency(\.keymeTestsClient) var keymeTestsClient
     
     public init() { }
@@ -36,16 +39,6 @@ public struct KeymeTestsStartFeature: Reducer {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case let .fetchOnboardingTests(.success(tests)):
-                state.nickname = tests.nickname
-                state.icons = tests.icons
-            case .fetchOnboardingTests(.failure):
-                state.nickname = nil
-            case let .fetchDailyTests(.success(tests)):
-                state.nickname = tests.nickname
-                state.icons = tests.icons
-            case .fetchDailyTests(.failure):
-                state.nickname = nil
             case .viewWillAppear:
                 if state.isOnboarding {
                     return .run { send in
@@ -60,8 +53,26 @@ public struct KeymeTestsStartFeature: Reducer {
                         ))
                     }
                 }
+            case let .fetchOnboardingTests(.success(tests)),
+                let .fetchDailyTests(.success(tests)):
+                state.nickname = tests.nickname
+                state.isAnimating.toggle()
+                return .run { send in
+                    repeat {
+                        for icon in tests.icons {
+                            await send(.setIcon(icon))
+                            try await self.clock.sleep(for: .seconds(1.59))
+                        }
+                    } while true
+                }
+            case .fetchOnboardingTests(.failure),
+                    .fetchDailyTests(.failure):
+                state.nickname = nil
             case .startTests:
+            // TODO: 웹뷰 구현
                 return .none
+            case let .setIcon(icon):
+                state.icon = icon
             }
             return .none
         }

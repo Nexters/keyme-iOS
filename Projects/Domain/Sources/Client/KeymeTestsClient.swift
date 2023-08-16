@@ -26,13 +26,14 @@ extension KeymeTestsClient: DependencyKey {
     public static var liveValue = KeymeTestsClient(
         fetchOnboardingTests: {
             let api = KeymeTestsAPI.onboarding
-            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
+//            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
+            var response = try await KeymeTestsAPIManager.shared.request(api, object: KeymeTestsDTO.self)
             
             return response.toIconModel()
         }, fetchDailyTests: {
             let api = KeymeTestsAPI.daily
-            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
-            
+            var response = try await KeymeTestsAPIManager.shared.request(api, object: KeymeTestsDTO.self)
+
             return response.toIconModel()
         }
     )

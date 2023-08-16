@@ -14,7 +14,6 @@ import Util
 import DSKit
 
 public struct KeymeTestsStartView: View {
-    @State private var isAnimation = false
     public var store: StoreOf<KeymeTestsStartFeature>
     
     public init(store: StoreOf<KeymeTestsStartFeature>) {
@@ -50,7 +49,7 @@ public struct KeymeTestsStartView: View {
     }
     
     func logoImage() -> some View {
-    #warning("로고로 이미지 변경 필요")
+        // TODO: 로고로 이미지 변경 필요
         return Image(systemName: "eyes.inverse")
             .frame(width: 30, height: 30)
             .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
@@ -70,29 +69,26 @@ public struct KeymeTestsStartView: View {
             Circle()
                 .strokeBorder(.white.opacity(0.3), lineWidth: 1)
                 .background(Circle().foregroundColor(.white.opacity(0.3)))
-                .frame(width: isAnimation ? 230 : 180, height: isAnimation ? 230 : 180)
+                .frame(width: 280, height: 280)
+                .scaleEffect(viewStore.isAnimating ? 1 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
+                .animation(.spring(response: 0.85).repeatForever(), value: viewStore.isAnimating)
             
             Circle()
-                .foregroundColor(Color.hex(viewStore.state.icons.first?.color ?? ""))
-                .frame(width: isAnimation ? 110 : 0, height: isAnimation ? 110 : 0)
+                .foregroundColor(viewStore.icon.color)
+                .frame(width: 110, height: 110)
+                .scaleEffect(viewStore.isAnimating ? 1 : 0)
+                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
-            viewStore.state.icons.first?.image.toImage()
-                .frame(width: isAnimation ? 30 : 0, height: isAnimation ? 30 : 0)
-        }
-        .onAppear {
-            withAnimation(
-                .easeIn(duration: 0.5)
-                .delay(0.3)
-                .repeatForever(autoreverses: true)
-            ) {
-                isAnimation.toggle()
-            }
+            KFImageManager.shared.toImage(url:viewStore.icon.image)
+                .frame(width: 24, height: 24)
+                .scaleEffect(viewStore.isAnimating ? 1 : 0)
+                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
         }
     }
 }
 
-#warning("Util로 이동")
+//TODO: Util로 이동
 extension EdgeInsets {
     static func insets(top: CGFloat=0, leading: CGFloat=0, bottom: CGFloat=0, trailing: CGFloat=0) -> EdgeInsets {
         return EdgeInsets(top: top, leading: leading, bottom: bottom, trailing: trailing)
