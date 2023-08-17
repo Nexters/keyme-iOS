@@ -8,6 +8,7 @@
 
 import ComposableArchitecture
 import Domain
+import DSKit
 import Foundation
 import SwiftUI
 import Network
@@ -40,55 +41,55 @@ struct MyPageFeature: Reducer {
 
                 state.circleDataList = [
                     CircleData(
-                        color: .blue,
+                        color: .hex("89B5F6"),
                         xPoint: 0.2068919881427701,
                         yPoint: 0.7022698911578201,
                         radius: 0.14644660940672627,
                         metadata: CircleMetadata(
-                            icon: Image(systemName: "person.fill"),
-                            keyword: "표현력",
+                            icon: DSKitAsset.Image.감성.swiftUIImage,
+                            keyword: "감성",
                             averageScore: 4.2,
-                            myScore: 4.2)),
+                            myScore: 1)),
                     CircleData(
-                        color: .red,
+                        color: .hex("BF36FE"),
                         xPoint: -0.20710678118654763,
                         yPoint: -0.4925857155047088,
                         radius: 0.20710678118654754,
                         metadata: CircleMetadata(
-                            icon: Image(systemName: "person.fill"),
-                            keyword: "표현력",
-                            averageScore: 4.2,
-                            myScore: 3.5)),
+                            icon: DSKitAsset.Image.계획적.swiftUIImage,
+                            keyword: "계획적",
+                            averageScore: 1.5,
+                            myScore: 3)),
                     CircleData(
-                        color: .gray,
+                        color: .hex("568049"),
                         xPoint: -0.2218254069479773,
                         yPoint: 0.6062444788590935,
                         radius: 0.29289321881345254,
                         metadata: CircleMetadata(
-                            icon: Image(systemName: "person.fill"),
-                            keyword: "표현력",
-                            averageScore: 4.2,
-                            myScore: 3.5)),
+                            icon: DSKitAsset.Image.돈관리.swiftUIImage,
+                            keyword: "돈관리",
+                            averageScore: 2.7,
+                            myScore: 2)),
                     CircleData(
-                        color: .cyan,
+                        color: .hex("A9DBC3"),
                         xPoint: -0.5857864376269051,
                         yPoint: 0.0,
                         radius: 0.4142135623730951,
                         metadata: CircleMetadata(
-                            icon: Image(systemName: "person.fill"),
-                            keyword: "표현력",
-                            averageScore: 4.2,
-                            myScore: 3.5)),
+                            icon: DSKitAsset.Image.센스.swiftUIImage,
+                            keyword: "센스",
+                            averageScore: 3.2,
+                            myScore: 3)),
                     CircleData(
-                        color: .mint,
+                        color: .hex("643FFF"),
                         xPoint: 0.4142135623730951,
                         yPoint: 0.0,
                         radius: 0.5857864376269051,
                         metadata: CircleMetadata(
-                            icon: Image(systemName: "person.fill"),
-                            keyword: "표현력",
-                            averageScore: 4.2,
-                            myScore: 3.5))
+                            icon: DSKitAsset.Image.유머.swiftUIImage,
+                            keyword: "유머",
+                            averageScore: 5,
+                            myScore: 5))
                 ]
                 
                 return .none

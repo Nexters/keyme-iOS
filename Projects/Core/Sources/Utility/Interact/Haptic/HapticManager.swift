@@ -40,6 +40,13 @@ public class HapticManager {
         generator.notificationOccurred(.error)
     }
     
+    /// 톡
+    public func tok() {
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+    
     /// 패턴 재생(패턴은 추후 협의 후 개발해서 추가)
     public func playHapticPattern() {
         do {

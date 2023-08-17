@@ -14,14 +14,14 @@ import Foundation
 
 final class FocusedCircleViewOption {
     typealias LongPressGestureValue = SequenceGesture<LongPressGesture, DragGesture>.Value
-    var onLongPressStarted: (LongPressGestureValue) -> Void
-    var onLongPressEnded: (LongPressGestureValue) -> Void
+    var onLongPressStarted: () -> Void
+    var onLongPressEnded: () -> Void
     var onDragChanged: (DragGesture.Value) -> Void
     var onDragEnded: (DragGesture.Value) -> Void
     
     init(
-        onLongPressStarted: @escaping (LongPressGestureValue) -> Void = { _ in },
-        onLongPressEnded: @escaping (LongPressGestureValue) -> Void = { _ in },
+        onLongPressStarted: @escaping () -> Void = { },
+        onLongPressEnded: @escaping () -> Void = { },
         onDragChanged: @escaping (DragGesture.Value) -> Void = { _ in },
         onDragEnded: @escaping (DragGesture.Value) -> Void = { _ in }
     ) {
@@ -84,7 +84,7 @@ struct FocusedCircleView: View {
                     
                     if isPressed {
                         overlayingCircleView
-                            .frame(width: 100)
+                            .frame(width: scoreToRadius(score: CGFloat(circleData.metadata.myScore)))
                             .zIndex(1)
                     }
                     
@@ -101,15 +101,14 @@ struct FocusedCircleView: View {
                     switch value {
                     case .second(true, nil):
                         HapticManager.shared.homeButtonTouchDown()
-                        option.onLongPressStarted(value)
                         state = true
                     default:
                         break
                     }
                 }
-                .onEnded { value in
+                .onEnded { _ in
                     HapticManager.shared.homeButtonTouchUp()
-                    option.onLongPressEnded(value)
+                    option.onLongPressEnded()
                 }
                 .simultaneously(
                     with: DragGesture(minimumDistance: 0, coordinateSpace: .global)
@@ -126,6 +125,11 @@ struct FocusedCircleView: View {
             height: calculatedOutlineCircleRaduis)
         .animation(Animation.customInteractiveSpring(), value: showComponents)
         .animation(Animation.customInteractiveSpring(), value: isPressed)
+        .onChange(of: isPressed, perform: { newValue in
+            if newValue == true {
+                option.onLongPressStarted()
+            }
+        })
         .onAppear {
             startAnimation()
         }
@@ -243,13 +247,13 @@ extension FocusedCircleView: GeometryAnimatableCircle {
     
     func calculatedInnerCircleRaduis(with data: CircleData) -> CGFloat {
         calculatedCircleRaduis(
-            initialValue: data.radius * outboundLength,
-            targetValue: 120) // TODO: 나중에 데이터 받으면 고치기
+            initialValue: scoreToRadius(score: CGFloat(data.metadata.averageScore)),
+            targetValue: 120)
     }
     
     var calculatedOutlineCircleRaduis: CGFloat {
         calculatedCircleRaduis(
-            initialValue: outboundLength,
+            initialValue: 320,
             targetValue: 120)
     }
     
@@ -265,8 +269,8 @@ extension FocusedCircleView: GeometryAnimatableCircle {
             , 0)
     }
     
-    var customAnimation: Animation {
-        .timingCurve( 0.57, 0.24, 0.88, 0.35 , duration: 0.35)
+    func scoreToRadius(score: CGFloat) -> CGFloat {
+        return (score - 1) / (5 - 1) * (320 - 100) + 100
     }
 }
 
@@ -283,12 +287,12 @@ extension FocusedCircleView {
         return self
     }
     
-    func onLongPressStarted(_ action: @escaping (LongPressGestureValue) -> Void) -> FocusedCircleView {
+    func onLongPressStarted(_ action: @escaping () -> Void) -> FocusedCircleView {
         option.onLongPressStarted = action
         return self
     }
     
-    func onLongPressEnded(_ action: @escaping (LongPressGestureValue) -> Void) -> FocusedCircleView {
+    func onLongPressEnded(_ action: @escaping () -> Void) -> FocusedCircleView {
         option.onLongPressEnded = action
         return self
     }

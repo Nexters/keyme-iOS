@@ -165,10 +165,10 @@ public struct CirclePackView<DetailView: View>: View {
                         circleData: focusedCircleData)
                     .onDragChanged(self.onDragChanged)
                     .onDragEnded(self.onDragEnded)
-                    .onLongPressStarted { _ in
+                    .onLongPressStarted {
                         isPersonalityCirclePressed = true
                     }
-                    .onLongPressEnded { _ in
+                    .onLongPressEnded {
                         isPersonalityCirclePressed = false
                     }
                     .transition(.offset(x: 1, y: 1).combined(with: .opacity))
@@ -233,7 +233,7 @@ public struct CirclePackView<DetailView: View>: View {
 }
 
 private extension CirclePackView {
-    /// 성격 더보기
+    /// 성격 더보기 (얘는 나중에 밖으로 분리)
     var morePersonalityButton: some View {
         VStack(alignment: .center) {
             Spacer()

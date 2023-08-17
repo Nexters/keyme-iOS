@@ -30,8 +30,8 @@ public struct CircleContentView: View {
         VStack(spacing: imageSize / 4) {
             metadata.icon
                 .resizable()
-                .frame(width: imageSize, height: imageSize)
                 .scaledToFit()
+                .frame(height: imageSize)
                 .opacity(showSubText ? 0.6 : 1)
                 .matchedGeometryEffect(id: contentIconEffectID, in: namespace)
             
