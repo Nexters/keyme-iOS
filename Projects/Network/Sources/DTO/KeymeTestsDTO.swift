@@ -15,10 +15,10 @@ public struct KeymeTestsDTO: Codable {
 }
 
 public struct DataDTO: Codable {
+    public let testResultId: Int?
     public let owner: PresenterProfileDTO
     public let questions: [QuestionDTO]
     let solvedCount, testId: Int
-    let testResultId: Int
     let title: String
 }
 
