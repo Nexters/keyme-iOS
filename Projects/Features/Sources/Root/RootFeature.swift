@@ -100,7 +100,7 @@ public struct RootFeature: Reducer {
                     await send(.onboardingChecked(
                         TaskResult {
                             // TODO: API 갈아끼우기
-                            try await Task.sleep(until: .now + .seconds(3), clock: .continuous)
+                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
 
                             return true
                         }
