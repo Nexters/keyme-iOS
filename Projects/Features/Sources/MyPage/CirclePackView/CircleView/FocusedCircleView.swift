@@ -231,7 +231,6 @@ extension FocusedCircleView: GeometryAnimatableCircle {
             metadata: circleData.metadata,
             showSubText: false,
             imageSize: 48)
-        .border(.red)
         .matchedGeometryEffect(
             id: contentEffectID,
             in: namespace,
