@@ -23,6 +23,12 @@ public struct KeymeTestsView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
                 KeymeWebView(url: viewStore.url)
+                    .onCloseWebView {
+                        print("close")
+                    }
+                    .onTestSubmitted { testResultId in
+                        print(testResultId)
+                    }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
