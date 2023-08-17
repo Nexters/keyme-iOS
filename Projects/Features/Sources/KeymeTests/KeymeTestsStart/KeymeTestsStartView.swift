@@ -23,17 +23,33 @@ public struct KeymeTestsStartView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
-                Spacer()
-                    .frame(height: 75)
-                
-                welcomeText(viewStore)
-                
-                Spacer()
-                
-                startTestsButton(viewStore)
-                
-                Spacer()
-                Spacer()
+                IfLetStore(
+                    self.store.scope(
+                        state: \.keymeTests,
+                        action: KeymeTestsStartFeature.Action.keymeTests
+                    ),
+                    then: { store in
+                        KeymeTestsView(store: store)
+                            .ignoresSafeArea(.all)
+                            .transition(.scale.animation(.easeIn))
+                    },
+                    else: {
+                        Spacer()
+                            .frame(height: 75)
+                        
+                        welcomeText(viewStore)
+                        
+                        Spacer()
+                        
+                        startTestsButton(viewStore)
+                            .onTapGesture {
+                                viewStore.send(.startButtonDidTap)
+                            }
+                        
+                        Spacer()
+                        Spacer()
+                    }
+                )
             }
             .frame(maxWidth: .infinity)
             .onAppear {
@@ -58,19 +74,19 @@ public struct KeymeTestsStartView: View {
                 .strokeBorder(.white.opacity(0.3), lineWidth: 1)
                 .background(Circle().foregroundColor(.white.opacity(0.3)))
                 .frame(width: 280, height: 280)
-                .scaleEffect(viewStore.isAnimating ? 1 : 0.8)
+                .scaleEffect(viewStore.isAnimating ? 1.0 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
                 .animation(.spring(response: 0.85).repeatForever(), value: viewStore.isAnimating)
             
             Circle()
                 .foregroundColor(viewStore.icon.color)
                 .frame(width: 110, height: 110)
-                .scaleEffect(viewStore.isAnimating ? 1 : 0)
+                .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
             KFImageManager.shared.toImage(url:viewStore.icon.image)
                 .frame(width: 24, height: 24)
-                .scaleEffect(viewStore.isAnimating ? 1 : 0)
+                .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
         }
     }
