@@ -8,7 +8,9 @@
 
 import SwiftUI
 import Core
+import ComposableArchitecture
 import Domain
+import DSKit
 import Foundation
 
 public class CirclePackViewOption<DetailView: View> {
@@ -23,15 +25,12 @@ public class CirclePackViewOption<DetailView: View> {
     /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
     var magnifiedCircleRatio: CGFloat
     
-    var detailViewBuilder: (CircleData) -> DetailView
-    
     var onCircleTappedHandler: (CircleData) -> Void
     var onCircleDismissedHandler: (CircleData) -> Void
     
     public init(
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in },
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
         activateCircleBlink = true
         background = .white
@@ -41,7 +40,6 @@ public class CirclePackViewOption<DetailView: View> {
         magnifiedCircleRatio =  0.9
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
-        self.detailViewBuilder = detailViewBuilder
     }
     
     public init(
@@ -52,8 +50,7 @@ public class CirclePackViewOption<DetailView: View> {
         rotationAngle: Angle,
         magnifiedCircleRatio: CGFloat,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in },
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
         self.activateCircleBlink = activateCircleBlink
         self.background = background
@@ -63,7 +60,6 @@ public class CirclePackViewOption<DetailView: View> {
         self.magnifiedCircleRatio = magnifiedCircleRatio
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
-        self.detailViewBuilder = detailViewBuilder
     }
 }
 
@@ -80,19 +76,25 @@ public struct CirclePackView<DetailView: View>: View {
     
     @State private var animationEnded: Bool = true
     
+    @State private var showMorePersonalitySheet: Bool = false
     @State private var focusedCircleData: CircleData?
     
     private let circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
+    
+    private let morePersonalitystore = Store(initialState: MorePersonalityFeature.State()) {
+        MorePersonalityFeature()
+    }
 
     public init(
         data: [CircleData],
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
         self.circleData = data
-        self.option = .init(detailViewBuilder: detailViewBuilder)
+        self.option = .init()
         
+        self.morePersonalitystore.send(.loadPersonality)
         self.detailViewBuilder = detailViewBuilder
     }
         
@@ -129,15 +131,16 @@ public struct CirclePackView<DetailView: View>: View {
                 .pinchZooming()
             }
             .zIndex(1)
-
+            
             // 아래에 깔린 뷰 블러시키는 특수 뷰
             // `opacity`를 이용해서 visibility 조절함
             BackgroundBlurringView(style: .dark)
                 .ignoresSafeArea()
                 .zIndex(1.5)
-                .opacity(focusedCircleData == nil ? 0: 1)
+                .opacity(focusedCircleData == nil ? 0 : 1)
                 .onTapGesture(perform: onDismiss)
             
+            // 개별보기
             VStack(alignment: .center) {
                 if let focusedCircleData {
                     FocusedCircleView(
@@ -171,6 +174,11 @@ public struct CirclePackView<DetailView: View>: View {
             .frame(width: UIScreen.main.bounds.width)
             .ignoresSafeArea(edges: [.bottom])
             .zIndex(2)
+            
+            // 성격 더보기
+            morePersonalityButton
+                .zIndex(2.5)
+                .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
             customInteractiveSpringAnimation,
@@ -185,13 +193,67 @@ public struct CirclePackView<DetailView: View>: View {
                 self.animationEnded = true
             }
         }
+        .fullScreenCover(isPresented: $showMorePersonalitySheet) {
+            FocusedCircleOverlayView(
+                focusedCircle: CircleData.emptyCircle,
+                maxShrinkageDistance: maxSheetOffset,
+                detailViewBuilder: {
+                    MorePersonalityView(store: morePersonalitystore)
+                })
+            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            .showTopBar(true)
+            .onDismiss {
+                self.showMorePersonalitySheet = false
+            }
+        }
+    }
+}
+
+private extension CirclePackView {
+    /// 성격 더보기
+    var morePersonalityButton: some View {
+        VStack(alignment: .center) {
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    showMorePersonalitySheet = true
+                    print("Tapped")
+                }) {
+                    VStack {
+                        Text("내 성격 더보기")
+                            .font(.Keyme.body3Semibold)
+                        
+                        UpArrowButton()
+                            .frame(width: 24, height: 24)
+                    }
+                    .frame(height: 52)
+                    .foregroundColor(.white)
+                }
+                .frame(width: 135, height: 75)
+                .padding(.bottom, 18)
+                .contentShape(Rectangle())
+                
+                Spacer()
+            }
+        }
+        .fullFrame()
+        .background(
+            // 위에서 약 3/4 지점에서 시작하는 그래디언트
+            LinearGradient(
+                colors: [.clear, .black],
+                startPoint: .init(x: 0, y: 0.7),
+                endPoint: .init(x: 0, y: 1))
+            .allowsHitTesting(false))
     }
 }
 
 private extension CirclePackView {
     // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
     var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5)
+        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // 0.5
     }
     
     func onDragChanged(_ value: DragGesture.Value) {
@@ -257,12 +319,6 @@ private extension CirclePackView {
 extension CirclePackView {
     func activateCircleBlink(_ activated: Bool) -> CirclePackView {
         self.option.activateCircleBlink = activated
-        return self
-    }
-    
-    /// 원을 누르면 나올 바텀시트의 콘텐츠를 그리기
-    func drawDetailView(@ViewBuilder content: @escaping (CircleData) -> DetailView) -> CirclePackView {
-        self.option.detailViewBuilder = content
         return self
     }
     

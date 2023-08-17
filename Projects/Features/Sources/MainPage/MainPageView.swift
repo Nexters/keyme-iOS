@@ -11,7 +11,7 @@ import SwiftUIIntrospect
 import ComposableArchitecture
 
 struct KeymeMainView: View {
-    @State private var selectedTab = 0
+    @State private var selectedTab = 1
     
     private var myPageStore = Store(initialState: MyPageFeature.State()) {
         MyPageFeature()

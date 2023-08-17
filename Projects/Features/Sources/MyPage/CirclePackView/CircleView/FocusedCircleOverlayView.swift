@@ -6,112 +6,111 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Core
+import DSKit
 import Domain
 import SwiftUI
 
-struct FocusedCircleOverlayView<DetailView: View>: View {
-    private let namespace: Namespace.ID
-    private let focusedCircle: CircleData
+final class FocusedCircleOverlayViewAction {
+    var onDismiss: () -> Void
+    var onDragChanged: (DragGesture.Value) -> Void
+    var onDragEnded: (DragGesture.Value) -> Void
+    
+    init(
+        onDismiss: @escaping () -> Void = {},
+        onDragChanged: @escaping (DragGesture.Value) -> Void = { _ in },
+        onDragEnded: @escaping (DragGesture.Value) -> Void = { _ in }
+    ) {
+        self.onDismiss = onDismiss
+        self.onDragChanged = onDragChanged
+        self.onDragEnded = onDragEnded
+    }
+}
 
+final class FocusedCircleOverlayViewOption {
+    var showTopBar: Bool
+    var backgroundColor: Color
+    
+    init(
+        showTopBar: Bool = false,
+        backgroundColor: Color = DSKitAsset.Color.keymeBottom.swiftUIColor
+    ) {
+        self.showTopBar = showTopBar
+        self.backgroundColor = backgroundColor
+    }
+}
+
+struct FocusedCircleOverlayView<DetailView: View>: View {
+    @Namespace private var namespace
+    
+    private let magnifiedCircleRatio: CGFloat = 0.9
+    
     @State private var doneDragging: Bool = false
+    
     @State private var currentSheet: SheetPosition = .middle
     @State private var currentSheetOffset: CGFloat = 0
     @State private var idealSheetHeight: CGFloat = 400
     
-    @State private var showSheet = false
+    private let focusedCircle: CircleData
+    private var action: FocusedCircleOverlayViewAction
+    private var option: FocusedCircleOverlayViewOption
 
     private let maxShrinkageDistance: CGFloat
-    private let onDismiss: () -> Bool
-    
-    var option: CirclePackViewOption<DetailView>
-    var detailViewBuilder: (CircleData) -> DetailView
+    var detailViewBuilder: () -> DetailView
     
     internal init(
-        namespace: Namespace.ID,
         focusedCircle: CircleData,
         maxShrinkageDistance: CGFloat,
-        onDismiss: @escaping () -> Bool,
-        option: CirclePackViewOption<DetailView>,
-        @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
+        option: FocusedCircleOverlayViewOption = .init(),
+        action: FocusedCircleOverlayViewAction = .init(),
+        @ViewBuilder detailViewBuilder: @escaping () -> DetailView
     ) {
-        self.namespace = namespace
         self.focusedCircle = focusedCircle
-        self.maxShrinkageDistance = maxShrinkageDistance
-        self.onDismiss = onDismiss
+        self.action = action
         self.option = option
+
+        self.maxShrinkageDistance = maxShrinkageDistance
         self.detailViewBuilder = detailViewBuilder
     }
     
     var body: some View {
-        Color.black.opacity(0.01)
-            .onTapGesture {
-                guard onDismiss() else { return }
-                showSheet = false
-            }
-            .onAppear {
-                showSheet = true
-            }
-        
         VStack(alignment: .center) {
+            if option.showTopBar {
+                topBar
+                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                    .padding(.horizontal, 17)
+            }
+            
             FocusedCircleView(
                 namespace: namespace,
                 shrinkageDistance: currentSheetOffset,
                 maxShrinkageDistance: maxShrinkageDistance,
-                outboundLength: UIScreen.main.bounds.width * option.magnifiedCircleRatio,
+                outboundLength: UIScreen.main.bounds.width * magnifiedCircleRatio,
                 blinkCircle: false,
                 circleData: focusedCircle)
+            .onDragChanged(self.onDragChanged)
+            .onDragEnded(self.onDragEnded)
             .padding(.top, 20)
 
-            if showSheet {
+            VStack {
                 BottomSheetWrapperView {
-                    detailViewBuilder(focusedCircle)
+                    detailViewBuilder()
                 }
-                .onDragChanged { value in
-                    doneDragging = false
-                    currentSheetOffset =
-                    currentSheet.position + value.translation.height.between(
-                        min: -maxShrinkageDistance,
-                        max: maxShrinkageDistance)
-                }
-                .onDragEnded { value in
-                    let velocity = CGSize(
-                        width:  value.predictedEndLocation.x - value.location.x,
-                        height: value.predictedEndLocation.y - value.location.y
-                    ).height
-                    
-                    let velocityThreshold: CGFloat = 200
-                    switch velocity {
-                    case _ where velocity > velocityThreshold:
-                        currentSheet = currentSheet.previous()
-                    case _ where velocity < -velocityThreshold:
-                        currentSheet = currentSheet.next()
-                    default:
-                        break
-                    }
-                    
-                    currentSheetOffset = currentSheet.position
-                    doneDragging = true
-                    
-                    if case .dismiss = currentSheet {
-                        guard onDismiss() else { return }
-                        showSheet = false
-                    }
-                }
-                .transition(.move(edge: .bottom))
-                .frame(
-                    minWidth: UIScreen.main.bounds.width,
-                    maxWidth: UIScreen.main.bounds.width,
-                    idealHeight: idealSheetHeight)
-                .cornerRadius(16, corners: [.topLeft, .topRight])
+                .onDragChanged(self.onDragChanged)
+                .onDragEnded(self.onDragEnded)
             }
+            .frame(
+                minWidth: UIScreen.main.bounds.width,
+                maxWidth: UIScreen.main.bounds.width,
+                idealHeight: idealSheetHeight)
+            .cornerRadius(16, corners: [.topLeft, .topRight])
         }
+        .frame(width: UIScreen.main.bounds.width)
+        .background(option.backgroundColor)
         .ignoresSafeArea(edges: [.bottom])
         .animation(
-            doneDragging
-            ? .spring()
-            : .none,
+            customInteractiveSpringAnimation,
             value: doneDragging)
-        .animation(.easeInOut(duration: 1), value: showSheet)
     }
     
     enum SheetPosition: CaseIterable {
@@ -129,5 +128,78 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
                 return 0
             }
         }
+    }
+    
+    var customInteractiveSpringAnimation: Animation {
+        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5)
+    }
+}
+
+extension FocusedCircleOverlayView {
+    var topBar: some View {
+        ZStack(alignment: .center) {
+            Text("내 성격 더 보기")
+                .font(.Keyme.body3Semibold)
+            
+            HStack {
+                Spacer()
+                
+                Button(action: action.onDismiss) {
+                    Image(systemName: "xmark")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .scaledToFit()
+                }
+            }
+        }
+    }
+}
+
+private extension FocusedCircleOverlayView {
+    func onDragChanged(_ value: DragGesture.Value) {
+        doneDragging = false
+        currentSheetOffset =
+            currentSheet.position + value.translation.height.between(
+                min: -maxShrinkageDistance,
+                max: maxShrinkageDistance)
+    }
+    
+    func onDragEnded(_ value: DragGesture.Value) {
+        let velocity = CGSize(
+            width:  value.predictedEndLocation.x - value.location.x,
+            height: value.predictedEndLocation.y - value.location.y
+        ).height
+        
+        let velocityThreshold: CGFloat = 150
+        switch velocity {
+        case _ where velocity > velocityThreshold:
+            currentSheet = currentSheet.previous()
+        case _ where velocity < -velocityThreshold:
+            currentSheet = currentSheet.next()
+        default:
+            HapticManager.shared.unexpectedDelight()
+        }
+        
+        currentSheetOffset = currentSheet.position
+        doneDragging = true
+        
+        if case .dismiss = currentSheet { action.onDismiss() }
+    }
+}
+
+extension FocusedCircleOverlayView {
+    func showTopBar(_ show: Bool) -> FocusedCircleOverlayView {
+        self.option.showTopBar = show
+        return self
+    }
+    
+    func backgroundColor(_ color: Color) -> FocusedCircleOverlayView {
+        self.option.backgroundColor = color
+        return self
+    }
+    
+    func onDismiss(_ action: @escaping () -> Void) -> FocusedCircleOverlayView {
+        self.action.onDismiss = action
+        return self
     }
 }
