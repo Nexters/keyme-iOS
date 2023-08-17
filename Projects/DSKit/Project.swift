@@ -13,5 +13,10 @@ let project = Project.makeModule(
     internalDependencies: [
         .Core
     ],
-    hasResource: true
+    hasResource: true,
+    resourceSynthesizers: [
+        .custom(name: "Lottie", parser: .json, extensions: ["lottie"]),
+        .fonts(),
+        .assets()
+    ]
 )
