@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension Comparable {
+public extension Comparable {
     /// `min` 과  `max` 사이의 값만  반환해줘요.
     func between(min minValue: Self, max maxValue: Self) -> Self {
         min(maxValue, max(minValue, self))

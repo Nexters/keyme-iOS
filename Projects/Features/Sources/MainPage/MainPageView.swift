@@ -11,8 +11,12 @@ import SwiftUIIntrospect
 import ComposableArchitecture
 
 struct KeymeMainView: View {
-    @State private var selectedTab = 0
-
+    @State private var selectedTab = 1
+    
+    private var myPageStore = Store(initialState: MyPageFeature.State()) {
+        MyPageFeature()
+    }
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             TestView(store: Store(
@@ -24,7 +28,7 @@ struct KeymeMainView: View {
             }
             .tag(0)
             
-            Text("My page content")
+            MyPageView(store: myPageStore)
                 .tabItem {
                     Image(systemName: "2.square.fill")
                     Text("My page")

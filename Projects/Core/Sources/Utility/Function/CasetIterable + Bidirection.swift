@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension CaseIterable where Self: Equatable, AllCases: BidirectionalCollection {
+public extension CaseIterable where Self: Equatable, AllCases: BidirectionalCollection {
     /// 이전 `case`를 반환해요
     func previous() -> Self {
         let all = Self.allCases

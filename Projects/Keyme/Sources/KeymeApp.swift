@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 
+import ComposableArchitecture
 import FirebaseCore
 import FirebaseMessaging
 
