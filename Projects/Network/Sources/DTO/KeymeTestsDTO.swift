@@ -18,7 +18,8 @@ public struct DataDTO: Codable {
     public let testResultId: Int?
     public let owner: PresenterProfileDTO
     public let questions: [QuestionDTO]
-    let solvedCount, testId: Int
+    let solvedCount: Int
+    public let testId: Int
     let title: String
 }
 

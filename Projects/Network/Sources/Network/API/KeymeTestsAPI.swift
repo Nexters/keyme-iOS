@@ -35,7 +35,7 @@ extension KeymeTestsAPI: BaseAPI {
     
     public var headers: [String : String]? {
         // TODO: token 받아서 넣기
-        return ["Authorization": "access-token"]
+        return ["Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhY2Nlc3NUb2tlbiIsImlhdCI6MTY5MTg0MjM1NiwiZXhwIjoxNjk0NDM0MzU2LCJtZW1iZXJJZCI6Miwicm9sZSI6IlJPTEVfVVNFUiJ9.bLUl_ObvXr2pkLGNBZYWbJgLZLo3P0xB2pawckRGYZM"]
     }
     
     public var sampleData: Data {
@@ -44,13 +44,13 @@ extension KeymeTestsAPI: BaseAPI {
             "code": 200,
             "message": "요청에 성공했습니다.",
             "data": {
-                "testId": 5,
+                "testId": 4,
                 "testResultId": null,
                 "solvedCount": 0,
                 "title": "님은 돈관리를 잘한다",
                 "owner": {
                     "id": 2,
-                    "nickname": null,
+                    "nickname": "영인",
                     "profileThumbnail": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/keyme_default.png"
                 },
                 "questions": [

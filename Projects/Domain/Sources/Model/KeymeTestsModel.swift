@@ -14,6 +14,7 @@ import Kingfisher
 
 public struct KeymeTestsModel: Equatable {
     public let nickname: String
+    public let testId: Int
     public let icons: [IconModel]
 }
 
@@ -31,6 +32,8 @@ public extension KeymeTestsDTO {
             IconModel(image: $0.category.iconUrl,
                       color: Color.hex($0.category.color))
         }
-        return KeymeTestsModel(nickname: nickname ?? "키미키미", icons: icons)
+        return KeymeTestsModel(nickname: nickname ?? "키미키미",
+                               testId: data.testId,
+                               icons: icons)
     }
 }
