@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftUIIntrospect
 import Core
 
-public struct SegmentControlView<SegmentType: Identifiable, Content: View>: View {
+public struct SegmentControlView<SegmentType: Identifiable, Content: View>: View where SegmentType: Equatable {
     let segments: [SegmentType]
     @Binding var selected: SegmentType
 
@@ -51,6 +51,7 @@ public struct SegmentControlView<SegmentType: Identifiable, Content: View>: View
                     .frame(width: bounds.size.width / CGFloat(segments.count))
                 }
             }
+            .animation(Animation.customInteractiveSpring(), value: selected)
         }
         .padding(4)
 
@@ -82,9 +83,7 @@ extension SegmentControlView {
             GeometryReader { bounds in
                 Button(action: {
                     HapticManager.shared.tok()
-                    withAnimation(Animation.customInteractiveSpring()) {
-                        selectedId = id
-                    }
+                    selectedId = id
                 }) {
                     content()
                 }
@@ -104,7 +103,7 @@ extension SegmentControlView {
     }
 }
 
-public enum Segment: Identifiable, CaseIterable {
+public enum MyPageSegment: Identifiable, CaseIterable, Equatable {
     case similar, different
     
     public var id: String {

@@ -64,7 +64,8 @@ public class CirclePackViewOption<DetailView: View> {
 }
 
 public struct CirclePackView<DetailView: View>: View {
-    @Namespace private var namespace
+//    @Namespace private var namespace
+    private let namespace: Namespace.ID
     
     // 애니메이션 관련
     @State private var doneDragging = true
@@ -89,13 +90,16 @@ public struct CirclePackView<DetailView: View>: View {
     }
 
     public init(
+        namespace: Namespace.ID,
         data: [CircleData],
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
+        print("init")
+        self.namespace = namespace
         self.circleData = data
         self.option = .init()
         
-        self.morePersonalitystore.send(.loadPersonality)
+        self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
     }
         
@@ -377,75 +381,5 @@ extension CirclePackView {
     func onCircleDismissed(_ handler: @escaping (CircleData) -> Void) -> CirclePackView {
         self.option.onCircleDismissedHandler = handler
         return self
-    }
-}
-
-struct CirclePackView_Previews: PreviewProvider {
-    static var previews: some View {
-        CirclePackView(
-            data: [
-                CircleData(
-                    color: .blue,
-                    xPoint: 0.2068919881427701,
-                    yPoint: 0.7022698911578201,
-                    radius: 0.14644660940672627,
-                    metadata: CircleMetadata(
-                        icon: Image(systemName: "person.fill"),
-                        keyword: "표현력",
-                        averageScore: 4.2,
-                        myScore: 4.2)),
-                CircleData(
-                    color: .red,
-                    xPoint: -0.20710678118654763,
-                    yPoint: -0.4925857155047088,
-                    radius: 0.20710678118654754,
-                    metadata: CircleMetadata(
-                        icon: Image(systemName: "person.fill"),
-                        keyword: "표현력",
-                        averageScore: 4.2,
-                        myScore: 3.5)),
-                CircleData(
-                    color: .gray,
-                    xPoint: -0.2218254069479773,
-                    yPoint: 0.6062444788590935,
-                    radius: 0.29289321881345254,
-                    metadata: CircleMetadata(
-                        icon: Image(systemName: "person.fill"),
-                        keyword: "표현력",
-                        averageScore: 4.2,
-                        myScore: 3.5)),
-                CircleData(
-                    color: .cyan,
-                    xPoint: -0.5857864376269051,
-                    yPoint: 0.0,
-                    radius: 0.4142135623730951,
-                    metadata: CircleMetadata(
-                        icon: Image(systemName: "person.fill"),
-                        keyword: "표현력",
-                        averageScore: 4.2,
-                        myScore: 3.5)),
-                CircleData(
-                    color: .mint,
-                    xPoint: 0.4142135623730951,
-                    yPoint: 0.0,
-                    radius: 0.5857864376269051,
-                    metadata: CircleMetadata(
-                        icon: Image(systemName: "person.fill"),
-                        keyword: "표현력",
-                        averageScore: 4.2,
-                        myScore: 3.5))
-            ],
-            detailViewBuilder: { _ in
-                let scores = [
-                    CharacterScore(score: 4, date: Date()),
-                    CharacterScore(score: 5, date: Date()),
-                    CharacterScore(score: 3, date: Date()),
-                    CharacterScore(score: 1, date: Date()),
-                    CharacterScore(score: 2, date: Date())
-                ]
-                
-                DetailCharacterView(title: "키미님의 애정도", subtitle: "서브타이틀", scores: scores)
-            })
-        .previewDevice(PreviewDevice(rawValue: "iPhone SE (2nd generation)"))
     }
 }

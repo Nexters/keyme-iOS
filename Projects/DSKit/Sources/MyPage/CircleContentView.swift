@@ -31,17 +31,15 @@ public struct CircleContentView: View {
             metadata.icon
                 .resizable()
                 .scaledToFit()
-                .frame(height: imageSize)
+                .frame(width: imageSize)
                 .opacity(showSubText ? 0.6 : 1)
                 .matchedGeometryEffect(id: contentIconEffectID, in: namespace)
             
             if showSubText {
-                VStack(spacing: 0) {
-                    Text(metadata.keyword)
-                        .font(.Keyme.body3Semibold)
+                VStack(alignment: .center, spacing: 0) {
+                    Text.keyme(metadata.keyword, font: .body3Semibold)
                     
-                    Text(String(format: "%.1f", metadata.averageScore))
-                        .font(.Score.mypage)
+                    Text.keyme(String(format: "%.1f", metadata.averageScore), font: .mypage)
                 }
                 .matchedGeometryEffect(id: contentTextEffectID, in: namespace)
                 .transition(.opacity)
@@ -52,7 +50,7 @@ public struct CircleContentView: View {
 }
 
 extension CircleContentView: GeometryAnimatableCircle {
-    public var id: String {
-        metadata.id.uuidString
+    public var animationId: Int {
+        metadata.animationId
     }
 }

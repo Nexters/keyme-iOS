@@ -137,8 +137,8 @@ struct FocusedCircleView: View {
 }
 
 extension FocusedCircleView: GeometryAnimatableCircle {
-    var id: String {
-        circleData.id.uuidString
+    var animationId: Int {
+        circleData.metadata.animationId
     }
     
     func startAnimation() {
@@ -231,18 +231,11 @@ extension FocusedCircleView: GeometryAnimatableCircle {
             metadata: circleData.metadata,
             showSubText: false,
             imageSize: 48)
-            .matchedGeometryEffect(
-                id: contentEffectID,
-                in: namespace,
-                anchor: .center)
-    }
-    
-    var innerCircleEffectID: String {
-        id + "innerCircle"
-    }
-    
-    var outlineEffectID: String {
-        id + "outline"
+        .border(.red)
+        .matchedGeometryEffect(
+            id: contentEffectID,
+            in: namespace,
+            anchor: .center)
     }
     
     func calculatedInnerCircleRaduis(with data: CircleData) -> CGFloat {

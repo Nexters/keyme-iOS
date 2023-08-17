@@ -15,7 +15,7 @@ struct KeymeMainView: View {
     @State private var selectedTab: Tab = .home
     
     private var myPageStore = Store(initialState: MyPageFeature.State()) {
-        MyPageFeature()
+        MyPageFeature()._printChanges()
     }
     
     enum Tab: Int {

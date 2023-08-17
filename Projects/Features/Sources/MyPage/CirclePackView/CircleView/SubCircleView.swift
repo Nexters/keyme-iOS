@@ -56,8 +56,8 @@ struct SubCircleView: View {
 }
 
 extension SubCircleView: GeometryAnimatableCircle {
-    var id: String {
-        circleData.id.uuidString
+    var animationId: Int {
+        circleData.metadata.animationId
     }
     
     var radius: CGFloat {

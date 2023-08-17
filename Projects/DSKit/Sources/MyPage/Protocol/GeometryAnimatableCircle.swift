@@ -9,27 +9,27 @@
 import SwiftUI
 
 public protocol GeometryAnimatableCircle {
-    var id: String { get }
+    var animationId: Int { get }
 }
 
 public extension GeometryAnimatableCircle {
     var innerCircleEffectID: String {
-        id + "innerCircle"
+        "\(animationId) innerCircle"
     }
     
     var outlineEffectID: String {
-        id + "outline"
+        "\(animationId) outline"
     }
     
     var contentEffectID: String {
-        id + "content"
+        "\(animationId) content"
     }
     
     var contentIconEffectID: String {
-        id + "contentIcon"
+        "\(animationId) contentIcon"
     }
     
     var contentTextEffectID: String {
-        id + "contentText"
+        "\(animationId) contentText"
     }
 }

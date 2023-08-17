@@ -13,10 +13,7 @@ import DSKit
 import SwiftUI
 
 struct MyPageView: View {
-    
-    @State private var selectedSegment: Segment = .similar
-    
-    @State var themeColor: Color = .primary
+    @Namespace private var namespace
     
     private let store: StoreOf<MyPageFeature>
     private let scoreListStore: StoreOf<ScoreListFeature>
@@ -27,7 +24,7 @@ struct MyPageView: View {
             ScoreListFeature()
         })
         
-        store.send(.loadCircle)
+        store.send(.loadCircle(.top5))
         scoreListStore.send(.loadScores)
     }
     
@@ -35,21 +32,22 @@ struct MyPageView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack(alignment: .topLeading) {
                 CirclePackView(
-                    data: viewStore.state.circleDataList,
+                    namespace: namespace,
+                    data: viewStore.circleDataList,
                     detailViewBuilder: { data in
                         ScoreListView(
                             nickname: "ninkname",
                             keyword: data.metadata.keyword,
                             store: scoreListStore)
                     })
-                .graphBackgroundColor(.hex("232323"))
+                .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 .activateCircleBlink(viewStore.state.shownFirstTime)
                 .onCircleTapped { _ in
                     viewStore.send(.circleTapped)
                     HapticManager.shared.tok()
                 }
                 .onCircleDismissed { _ in
-                    withAnimation {
+                    withAnimation(Animation.customInteractiveSpring()) {
                         viewStore.send(.markViewAsShown)
                         viewStore.send(.circleDismissed)
                     }
@@ -69,8 +67,10 @@ struct MyPageView: View {
                         .padding(.top, 10)
                         
                         SegmentControlView(
-                            segments: Segment.allCases,
-                            selected: $selectedSegment
+                            segments: MyPageSegment.allCases,
+                            selected: viewStore.binding(
+                                get: \.selectedSegment,
+                                send: { .selectSegement($0) })
                         ) { segment in
                             Text.keyme(segment.title, font: .body3Semibold)
                                 .padding(.horizontal)
@@ -87,7 +87,6 @@ struct MyPageView: View {
                     .foregroundColor(.white)
                 }
             }
-            
         }
     }
 }

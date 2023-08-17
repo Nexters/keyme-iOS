@@ -10,13 +10,20 @@ import SwiftUI
 import Foundation
 
 public struct CircleMetadata {
-    public let id = UUID()
+    public let animationId: Int
     public let icon: Image
     public let keyword: String
     public let averageScore: Float
     public let myScore: Float
     
-    public init(icon: Image, keyword: String, averageScore: Float, myScore: Float) {
+    public init(
+        animationId: Int = Int.random(in: 0...99999),
+        icon: Image,
+        keyword: String,
+        averageScore: Float,
+        myScore: Float
+    ) {
+        self.animationId = animationId
         self.icon = icon
         self.keyword = keyword
         self.averageScore = averageScore
@@ -24,6 +31,6 @@ public struct CircleMetadata {
     }
     
     public static var emptyData: CircleMetadata {
-        return  CircleMetadata(icon: Image(""), keyword: "", averageScore: 0.0, myScore: 0.0)
+        return  CircleMetadata(animationId: -1, icon: Image(""), keyword: "", averageScore: 0.0, myScore: 0.0)
     }
 }
