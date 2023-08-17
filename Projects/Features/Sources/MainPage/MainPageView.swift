@@ -15,7 +15,7 @@ struct KeymeMainView: View {
     @State private var selectedTab: Tab = .home
     
     private var myPageStore = Store(initialState: MyPageFeature.State()) {
-        MyPageFeature()._printChanges()
+        MyPageFeature()
     }
     
     enum Tab: Int {
@@ -48,7 +48,7 @@ struct KeymeMainView: View {
             let tabBar = tabViewController.tabBar
             
             let barAppearance = UITabBarAppearance()
-            barAppearance.configureWithOpaqueBackground()
+            barAppearance.configureWithDefaultBackground()
             barAppearance.backgroundColor = UIColor(Color.hex("232323"))
             
             let itemAppearance = UITabBarItemAppearance()

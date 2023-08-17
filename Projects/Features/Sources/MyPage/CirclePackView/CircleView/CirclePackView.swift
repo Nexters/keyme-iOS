@@ -266,13 +266,13 @@ private extension CirclePackView {
             }
         }
         .fullFrame()
-        .background(
-            // 위에서 약 3/4 지점에서 시작하는 그래디언트
-            LinearGradient(
-                colors: [.clear, .black],
-                startPoint: .init(x: 0, y: 0.7),
-                endPoint: .init(x: 0, y: 1))
-            .allowsHitTesting(false))
+//        .background(
+//            // 위에서 약 3/4 지점에서 시작하는 그래디언트
+//            LinearGradient(
+//                colors: [.clear, .black],
+//                startPoint: .init(x: 0, y: 0.7),
+//                endPoint: .init(x: 0, y: 1))
+//            .allowsHitTesting(false))
     }
 }
 

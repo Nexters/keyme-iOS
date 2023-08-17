@@ -12,7 +12,7 @@ import Combine
 import CombineMoya
 import Moya
 
-public struct KeymeTestsAPIManager {
+public class KeymeTestsAPIManager {
     public typealias APIType = KeymeTestsAPI
 
     private var core: CoreNetworkService<KeymeTestsAPI>
@@ -22,10 +22,8 @@ public struct KeymeTestsAPIManager {
         self.core = core
     }
 
-    @discardableResult
-    public mutating func registerAuthorizationToken(_ token: String) -> Self {
+    public func registerAuthorizationToken(_ token: String) {
         core.registerAuthorizationToken(token)
-        return self
     }
 }
 
@@ -50,5 +48,5 @@ extension KeymeTestsAPIManager: APIRequestable {
 }
 
 public extension KeymeTestsAPIManager {
-    static let shared = KeymeTestsAPIManager(core: .init())
+    static let shared = KeymeTestsAPIManager(core: .init(provider: .init()))
 }

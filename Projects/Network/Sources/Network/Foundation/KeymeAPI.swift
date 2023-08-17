@@ -13,6 +13,7 @@ import Moya
 public enum KeymeAPI {
     case test
     case myPage(MyPage)
+    case registerPushToken(String)
 }
 
 public enum MyPage {
@@ -30,6 +31,8 @@ extension KeymeAPI: BaseAPI {
             return "/api"
         case .myPage(.statistics(let id)):
             return "/members/\(id)/statistics"
+        case .registerPushToken:
+            return "/members/devices"
         }
     }
 
@@ -39,6 +42,8 @@ extension KeymeAPI: BaseAPI {
             return .get
         case .myPage(.statistics):
             return .get
+        case .registerPushToken:
+            return .post
         }
     }
 
@@ -48,7 +53,8 @@ extension KeymeAPI: BaseAPI {
             return .requestPlain
         case .myPage(.statistics):
             return .requestPlain
-            
+        case .registerPushToken(let token):
+            return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
         }
     }
 
