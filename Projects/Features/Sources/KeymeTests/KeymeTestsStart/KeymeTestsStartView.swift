@@ -10,6 +10,7 @@ import SwiftUI
 
 import ComposableArchitecture
 
+import Core
 import Util
 import DSKit
 
@@ -64,7 +65,7 @@ public struct KeymeTestsStartView: View {
             .font(Font.Keyme.heading1)
             .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(EdgeInsets.insets(leading: 16))
+            .padding(Padding.insets(leading: 16))
     }
     
     func startTestsButton(_ viewStore: ViewStore<KeymeTestsStartFeature.State,
@@ -89,12 +90,5 @@ public struct KeymeTestsStartView: View {
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
         }
-    }
-}
-
-//TODO: Util로 이동
-extension EdgeInsets {
-    static func insets(top: CGFloat=0, leading: CGFloat=0, bottom: CGFloat=0, trailing: CGFloat=0) -> EdgeInsets {
-        return EdgeInsets(top: top, leading: leading, bottom: bottom, trailing: trailing)
     }
 }

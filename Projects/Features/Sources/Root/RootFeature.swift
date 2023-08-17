@@ -28,15 +28,15 @@ public struct RootFeature: Reducer {
                 logInStatus = .notDetermined
             }
             
-            if let doneOnboarding {
-                onboardingStatus = doneOnboarding ? .completed : .needsOnboarding
-            } else {
-                onboardingStatus = .notDetermined
-            }
+//            if let doneOnboarding {
+//                onboardingStatus = doneOnboarding ? .completed : .needsOnboarding
+//            } else {
+//                onboardingStatus = .notDetermined
+//            }
         }
     }
     
-    public enum Action: Equatable {
+    public enum Action {
         case login(PresentationAction<SignInFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
         case mainPage(MainPageFeature.Action)
@@ -63,12 +63,12 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .onboarding(.presented(let result)):
-                switch result {
-                case .succeeded:
-                    state.onboardingStatus = .completed
-                case .failed:
-                    state.onboardingStatus = .needsOnboarding
-                }
+//                switch result {
+//                case .succeeded:
+//                    state.onboardingStatus = .completed
+//                case .failed:
+//                    state.onboardingStatus = .needsOnboarding
+//                }
                 return .none
                 
             case .logInChecked(let result):
@@ -81,12 +81,12 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .onboardingChecked(.success(let result)):
-                switch result {
-                case true:
-                    state.onboardingStatus = .completed
-                case false:
-                    state.onboardingStatus = .needsOnboarding
-                }
+//                switch result {
+//                case true:
+//                    state.onboardingStatus = .completed
+//                case false:
+//                    state.onboardingStatus = .needsOnboarding
+//                }
                 return .none
                 
             case .checkLoginStatus:
