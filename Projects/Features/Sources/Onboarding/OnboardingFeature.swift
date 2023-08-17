@@ -10,6 +10,7 @@ import Foundation
 import ComposableArchitecture
 
 import DSKit
+import Domain
 
 public enum LottieType: CaseIterable {
     case splash1
@@ -52,6 +53,8 @@ public struct OnboardingFeature: Reducer {
     //    }
     
     public struct State: Equatable {
+        public var keymeTests: KeymeTestsFeature.State?
+        public var testId: Int = 0
         public var lottieType: LottieType = .splash1
         public var lottieIdx: Int = 0
         public var isButtonShown: Bool = false
@@ -62,12 +65,17 @@ public struct OnboardingFeature: Reducer {
     }
     
     public enum Action: Equatable {
+        case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
+        case startButtonDidTap
+        case keymeTests(KeymeTestsFeature.Action)
         
         case succeeded
         case failed
     }
+    
+    @Dependency(\.keymeTestsClient) var keymeTestsClient
     
     public init() { }
     
@@ -85,14 +93,32 @@ public struct OnboardingFeature: Reducer {
             case .lottieEnded:
                 if state.lottieType == .splash3 {
                     state.lottieType = .question
+                    state.isLoop = true
+                    return .run { send in
+                        await send(.fetchOnboardingTests(
+                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests() }
+                        ))
+                    }
                 } else {
                     state.isButtonShown = true
+                    state.isLoop = true
                 }
-                state.isLoop = true
+            case let .fetchOnboardingTests(.success(tests)):
+                state.testId = tests.testId
+            case .fetchOnboardingTests(.failure):
+                return .none
+            case .startButtonDidTap:
+                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)?nickname=키미"
+                state.keymeTests = KeymeTestsFeature.State(url: url)
+            case .keymeTests:
+                return .none
             case .succeeded, .failed:
                 return .none
             }
             return .none
+        }
+        .ifLet(\.keymeTests, action: /Action.keymeTests) {
+            KeymeTestsFeature()
         }
     }
 }
