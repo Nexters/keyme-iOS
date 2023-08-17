@@ -8,13 +8,18 @@
 
 import SwiftUI
 import SwiftUIIntrospect
+import DSKit
 import ComposableArchitecture
 
 struct KeymeMainView: View {
-    @State private var selectedTab = 1
+    @State private var selectedTab: Tab = .home
     
     private var myPageStore = Store(initialState: MyPageFeature.State()) {
         MyPageFeature()
+    }
+    
+    enum Tab: Int {
+        case home, myPage
     }
     
     var body: some View {
@@ -23,24 +28,28 @@ struct KeymeMainView: View {
                 initialState: TestStore.State(),
                 reducer: TestStore()))
             .tabItem {
-                Image(systemName: "1.square.fill")
-                Text("Home")
+                homeTabImage
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .aspectRatio(contentMode: .fit)
             }
-            .tag(0)
+            .tag(Tab.home)
             
             MyPageView(store: myPageStore)
                 .tabItem {
-                    Image(systemName: "2.square.fill")
-                    Text("My page")
+                    myPageTabImage
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .aspectRatio(contentMode: .fit)
                 }
-                .tag(1)
+                .tag(Tab.myPage)
         }
         .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
             let tabBar = tabViewController.tabBar
             
             let barAppearance = UITabBarAppearance()
             barAppearance.configureWithOpaqueBackground()
-            barAppearance.backgroundColor = .black
+            barAppearance.backgroundColor = UIColor(Color.hex("232323"))
             
             let itemAppearance = UITabBarItemAppearance()
             itemAppearance.selected.iconColor = .white
@@ -53,6 +62,24 @@ struct KeymeMainView: View {
             tabBar.standardAppearance.stackedLayoutAppearance = itemAppearance
             tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
             tabBar.scrollEdgeAppearance = tabBar.standardAppearance
+        }
+    }
+}
+
+private extension KeymeMainView {
+    var homeTabImage: Image {
+        if selectedTab == .home {
+            return DSKitAsset.Image.homeSelected.swiftUIImage
+        } else {
+            return DSKitAsset.Image.home.swiftUIImage
+        }
+    }
+    
+    var myPageTabImage: Image {
+        if selectedTab == .myPage {
+            return DSKitAsset.Image.userSelected.swiftUIImage
+        } else {
+            return DSKitAsset.Image.user.swiftUIImage
         }
     }
 }

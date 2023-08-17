@@ -223,8 +223,7 @@ private extension CirclePackView {
                     print("Tapped")
                 }) {
                     VStack {
-                        Text("내 성격 더보기")
-                            .font(.Keyme.body3Semibold)
+                        Text.keyme("내 성격 더보기", font: .body3Semibold)
                         
                         UpArrowButton()
                             .frame(width: 24, height: 24)
