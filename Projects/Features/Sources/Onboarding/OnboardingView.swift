@@ -9,7 +9,9 @@
 import SwiftUI
 import ComposableArchitecture
 
-// FIXME: Temp
+import Core
+import DSKit
+
 public struct OnboardingView: View {
     private let store: StoreOf<OnboardingFeature>
     
@@ -18,8 +20,66 @@ public struct OnboardingView: View {
     }
     
     public var body: some View {
-        Button(action: { store.send(.succeeded) }) {
-            Text("온보딩?")
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            ZStack {
+                KeymeLottieView(asset: AnimationAsset.background,
+                                loopMode: .loop)
+                
+                if viewStore.isBlackBackground {
+                    Rectangle()
+                        .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                } else {
+                    BackgroundBlurringView(style: .systemMaterialDark)
+                }
+                
+                if viewStore.isLoop {
+                    KeymeLottieView(asset: viewStore.lottieType.lottie,
+                                    loopMode: .loop)
+                } else {
+                    KeymeLottieView(asset: viewStore.lottieType.lottie) {
+                        viewStore.send(.lottieEnded)
+                    }
+                }
+                
+                splashView(viewStore)
+            }
+            .ignoresSafeArea()
         }
+    }
+    
+    func splashView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
+        VStack {
+            Spacer()
+                .frame(height: 119)
+            
+            Text.keyme(viewStore.lottieType.title, font: .heading1)
+                .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                .padding(Padding.insets(leading: 16))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .animation(.easeIn(duration: 0.4), value: viewStore.lottieType)
+            
+            Spacer()
+            
+            ZStack {
+                Rectangle()
+                    .cornerRadius(16)
+                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                
+                Text("다음")
+                    .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
+                    .foregroundColor(.black)
+            }
+            .onTapGesture {
+                viewStore.send(.nextButtonDidTap)
+            }
+            .padding(Padding.insets(leading: 16, trailing: 16))
+            .frame(height: 60)
+            .opacity(viewStore.isButtonShown ? 1.0 : 0.0)
+            .animation(.easeIn(duration: 0.5), value: viewStore.isButtonShown)
+            
+            Spacer()
+                .frame(height: 54)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
