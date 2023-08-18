@@ -19,6 +19,7 @@ public struct KeymeTestsStartView: View {
     
     public init(store: StoreOf<KeymeTestsStartFeature>) {
         self.store = store
+        store.send(.viewWillAppear)
     }
     
     public var body: some View {
@@ -52,15 +53,12 @@ public struct KeymeTestsStartView: View {
                 )
             }
             .frame(maxWidth: .infinity)
-            .onAppear {
-                viewStore.send(.viewWillAppear)
-            }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
         }
     }
     
     func welcomeText(_ viewStore: ViewStore<KeymeTestsStartFeature.State, KeymeTestsStartFeature.Action>) -> some View {
-        Text.keyme("환영해요 \(viewStore.nickname ?? "")님!\n이제 문제를 풀어볼까요?", font: .heading1)
+        Text.keyme("환영해요 \(viewStore.nickname ?? "키미")님!\n이제 문제를 풀어볼까요?", font: .heading1) // TODO: 닉변
             .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Padding.insets(leading: 16))

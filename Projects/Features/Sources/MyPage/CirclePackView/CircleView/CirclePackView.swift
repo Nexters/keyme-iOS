@@ -200,9 +200,9 @@ public struct CirclePackView<DetailView: View>: View {
             .zIndex(2)
             
             // 성격 더보기
-            morePersonalityButton
-                .zIndex(2.5)
-                .opacity(focusedCircleData == nil ? 1 : 0)
+//            morePersonalityButton
+//                .zIndex(2.5)
+//                .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
             Animation.customInteractiveSpring(),

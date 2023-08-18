@@ -32,7 +32,7 @@ public extension KeymeTestsDTO {
             IconModel(image: $0.category.iconUrl,
                       color: Color.hex($0.category.color))
         }
-        return KeymeTestsModel(nickname: nickname ?? "키미키미",
+        return KeymeTestsModel(nickname: nickname ?? "키미",
                                testId: data.testId,
                                icons: icons)
     }

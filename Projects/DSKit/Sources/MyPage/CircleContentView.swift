@@ -7,6 +7,7 @@
 //
 
 import Domain
+import Kingfisher
 import SwiftUI
 
 public struct CircleContentView: View {
@@ -28,7 +29,7 @@ public struct CircleContentView: View {
     
     public var body: some View {
         VStack(spacing: imageSize / 4) {
-            metadata.icon
+            KFImage(metadata.iconURL)
                 .resizable()
                 .scaledToFit()
                 .frame(width: imageSize)
