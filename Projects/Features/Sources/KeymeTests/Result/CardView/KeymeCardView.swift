@@ -2,92 +2,104 @@
 //  KeymeCardView.swift
 //  Features
 //
-//  Created by 고도현 on 2023/08/18.
+//  Created by 김영인 on 2023/08/18.
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
 import SwiftUI
 
-// CarouselView의 카드 한 장에 해당하는 뷰
-struct KeymeCardView: View {
-    let index: Int
-    let minCircleRadius: CGFloat = 210
+import Core
+import Util
+import DSKit
+import Domain
+
+public struct KeymeCardView: View {
+    private let testResult: TestResultModel
     
-    var body: some View {
-        VStack(alignment: .center, spacing: 4) {
+    public init(testResult: TestResultModel) {
+        self.testResult = testResult
+    }
+    
+    public var body: some View {
+        VStack {
             Spacer()
+                .frame(height: 33)
             
-            VStack(alignment: .leading, spacing: 8) {
-                Text("표현력")
-                    .font(.system(size: 14)) // FIXME: font system으로 변경
-                    .foregroundColor(.gray)
-                
-                Text("키미미미미미님의 애정표현 정도는?")
-                    .font(.system(size: 24)) // FIXME: font system으로 변경
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.leading)
-                
-                Rectangle()
-                    .frame(height: 0.3)
-                    .foregroundColor(.hex("#FFFFFF"))
-                
-                HStack {
-                    Text("04")
-                        .font(.system(size: 32))
-                        .fontWeight(.bold)
-                    
-                    Text("점")
-                        .font(.system(size: 12))
-                    
-                    Spacer()
-                }
-            }
-            .frame(width: 256)
+            cardTopView()
+                .padding(Padding.insets(leading: 33))
             
             Spacer()
             
-            HStack {
-                Spacer()
-                
-                ZStack(alignment: .center) {
-                    Circle() // 큰 원
-                        .frame(width: 280, height: 280)
-                        .foregroundColor(.hex("#3A3A3A"))
-                        .overlay( // 큰 원의 테두리
-                            Circle()
-                                .stroke(
-                                    Color.hex("#3A3A3A"),
-                                    lineWidth: 1
-                                )
-                        )
-                    
-                    Circle() // 작은 원
-                        .frame(width: minCircleRadius, height: minCircleRadius)
-                        .foregroundColor(.mint)
-                }
-                
-                Spacer()
-            }
+            circleView()
             
             Spacer()
         }
-        .padding() // MARGIN
-        .frame(width: 341, height: 491)
-        .background(Color.hex("#232323"))
+        .background(DSKitAsset.Color.keymeBottom.swiftUIColor)
         .cornerRadius(24)
         .overlay(
             RoundedRectangle(cornerRadius: 24)
                 .stroke(
-                    Color.hex("#3A3A3A"),
+                    DSKitAsset.Color.keymeStrokegray.swiftUIColor,
                     lineWidth: 1
                 )
         )
+        .frame(width: 320, height: 490)
     }
-}
-
-struct KeymeCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        KeymeCardView(index: 0)
+    
+    // 카드 상단 뷰 (키워드, 타이틀, 점수)
+    func cardTopView() -> some View {
+        VStack(alignment: .leading) {
+            Text.keyme(testResult.title, font: .body4)
+                .foregroundColor(.white.opacity(0.3))
+            
+            Spacer()
+                .frame(height: 8)
+            
+            Text.keyme("\(testResult.nickname)의 애정표현 정도는?", font: .heading1)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+            
+            Divider()
+                .background(.white.opacity(0.1))
+            
+            HStack {
+                Text.keyme("0\(testResult.score)", font: .checkResult)
+                    .foregroundColor(.white.opacity(0.6))
+                
+                Text.keyme("점", font: .caption1)
+                    .foregroundColor(.white.opacity(0.6))
+                
+                Spacer()
+            }
+        }
+    }
+    
+    // 원모양 결과 뷰
+    func circleView() -> some View {
+        HStack {
+            Spacer()
+            
+            ZStack(alignment: .center) {
+                Circle()
+                    .strokeBorder(.white.opacity(0.3), lineWidth: 1)
+                    .background(Circle().foregroundColor(.white.opacity(0.3)))
+                    .frame(width: 280, height: 280)
+                
+                Circle()
+                    .foregroundColor(testResult.icon.color)
+                    .frame(width: scoreToRadius(score: testResult.score), height: scoreToRadius(score: testResult.score))
+                
+                KFImageManager.shared.toImage(url: testResult.icon.image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 48)
+            }
+            
+            Spacer()
+        }
+    }
+    
+    func scoreToRadius(score: Int) -> CGFloat {
+        return (CGFloat(score) - 1) / (5 - 1) * (280 - 100) + 100
     }
 }

@@ -22,10 +22,10 @@ public struct OnboardingView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                if let resultData = viewStore.resultData {
-                    TestsResultView(store: Store(
-                        initialState: TestsResultFeature.State()) {
-                            TestsResultFeature()
+                if let testResult = viewStore.resultData {
+                    TestResultView(store: Store(
+                        initialState: TestResultFeature.State(testResultId: testResult.testResultId)) {
+                            TestResultFeature()
                         })
                 } else {
                     IfLetStore(

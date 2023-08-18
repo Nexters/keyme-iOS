@@ -13,6 +13,8 @@ import Network
 public struct KeymeTestsClient {
     public var fetchOnboardingTests: @Sendable () async throws -> KeymeTestsModel
     public var fetchDailyTests: @Sendable () async throws -> KeymeTestsModel
+    public var fetchTestResult: @Sendable (Int) async throws -> [TestResultModel]
+    public var postTestResult: @Sendable (String) async throws -> String
 }
 
 extension DependencyValues {
@@ -32,10 +34,22 @@ extension KeymeTestsClient: DependencyKey {
             return response.toIconModel()
         }, fetchDailyTests: {
             let api = KeymeTestsAPI.daily
-//            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
+            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
             var response = try await KeymeTestsAPIManager.shared.request(api, object: KeymeTestsDTO.self)
             
             return response.toIconModel()
+        }, fetchTestResult: { testResultId in
+            let api = KeymeTestsAPI.result(testResultId)
+            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: TestResultDTO.self)
+            var response = try await KeymeTestsAPIManager.shared.request(api, object: TestResultDTO.self)
+            
+            return response.data.results.map { $0.toModel() }
+        }, postTestResult: { resultCode in
+            let api = KeymeTestsAPI.register(resultCode)
+            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: BaseDTO<String>.self)
+            var response = try await KeymeTestsAPIManager.shared.request(api, object: BaseDTO<String>.self)
+            
+            return response.message
         }
     )
 }

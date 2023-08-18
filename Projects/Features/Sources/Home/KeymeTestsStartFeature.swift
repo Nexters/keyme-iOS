@@ -12,7 +12,6 @@ import ComposableArchitecture
 import Domain
 
 public struct KeymeTestsStartFeature: Reducer {
-    
     public struct State: Equatable {
         public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false

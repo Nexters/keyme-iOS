@@ -7,7 +7,9 @@
 //
 
 import ComposableArchitecture
-import Foundation
+
+import Domain
+import Network
 
 public struct KeymeTestsFeature: Reducer {
     
@@ -23,8 +25,11 @@ public struct KeymeTestsFeature: Reducer {
         case transition
         case close
         case submit(resultCode: String, testResultId: Int)
-        case showResult(data: String)
+        case showResult(data: KeymeWebViewModel)
+        case postResult(TaskResult<String>)
     }
+    
+    @Dependency(\.keymeTestsClient) var keymeTestsClient
     
     public init() { }
     
@@ -38,6 +43,14 @@ public struct KeymeTestsFeature: Reducer {
             case .submit(let code, let id):
                 return .none
             case .showResult(let data):
+                return .run { [resultCode = data.resultCode] send in
+                    await send(.postResult(
+                        TaskResult { try await
+                            self.keymeTestsClient.postTestResult(resultCode)
+                        }
+                    ))
+                }
+            default:
                 return .none
             }
         }

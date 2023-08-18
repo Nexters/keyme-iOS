@@ -18,7 +18,7 @@ public struct KeymeTestsModel: Equatable {
     public let icons: [IconModel]
 }
 
-public struct IconModel: Equatable {
+public struct IconModel: Equatable, Hashable {
     public let image: String
     public let color: Color
     

@@ -1,5 +1,5 @@
 //
-//  KeymeCarouselView.swift
+//  CarouselView.swift
 //  Features
 //
 //  Created by 고도현 on 2023/08/18.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct KeymeCarouselView<Content: View>: View {
+struct CarouselView<Content: View>: View {
     typealias PageIndex = Int
     
     let pageCount: Int

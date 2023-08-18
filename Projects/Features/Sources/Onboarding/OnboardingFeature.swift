@@ -54,6 +54,7 @@ public struct OnboardingFeature: Reducer {
     
     public struct State: Equatable {
         @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
+        @PresentationState public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
         public var testId: Int = 0
@@ -62,19 +63,20 @@ public struct OnboardingFeature: Reducer {
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
         
-        public var resultData: String?
+        public var resultData: KeymeWebViewModel?
 
         public init() { }
     }
     
     public enum Action: Equatable {
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
+        case testResult(PresentationAction<TestResultFeature.Action>)
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
         
-        case showResult(data: String)
+        case showResult(data: KeymeWebViewModel)
         case succeeded
         case failed
     }
@@ -100,7 +102,8 @@ public struct OnboardingFeature: Reducer {
                     state.isLoop = true
                     return .run { send in
                         await send(.fetchOnboardingTests(
-                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests() }
+                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests()
+                            }
                         ))
                     }
                 } else {
@@ -115,7 +118,8 @@ public struct OnboardingFeature: Reducer {
                 return .none
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(5)?nickname=키미" // TODO: 
+//                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
+                let url = "https://keyme-frontend.vercel.app/test/5"
                 state.keymeTestsState = KeymeTestsFeature.State(url: url)
                 
             case .keymeTests(.presented(.showResult(let data))):
@@ -138,6 +142,9 @@ public struct OnboardingFeature: Reducer {
         }
         .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
+        }
+        .ifLet(\.$testResultState, action: /Action.testResult) {
+            TestResultFeature()
         }
     }
 }
