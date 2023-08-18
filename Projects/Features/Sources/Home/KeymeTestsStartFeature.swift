@@ -44,6 +44,7 @@ public struct KeymeTestsStartFeature: Reducer {
                         TaskResult { try await self.keymeTestsClient.fetchDailyTests() }
                     ))
                 }
+                
             case let .fetchDailyTests(.success(tests)):
                 state.nickname = tests.nickname
                 state.testId = tests.testId
@@ -56,16 +57,21 @@ public struct KeymeTestsStartFeature: Reducer {
                         }
                     } while true
                 }
+                
             case .fetchDailyTests(.failure):
                 state.nickname = nil
+                
             case let .setIcon(icon):
                 state.icon = icon
+                
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
                 state.keymeTests = KeymeTestsFeature.State(url: url)
+                
             case .keymeTests:
                 return .none
             }
+            
             return .none
         }
         .ifLet(\.keymeTests, action: /Action.keymeTests) {

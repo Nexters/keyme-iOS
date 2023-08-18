@@ -15,9 +15,11 @@ public struct TestResultFeature: Reducer {
         @BindingState var testResult: TestResultModel = .EMPTY
         public var testResultId: Int
         public var testResults: [TestResultModel] = []
+        public var testId: Int
         
-        public init(testResultId: Int) {
+        public init(testResultId: Int, testId: Int) {
             self.testResultId = testResultId
+            self.testId = testId
         }
     }
     
@@ -26,7 +28,6 @@ public struct TestResultFeature: Reducer {
         case viewWillAppear
         case fetchTestResult(TaskResult<[TestResultModel]>)
         case closeButtonDidTap
-        case shareButtonDidTap
     }
     
     @Dependency(\.keymeTestsClient) var keymeTestsClient
@@ -50,9 +51,6 @@ public struct TestResultFeature: Reducer {
                 
             case .fetchTestResult(.failure):
                 return .none
-                
-            case .shareButtonDidTap:
-                return .none    // TODO: 공유하기 버튼 구현
                 
             default:
                 return .none

@@ -11,8 +11,12 @@ import ComposableArchitecture
 
 import Core
 import DSKit
+import Domain
+import Network
 
 public struct TestResultView: View {
+    @State var sharedURL: ActivityViewController.SharedURL?
+    
     private let store: StoreOf<TestResultFeature>
     
     public init(store: StoreOf<TestResultFeature>) {
@@ -109,10 +113,26 @@ public struct TestResultView: View {
                 .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
                 .foregroundColor(.black)
         }
-        .onTapGesture {
-            viewStore.send(.shareButtonDidTap)
-        }
         .padding(Padding.insets(leading: 16, trailing: 16))
         .frame(height: 60)
+        .onTapGesture {
+            Task {
+                // TODO: url 주석단거로 바꾸기
+//                let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                let url = "https://keyme-frontend.vercel.app/test/5"
+                let shortURL = try await ShortUrlAPIManager.shared.request(
+                    .shortenURL(longURL: url),
+                    object: BitlyResponse.self).link
+                
+                sharedURL = ActivityViewController.SharedURL(shortURL)
+            }
+        }
+        .sheet(item: $sharedURL) { item in
+            ActivityViewController(
+                isPresented: Binding<Bool>(
+                    get: { sharedURL != nil },
+                    set: { if !$0 { sharedURL = nil } }),
+                activityItems: [item.sharedURL])
+        }
     }
 }

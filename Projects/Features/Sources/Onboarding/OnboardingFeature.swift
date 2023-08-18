@@ -62,6 +62,7 @@ public struct OnboardingFeature: Reducer {
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
+        public var isShared: Bool = false
 
         public init() { }
     }
@@ -116,6 +117,7 @@ public struct OnboardingFeature: Reducer {
                 return .none
                 
             case .startButtonDidTap:
+                // TODO: url 주석단거로 바꾸기
 //                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
                 let url = "https://keyme-frontend.vercel.app/test/5"
                 state.keymeTestsState = KeymeTestsFeature.State(url: url)
@@ -124,7 +126,10 @@ public struct OnboardingFeature: Reducer {
                 return .send(.showResult(data: data))
                 
             case .showResult(data: let data):
-                state.testResultState = TestResultFeature.State(testResultId: data.testResultId)
+                state.testResultState = TestResultFeature.State(
+                    testResultId: data.testResultId,
+                    testId: state.testId
+                )
                 
             case .succeeded, .failed:
                 return .none
