@@ -92,7 +92,7 @@ public struct KeymeCardView: View {
                 KFImageManager.shared.toImage(url: testResult.icon.image)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 48)
+                    .frame(height: 40)
             }
             
             Spacer()
@@ -100,6 +100,6 @@ public struct KeymeCardView: View {
     }
     
     func scoreToRadius(score: Int) -> CGFloat {
-        return (CGFloat(score) - 1) / (5 - 1) * (280 - 100) + 100
+        return ((CGFloat(score) - 1) / (5 - 1) * (320 - 100) + 100) * 0.875
     }
 }

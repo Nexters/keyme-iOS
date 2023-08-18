@@ -22,29 +22,31 @@ public struct OnboardingView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                if let testResult = viewStore.resultData {
-                    TestResultView(store: Store(
-                        initialState: TestResultFeature.State(testResultId: testResult.testResultId)) {
-                            TestResultFeature()
-                        })
-                } else {
-                    IfLetStore(
-                        self.store.scope(
-                            state: \.$keymeTestsState,
-                            action: OnboardingFeature.Action.keymeTests
-                        ),
-                        then: { store in
-                            KeymeTestsView(store: store)
-                                .ignoresSafeArea(.all)
-                                .transition(
-                                    .scale.combined(with: .opacity)
-                                    .animation(Animation.customInteractiveSpring(duration: 1)))
-                        },
-                        else: {
-                            splashLottieView(viewStore)
-                        }
-                    )
-                }
+                IfLetStore(
+                    self.store.scope(
+                        state: \.testResultState,
+                        action: { .testResult($0) }
+                    ), then: {
+                        TestResultView(store: $0)
+                    }, else: {
+                        IfLetStore(
+                            self.store.scope(
+                                state: \.$keymeTestsState,
+                                action: OnboardingFeature.Action.keymeTests
+                            ),
+                            then: { store in
+                                KeymeTestsView(store: store)
+                                    .ignoresSafeArea(.all)
+                                    .transition(
+                                        .scale.combined(with: .opacity)
+                                        .animation(Animation.customInteractiveSpring(duration: 1)))
+                            },
+                            else: {
+                                splashLottieView(viewStore)
+                            }
+                        )
+                    }
+                )
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .ignoresSafeArea()

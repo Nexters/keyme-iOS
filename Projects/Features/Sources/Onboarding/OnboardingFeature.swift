@@ -54,7 +54,7 @@ public struct OnboardingFeature: Reducer {
     
     public struct State: Equatable {
         @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
-        @PresentationState public var testResultState: TestResultFeature.State?
+        public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
         public var testId: Int = 0
@@ -62,15 +62,13 @@ public struct OnboardingFeature: Reducer {
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
-        
-        public var resultData: KeymeWebViewModel?
 
         public init() { }
     }
     
     public enum Action: Equatable {
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
-        case testResult(PresentationAction<TestResultFeature.Action>)
+        case testResult(TestResultFeature.Action)
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
@@ -126,13 +124,16 @@ public struct OnboardingFeature: Reducer {
                 return .send(.showResult(data: data))
                 
             case .showResult(data: let data):
-                state.resultData = data
+                state.testResultState = TestResultFeature.State(testResultId: data.testResultId)
                 
             case .succeeded, .failed:
                 return .none
                 
             case .keymeTests(.dismiss):
                 break
+                
+            case .testResult(.closeButtonDidTap):
+                state.status = .completed
                 
             default:
                 break
@@ -143,7 +144,7 @@ public struct OnboardingFeature: Reducer {
         .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
-        .ifLet(\.$testResultState, action: /Action.testResult) {
+        .ifLet(\.testResultState, action: /Action.testResult) {
             TestResultFeature()
         }
     }
