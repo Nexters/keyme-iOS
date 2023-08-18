@@ -48,7 +48,7 @@ public struct KeymeWebView: UIViewRepresentable {
         // This is the important part
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
         webView.customUserAgent = "KEYME"
-        webView.backgroundColor = DSKitAsset.Color.keymeBlack.color
+        webView.backgroundColor = UIColor(Color.hex("171717"))
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
         
