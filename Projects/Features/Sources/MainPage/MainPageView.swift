@@ -48,7 +48,7 @@ struct KeymeMainView: View {
             let tabBar = tabViewController.tabBar
             
             let barAppearance = UITabBarAppearance()
-            barAppearance.configureWithOpaqueBackground()
+            barAppearance.configureWithDefaultBackground()
             barAppearance.backgroundColor = UIColor(Color.hex("232323"))
             
             let itemAppearance = UITabBarItemAppearance()

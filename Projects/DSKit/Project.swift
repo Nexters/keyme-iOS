@@ -11,7 +11,8 @@ import ProjectDescriptionHelpers
 let project = Project.makeModule(
     name: "DSKit",
     internalDependencies: [
-        .Core
+        .Core,
+        .Domain
     ],
     hasResource: true,
     resourceSynthesizers: [

@@ -64,7 +64,8 @@ public class CirclePackViewOption<DetailView: View> {
 }
 
 public struct CirclePackView<DetailView: View>: View {
-    @Namespace private var namespace
+//    @Namespace private var namespace
+    private let namespace: Namespace.ID
     
     // 애니메이션 관련
     @State private var doneDragging = true
@@ -78,6 +79,7 @@ public struct CirclePackView<DetailView: View>: View {
     
     @State private var showMorePersonalitySheet: Bool = false
     @State private var focusedCircleData: CircleData?
+    @State private var isPersonalityCirclePressed = false
     
     private let circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
@@ -88,13 +90,16 @@ public struct CirclePackView<DetailView: View>: View {
     }
 
     public init(
+        namespace: Namespace.ID,
         data: [CircleData],
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
+        print("init")
+        self.namespace = namespace
         self.circleData = data
         self.option = .init()
         
-        self.morePersonalitystore.send(.loadPersonality)
+        self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
     }
         
@@ -141,8 +146,20 @@ public struct CirclePackView<DetailView: View>: View {
                 .onTapGesture(perform: onDismiss)
             
             // 개별보기
-            VStack(alignment: .center) {
+            VStack(alignment: .center, spacing: 0) {
                 if let focusedCircleData {
+                    Group {
+                        if isPersonalityCirclePressed {
+                            ScoreAndPersonalityView(
+                                title: "나의 점수",
+                                score: focusedCircleData.metadata.myScore)
+                        } else {
+                            ScoreAndPersonalityView(
+                                circleData: focusedCircleData)
+                        }
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                            
                     FocusedCircleView(
                         namespace: namespace,
                         shrinkageDistance: currentSheetOffset,
@@ -152,8 +169,15 @@ public struct CirclePackView<DetailView: View>: View {
                         circleData: focusedCircleData)
                     .onDragChanged(self.onDragChanged)
                     .onDragEnded(self.onDragEnded)
-                    .padding(.top, 20)
-                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
+                    .onLongPressStarted {
+                        isPersonalityCirclePressed = true
+                    }
+                    .onLongPressEnded {
+                        isPersonalityCirclePressed = false
+                    }
+                    .transition(.offset(x: 1, y: 1).combined(with: .opacity))
+                    .padding(.vertical, 12)
+//                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
                     
                     VStack {
                         BottomSheetWrapperView {
@@ -181,10 +205,13 @@ public struct CirclePackView<DetailView: View>: View {
                 .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
-            customInteractiveSpringAnimation,
+            Animation.customInteractiveSpring(),
+            value: isPersonalityCirclePressed)
+        .animation(
+            Animation.customInteractiveSpring(),
             value: focusedCircleData)
         .animation(
-            customInteractiveSpringAnimation,
+            Animation.customInteractiveSpring(),
             value: doneDragging)
         .onChange(of: focusedCircleData) { _ in
             animationEnded = false
@@ -195,7 +222,7 @@ public struct CirclePackView<DetailView: View>: View {
         }
         .fullScreenCover(isPresented: $showMorePersonalitySheet) {
             FocusedCircleOverlayView(
-                focusedCircle: CircleData.emptyCircle,
+                focusedCircle: CircleData.emptyCircle(radius: 0.9),
                 maxShrinkageDistance: maxSheetOffset,
                 detailViewBuilder: {
                     MorePersonalityView(store: morePersonalitystore)
@@ -210,7 +237,7 @@ public struct CirclePackView<DetailView: View>: View {
 }
 
 private extension CirclePackView {
-    /// 성격 더보기
+    /// 성격 더보기 (얘는 나중에 밖으로 분리)
     var morePersonalityButton: some View {
         VStack(alignment: .center) {
             Spacer()
@@ -239,22 +266,17 @@ private extension CirclePackView {
             }
         }
         .fullFrame()
-        .background(
-            // 위에서 약 3/4 지점에서 시작하는 그래디언트
-            LinearGradient(
-                colors: [.clear, .black],
-                startPoint: .init(x: 0, y: 0.7),
-                endPoint: .init(x: 0, y: 1))
-            .allowsHitTesting(false))
+//        .background(
+//            // 위에서 약 3/4 지점에서 시작하는 그래디언트
+//            LinearGradient(
+//                colors: [.clear, .black],
+//                startPoint: .init(x: 0, y: 0.7),
+//                endPoint: .init(x: 0, y: 1))
+//            .allowsHitTesting(false))
     }
 }
 
 private extension CirclePackView {
-    // 테스트하고프면 https://www.cssportal.com/css-cubic-bezier-generator/
-    var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5) // 0.5
-    }
-    
     func onDragChanged(_ value: DragGesture.Value) {
         doneDragging = false
         currentSheetOffset =
@@ -359,35 +381,5 @@ extension CirclePackView {
     func onCircleDismissed(_ handler: @escaping (CircleData) -> Void) -> CirclePackView {
         self.option.onCircleDismissedHandler = handler
         return self
-    }
-}
-
-struct CirclePackView_Previews: PreviewProvider {
-    static var previews: some View {
-        CirclePackView(
-            data: [
-                CircleData(color: .blue, xPoint: 0.2068919881427701,
-                           yPoint: 0.7022698911578201, radius: 0.14644660940672627),
-                CircleData(color: .red, xPoint: -0.20710678118654763,
-                           yPoint: -0.4925857155047088, radius: 0.20710678118654754),
-                CircleData(color: .gray, xPoint: -0.2218254069479773,
-                           yPoint: 0.6062444788590935, radius: 0.29289321881345254),
-                CircleData(color: .cyan, xPoint: -0.5857864376269051,
-                           yPoint: 0.0, radius: 0.4142135623730951),
-                CircleData(color: .mint, xPoint: 0.4142135623730951,
-                           yPoint: 0.0, radius: 0.5857864376269051)
-            ],
-            detailViewBuilder: { _ in
-                let scores = [
-                    CharacterScore(score: 4, date: Date()),
-                    CharacterScore(score: 5, date: Date()),
-                    CharacterScore(score: 3, date: Date()),
-                    CharacterScore(score: 1, date: Date()),
-                    CharacterScore(score: 2, date: Date())
-                ]
-                
-                DetailCharacterView(title: "키미님의 애정도", subtitle: "서브타이틀", scores: scores)
-            })
-        .previewDevice(PreviewDevice(rawValue: "iPhone SE (2nd generation)"))
     }
 }

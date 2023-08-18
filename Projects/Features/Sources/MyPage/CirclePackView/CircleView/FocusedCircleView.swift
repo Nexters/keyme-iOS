@@ -14,15 +14,18 @@ import Foundation
 
 final class FocusedCircleViewOption {
     typealias LongPressGestureValue = SequenceGesture<LongPressGesture, DragGesture>.Value
-    var onLongPressEnded: (LongPressGestureValue) -> Void
+    var onLongPressStarted: () -> Void
+    var onLongPressEnded: () -> Void
     var onDragChanged: (DragGesture.Value) -> Void
     var onDragEnded: (DragGesture.Value) -> Void
     
     init(
-        onLongPressEnded: @escaping (LongPressGestureValue) -> Void = { _ in },
+        onLongPressStarted: @escaping () -> Void = { },
+        onLongPressEnded: @escaping () -> Void = { },
         onDragChanged: @escaping (DragGesture.Value) -> Void = { _ in },
         onDragEnded: @escaping (DragGesture.Value) -> Void = { _ in }
     ) {
+        self.onLongPressStarted = onLongPressStarted
         self.onLongPressEnded = onLongPressEnded
         self.onDragChanged = onDragChanged
         self.onDragEnded = onDragEnded
@@ -34,7 +37,6 @@ struct FocusedCircleView: View {
     private let option: FocusedCircleViewOption
     
     private let namespace: Namespace.ID
-    private let id: String
     
     private let shrinkageDistance: CGFloat
     private let maxShrinkageDistance: CGFloat
@@ -57,9 +59,7 @@ struct FocusedCircleView: View {
         circleData: CircleData
     ) {
         self.option = option
-        
         self.namespace = namespace
-        self.id = circleData.id.uuidString
         
         self.shrinkageDistance = shrinkageDistance
         self.maxShrinkageDistance = maxShrinkageDistance
@@ -74,21 +74,24 @@ struct FocusedCircleView: View {
             if circleData.isEmptyCircle {
                 emptyCircleView
             } else {
-                outlineCircleView
-                
-                innerCircleView(with: circleData)
-                    .opacity(blinkCircle ? animatedOpacity : 1)
-                    .opacity(isPressed ? 0.5 : 1)
-                
-                if isPressed {
-                    overlayingCircleView
-                        .frame(width: 100)
-                        .zIndex(1)
+                // 원
+                ZStack(alignment: .center) {
+                    outlineCircleView
+                    
+                    innerCircleView(with: circleData)
+                        .opacity(blinkCircle ? animatedOpacity : 1)
+                        .opacity(isPressed ? 0.5 : 1)
+                    
+                    if isPressed {
+                        overlayingCircleView
+                            .frame(width: scoreToRadius(score: CGFloat(circleData.metadata.myScore)))
+                            .zIndex(1)
+                    }
+                    
+                    circleContentView
+                        .frame(width: 75, height: 75)
+                        .zIndex(1.5)
                 }
-                
-                circleContentView
-                    .frame(width: 75, height: 75)
-                    .zIndex(1.5)
             }
         }
         .gesture(
@@ -105,7 +108,7 @@ struct FocusedCircleView: View {
                 }
                 .onEnded { _ in
                     HapticManager.shared.homeButtonTouchUp()
-                    
+                    option.onLongPressEnded()
                 }
                 .simultaneously(
                     with: DragGesture(minimumDistance: 0, coordinateSpace: .global)
@@ -120,8 +123,13 @@ struct FocusedCircleView: View {
         .frame(
             width: calculatedOutlineCircleRaduis,
             height: calculatedOutlineCircleRaduis)
-        .animation(customAnimation, value: showComponents)
-        .animation(.spring(), value: isPressed)
+        .animation(Animation.customInteractiveSpring(), value: showComponents)
+        .animation(Animation.customInteractiveSpring(), value: isPressed)
+        .onChange(of: isPressed, perform: { newValue in
+            if newValue == true {
+                option.onLongPressStarted()
+            }
+        })
         .onAppear {
             startAnimation()
         }
@@ -129,12 +137,8 @@ struct FocusedCircleView: View {
 }
 
 extension FocusedCircleView: GeometryAnimatableCircle {
-    var icon: Image {
-        Image("")
-    }
-    
-    var character: String {
-        "RRR"
+    var animationId: Int {
+        circleData.metadata.animationId
     }
     
     func startAnimation() {
@@ -171,8 +175,7 @@ extension FocusedCircleView: GeometryAnimatableCircle {
                 .overlay {
                     Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
                 }
-                .frame(width: calculatedInnerCircleRaduis(
-                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9)))
+                .frame(width: calculatedInnerCircleRaduis(with: CircleData.emptyCircle(radius: 0.9)))
             
             Circle()
                 .fill(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3))
@@ -180,7 +183,7 @@ extension FocusedCircleView: GeometryAnimatableCircle {
                     Circle().stroke(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.3), lineWidth: 2)
                 }
                 .frame(width: calculatedInnerCircleRaduis(
-                    with: CircleData(color: .clear, xPoint: 0, yPoint: 0, radius: 0.9 * 0.6)))
+                    with: CircleData.emptyCircle(radius: 0.9 * 0.6)))
         }
     }
     
@@ -223,36 +226,26 @@ extension FocusedCircleView: GeometryAnimatableCircle {
     }
     
     var circleContentView: some View {
-        VStack {
-            Image(systemName: "person.fill")
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-            Text("인싸력")
-                .foregroundColor(isPressed ? .white : .black.opacity(0.4))
-                .font(.system(size: 14))
-        }
+        CircleContentView(
+            namespace: namespace,
+            metadata: circleData.metadata,
+            showSubText: false,
+            imageSize: 48)
         .matchedGeometryEffect(
             id: contentEffectID,
             in: namespace,
             anchor: .center)
     }
     
-    var innerCircleEffectID: String {
-        id + "innerCircle"
-    }
-    
-    var outlineEffectID: String {
-        id + "outline"
-    }
-    
     func calculatedInnerCircleRaduis(with data: CircleData) -> CGFloat {
         calculatedCircleRaduis(
-            initialValue: data.radius * outboundLength,
-            targetValue: 120) // TODO: 나중에 데이터 받으면 고치기
+            initialValue: scoreToRadius(score: CGFloat(data.metadata.averageScore)),
+            targetValue: 120)
     }
     
     var calculatedOutlineCircleRaduis: CGFloat {
         calculatedCircleRaduis(
-            initialValue: outboundLength,
+            initialValue: 320,
             targetValue: 120)
     }
     
@@ -268,8 +261,8 @@ extension FocusedCircleView: GeometryAnimatableCircle {
             , 0)
     }
     
-    var customAnimation: Animation {
-        .timingCurve( 0.57, 0.24, 0.88, 0.35 , duration: 0.35)
+    func scoreToRadius(score: CGFloat) -> CGFloat {
+        return (score - 1) / (5 - 1) * (320 - 100) + 100
     }
 }
 
@@ -286,7 +279,12 @@ extension FocusedCircleView {
         return self
     }
     
-    func onLongPressEnded(_ action: @escaping (LongPressGestureValue) -> Void) -> FocusedCircleView {
+    func onLongPressStarted(_ action: @escaping () -> Void) -> FocusedCircleView {
+        option.onLongPressStarted = action
+        return self
+    }
+    
+    func onLongPressEnded(_ action: @escaping () -> Void) -> FocusedCircleView {
         option.onLongPressEnded = action
         return self
     }

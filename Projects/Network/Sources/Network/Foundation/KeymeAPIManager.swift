@@ -11,20 +11,26 @@ import CombineMoya
 import Moya
 import Foundation
 
-public struct KeymeAPIManager {
+public class KeymeAPIManager {
     public typealias APIType = KeymeAPI
 
     private var core: CoreNetworkService<KeymeAPI>
     private let decoder = JSONDecoder()
-
+    
+    init() {
+        let loggerConfig = NetworkLoggerPlugin.Configuration(logOptions: .verbose)
+        let networkLogger = NetworkLoggerPlugin(configuration: loggerConfig)
+        let provider = MoyaProvider<KeymeAPI>(plugins: [networkLogger])
+        
+        self.core = CoreNetworkService(provider: provider)
+    }
+    
     init(core: CoreNetworkService<KeymeAPI>) {
         self.core = core
     }
 
-    @discardableResult
-    public mutating func registerAuthorizationToken(_ token: String) -> Self {
+    public func registerAuthorizationToken(_ token: String) {
         core.registerAuthorizationToken(token)
-        return self
     }
 }
 
@@ -38,7 +44,7 @@ extension KeymeAPIManager: CoreNetworking {
     }
 }
 
-extension KeymeAPIManager: APIRequestable {
+extension KeymeAPIManager: APIRequestable {    
     public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) async throws -> T {
         let response = try await core.request(api)
         let decoded = try decoder.decode(T.self, from: response.data)
@@ -52,5 +58,5 @@ extension KeymeAPIManager: APIRequestable {
 }
 
 public extension KeymeAPIManager {
-    static let shared = KeymeAPIManager(core: .init())
+    static let shared = KeymeAPIManager()
 }

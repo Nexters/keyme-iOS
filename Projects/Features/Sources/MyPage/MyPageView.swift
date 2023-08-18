@@ -7,28 +7,85 @@
 //
 
 import ComposableArchitecture
+import Core
 import Domain
+import DSKit
 import SwiftUI
 
 struct MyPageView: View {
+    @Namespace private var namespace
+    
     private let store: StoreOf<MyPageFeature>
+    private let scoreListStore: StoreOf<ScoreListFeature>
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-        store.send(.loadCircle)
+        self.scoreListStore = Store(initialState: ScoreListFeature.State(), reducer: {
+            ScoreListFeature()
+        })
+        
+        store.send(.loadCircle(.top5))
+        scoreListStore.send(.loadScores)
     }
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            CirclePackView(
-                data: viewStore.state.circleDataList,
-                detailViewBuilder: { data in
-                    Text(data.id.uuidString)
-                })
-            .graphBackgroundColor(.hex("232323"))
-            .activateCircleBlink(viewStore.state.shownFirstTime)
-            .onCircleDismissed { _ in
-                viewStore.send(.markViewAsShown)
+            ZStack(alignment: .topLeading) {
+                CirclePackView(
+                    namespace: namespace,
+                    data: viewStore.circleDataList,
+                    detailViewBuilder: { data in
+                        ScoreListView(
+                            nickname: "ninkname",
+                            keyword: data.metadata.keyword,
+                            store: scoreListStore)
+                    })
+                .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                .activateCircleBlink(viewStore.state.shownFirstTime)
+                .onCircleTapped { _ in
+                    viewStore.send(.circleTapped)
+                    HapticManager.shared.tok()
+                }
+                .onCircleDismissed { _ in
+                    withAnimation(Animation.customInteractiveSpring()) {
+                        viewStore.send(.markViewAsShown)
+                        viewStore.send(.circleDismissed)
+                    }
+                }
+
+                if !viewStore.state.circleShown {
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 4) {
+                            Spacer()
+                            Text.keyme("마이", font: .body3Semibold)
+                            Image(systemName: "info.circle")
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                                .scaledToFit()
+                            Spacer()
+                        }
+                        .padding(.top, 10)
+                        
+                        SegmentControlView(
+                            segments: MyPageSegment.allCases,
+                            selected: viewStore.binding(
+                                get: \.selectedSegment,
+                                send: { .selectSegement($0) })
+                        ) { segment in
+                            Text.keyme(segment.title, font: .body3Semibold)
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                        }
+                        .frame(height: 50)
+                        .padding(.horizontal, 17)
+                        .padding(.top, 25)
+                        
+                        Text.keyme("친구들이 생각하는\nnickname님의 성격은?", font: .heading1) // TODO: Change nickname
+                            .padding(17)
+                            .transition(.opacity)
+                    }
+                    .foregroundColor(.white)
+                }
             }
         }
     }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct CharacterScore: Identifiable {
+public struct CharacterScore: Identifiable, Equatable {
     public let id = UUID()
     public let score: Int
     public let date: Date
