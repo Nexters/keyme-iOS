@@ -62,12 +62,13 @@ public struct KeymeCardView: View {
             Divider()
                 .background(.white.opacity(0.1))
             
-            HStack {
+            HStack(alignment: .bottom) {
                 Text.keyme("0\(testResult.score)", font: .checkResult)
                     .foregroundColor(.white.opacity(0.6))
                 
                 Text.keyme("점", font: .caption1)
                     .foregroundColor(.white.opacity(0.6))
+                    .padding(Padding.insets(bottom: 8))
                 
                 Spacer()
             }
