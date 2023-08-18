@@ -10,6 +10,7 @@ import SwiftUI
 import WebKit
 
 import Domain
+import DSKit
 
 final class KeymeWebViewOption {
     var onCloseWebView: () -> Void
@@ -47,7 +48,7 @@ public struct KeymeWebView: UIViewRepresentable {
         // This is the important part
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
         webView.customUserAgent = "KEYME"
-        webView.backgroundColor = .black
+        webView.backgroundColor = DSKitAsset.Color.keymeBlack.color
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
         
