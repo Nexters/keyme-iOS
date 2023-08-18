@@ -6,7 +6,6 @@ import FirebaseCore
 import FirebaseMessaging
 
 import Features
-
 import Network
 
 @main
