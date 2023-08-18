@@ -24,27 +24,30 @@ final class KeymeWebViewOption {
 
 public struct KeymeWebView: UIViewRepresentable {
     private let option: KeymeWebViewOption
+    private let webView: WKWebView
     public let url: String
     
     init(url: String) {
         self.option = .init()
         self.url = url
+        self.webView = WKWebView(frame: CGRect.zero, configuration: WKWebViewConfiguration())
+
+        if
+            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+            let url = URL(string: encodedUrl)
+        {
+            webView.load(URLRequest(url: url))
+
+        }
     }
     
     public func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView(frame: CGRect.zero, configuration: WKWebViewConfiguration())
-        
         // This is the important part
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
-        webView.backgroundColor = .init(white: 1, alpha: 0.3)
+        webView.backgroundColor = .black
+        webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
-        
-        if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            if let url = URL(string: encodedUrl) {
-                webView.load(URLRequest(url: url))
-            }
-        }
-        
+    
         return webView
     }
     

@@ -46,31 +46,37 @@ public enum LottieType: CaseIterable {
 }
 
 public struct OnboardingFeature: Reducer {
-    //    public enum State: Equatable {
-    //        case notDetermined
-    //        case completed
-    //        case needsOnboarding
-    //    }
+    public enum Status: Equatable {
+        case notDetermined
+        case needsOnboarding
+        case completed
+    }
     
     public struct State: Equatable {
-        public var keymeTests: KeymeTestsFeature.State?
+        @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
+        public var status: Status = .notDetermined
+        
         public var testId: Int = 0
-        public var lottieType: LottieType = .splash1
-        public var lottieIdx: Int = 0
+        public var lottieType: LottieType = .splash1 // TODO:
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
         
-        public init() { }
+        public var resultData: String?
+
+        public init() {
+//            keymeTestsState = .init(url: "https://www.naver.com")
+        }
     }
     
     public enum Action: Equatable {
+        case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
-        case keymeTests(KeymeTestsFeature.Action)
         
+        case showResult(data: String)
         case succeeded
         case failed
     }
@@ -86,10 +92,10 @@ public struct OnboardingFeature: Reducer {
                 if state.lottieType == .splash2 {
                     state.isBlackBackground = true
                 }
-                state.lottieIdx = (state.lottieIdx + 1) % LottieType.allCases.count
-                state.lottieType = LottieType.allCases[state.lottieIdx]
+                state.lottieType = state.lottieType.next()
                 state.isLoop = false
                 state.isButtonShown = false
+                
             case .lottieEnded:
                 if state.lottieType == .splash3 {
                     state.lottieType = .question
@@ -103,21 +109,36 @@ public struct OnboardingFeature: Reducer {
                     state.isButtonShown = true
                     state.isLoop = true
                 }
+                
             case let .fetchOnboardingTests(.success(tests)):
                 state.testId = tests.testId
+                
             case .fetchOnboardingTests(.failure):
                 return .none
+                
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)?nickname=키미"
-                state.keymeTests = KeymeTestsFeature.State(url: url)
-            case .keymeTests:
-                return .none
+                let url = "https://keyme-frontend.vercel.app/test/\(5)?nickname=키미" // TODO: 
+                state.keymeTestsState = KeymeTestsFeature.State(url: url)
+                
+            case .keymeTests(.presented(.showResult(let data))):
+                return .send(.showResult(data: data))
+                
+            case .showResult(data: let data):
+                state.resultData = data
+                
             case .succeeded, .failed:
                 return .none
+                
+            case .keymeTests(.dismiss):
+                break
+                
+            default:
+                break
             }
+            
             return .none
         }
-        .ifLet(\.keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }

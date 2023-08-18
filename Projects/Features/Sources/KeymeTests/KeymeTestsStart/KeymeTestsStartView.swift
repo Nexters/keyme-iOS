@@ -48,7 +48,6 @@ public struct KeymeTestsStartView: View {
                             }
                         
                         Spacer()
-                        Spacer()
                     }
                 )
             }
@@ -56,13 +55,12 @@ public struct KeymeTestsStartView: View {
             .onAppear {
                 viewStore.send(.viewWillAppear)
             }
-            .background(Color(DSKitAsset.Color.keymeBlack.color.cgColor))
+            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
         }
     }
     
     func welcomeText(_ viewStore: ViewStore<KeymeTestsStartFeature.State, KeymeTestsStartFeature.Action>) -> some View {
-        Text("환영해요 \(viewStore.nickname ?? "")님!\n이제 문제를 풀어볼까요?")
-            .font(Font.Keyme.heading1)
+        Text.keyme("환영해요 \(viewStore.nickname ?? "")님!\n이제 문제를 풀어볼까요?", font: .heading1)
             .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Padding.insets(leading: 16))

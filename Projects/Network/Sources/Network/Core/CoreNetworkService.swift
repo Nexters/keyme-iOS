@@ -21,15 +21,12 @@ public class CoreNetworkService<APIType: TargetType> {
 
 extension CoreNetworkService: CoreNetworking {
     func request(_ api: APIType) async throws -> Response {
-        print("[Network] 💻 REQUEST: \(api.headers ?? [:]) \(api.baseURL)\(api.path)is requested")
-        
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             provider.request(api) { result in
                 switch result {
                 case let .success(response) where 200..<300 ~= response.statusCode:
                     continuation.resume(returning: response)
                 case let .success(response) where 300... ~= response.statusCode:
-                    print("[Network] 🤬 ERROR: \(String(data: response.data, encoding: .utf8) ?? "")")
                     continuation.resume(throwing: MoyaError.statusCode(response))
                 case let .failure(error):
                     continuation.resume(throwing: error)
