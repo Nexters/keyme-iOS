@@ -23,8 +23,10 @@ public struct OnboardingView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
                 if let resultData = viewStore.resultData {
-                    Text("결과아이디: \(resultData)")
-                        .foregroundColor(.white)
+                    TestsResultView(store: Store(
+                        initialState: TestsResultFeature.State()) {
+                            TestsResultFeature()
+                        })
                 } else {
                     IfLetStore(
                         self.store.scope(
@@ -39,31 +41,7 @@ public struct OnboardingView: View {
                                     .animation(Animation.customInteractiveSpring(duration: 1)))
                         },
                         else: {
-                            ZStack {
-                                KeymeLottieView(asset: AnimationAsset.background,
-                                                loopMode: .loop)
-                                
-                                if viewStore.isBlackBackground {
-                                    Rectangle()
-                                        .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-                                } else {
-                                    BackgroundBlurringView(style: .systemMaterialDark)
-                                }
-                                
-                                if viewStore.isLoop {
-                                    KeymeLottieView(asset: viewStore.lottieType.lottie,
-                                                    loopMode: .loop)
-                                } else {
-                                    KeymeLottieView(asset: viewStore.lottieType.lottie) {
-                                        viewStore.send(.lottieEnded)
-                                    }
-                                }
-                                
-                                splashView(viewStore)
-                            }
-                            .transition(
-                                .asymmetric(insertion: .identity, removal: .scale)
-                                .animation(Animation.customInteractiveSpring(duration: 1)))
+                            splashLottieView(viewStore)
                         }
                     )
                 }
@@ -73,7 +51,35 @@ public struct OnboardingView: View {
         }
     }
     
-    func splashView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
+    func splashLottieView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
+        ZStack {
+            KeymeLottieView(asset: AnimationAsset.background,
+                            loopMode: .loop)
+            
+            if viewStore.isBlackBackground {
+                Rectangle()
+                    .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            } else {
+                BackgroundBlurringView(style: .systemMaterialDark)
+            }
+            
+            if viewStore.isLoop {
+                KeymeLottieView(asset: viewStore.lottieType.lottie,
+                                loopMode: .loop)
+            } else {
+                KeymeLottieView(asset: viewStore.lottieType.lottie) {
+                    viewStore.send(.lottieEnded)
+                }
+            }
+            
+            splashFrontView(viewStore)
+        }
+        .transition(
+            .asymmetric(insertion: .identity, removal: .scale)
+            .animation(Animation.customInteractiveSpring(duration: 1)))
+    }
+    
+    func splashFrontView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
         VStack {
             Spacer()
                 .frame(height: 119)

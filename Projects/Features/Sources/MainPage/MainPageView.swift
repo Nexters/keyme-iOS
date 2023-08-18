@@ -32,8 +32,9 @@ struct KeymeMainView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             TabView(selection: $selectedTab) {
                 KeymeTestsStartView(store: Store(
-                    initialState: KeymeTestsStartFeature.State(),
-                    reducer: KeymeTestsStartFeature()))
+                    initialState: KeymeTestsStartFeature.State()) {
+                        KeymeTestsStartFeature()
+                    })
                 .tabItem {
                     homeTabImage
                         .resizable()

@@ -50,8 +50,9 @@ public struct RootView: View {
             } else {
                 // 가입했고 온보딩을 진행한 유저
                 KeymeMainView(store: Store(
-                    initialState: MainPageFeature.State(),
-                    reducer: MainPageFeature()))
+                    initialState: MainPageFeature.State()) {
+                        MainPageFeature()
+                    })
             }
         }
     }

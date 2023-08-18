@@ -64,9 +64,7 @@ public struct OnboardingFeature: Reducer {
         
         public var resultData: String?
 
-        public init() {
-//            keymeTestsState = .init(url: "https://www.naver.com")
-        }
+        public init() { }
     }
     
     public enum Action: Equatable {
