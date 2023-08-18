@@ -10,11 +10,14 @@ import Foundation
 import ComposableArchitecture
 
 public struct MainPageFeature: Reducer {
-    public struct State: Equatable {}
-    public struct Action: Equatable {}
+    public struct State: Equatable {
+        public init() { }
+    }
+    
+    public enum Action { }
     
     public var body: some Reducer<State, Action> {
-        Reduce { state, action in
+        Reduce { _, action in
             return .none
         }
     }

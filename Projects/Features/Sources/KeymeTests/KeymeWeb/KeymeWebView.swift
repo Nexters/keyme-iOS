@@ -37,9 +37,12 @@ public struct KeymeWebView: UIViewRepresentable {
         // This is the important part
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
         webView.backgroundColor = .init(white: 1, alpha: 0.3)
+        webView.scrollView.isScrollEnabled = false
         
-        if let url = URL(string: url) {
-            webView.load(URLRequest(url: url))
+        if let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            if let url = URL(string: encodedUrl) {
+                webView.load(URLRequest(url: url))
+            }
         }
         
         return webView

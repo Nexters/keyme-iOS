@@ -15,7 +15,11 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+//            RootView()
+            
+            OnboardingView(store: Store(
+                initialState: OnboardingFeature.State(),
+                reducer: OnboardingFeature()))
         }
     }
 }
