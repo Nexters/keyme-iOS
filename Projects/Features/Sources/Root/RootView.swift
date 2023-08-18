@@ -35,8 +35,7 @@ public struct RootView: View {
                 IfLetStore(loginStore) { store in
                     SignInView(store: store)
                 }
-            }
-            else if viewStore.onboardingStatus?.status == .notDetermined {
+            } else if viewStore.onboardingStatus?.status == .notDetermined {
                 // 온보딩 상태를 로딩 중
                 ProgressView()
             } else if viewStore.onboardingStatus?.status == .needsOnboarding {
@@ -48,15 +47,11 @@ public struct RootView: View {
                 IfLetStore(onboardingStore) { store in
                     OnboardingView(store: store)
                 }
-            }
-            else {
+            } else {
                 // 가입했고 온보딩을 진행한 유저
                 KeymeMainView(store: Store(
                     initialState: MainPageFeature.State(),
                     reducer: MainPageFeature()))
-                .onAppear {
-                    print("@@", viewStore.logInStatus, viewStore.onboardingStatus)
-                }
             }
         }
     }

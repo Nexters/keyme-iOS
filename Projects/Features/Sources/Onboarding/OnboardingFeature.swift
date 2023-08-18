@@ -48,31 +48,34 @@ public enum LottieType: CaseIterable {
 public struct OnboardingFeature: Reducer {
     public enum Status: Equatable {
         case notDetermined
-        case completed
         case needsOnboarding
+        case completed
     }
     
     public struct State: Equatable {
+        @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
         public var status: Status = .notDetermined
         
-        public var keymeTests: KeymeTestsFeature.State?
         public var testId: Int = 0
         public var lottieType: LottieType = .splash1
         public var lottieIdx: Int = 0
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
+        
+        public var resultData: String?
 
         public init() { }
     }
     
     public enum Action: Equatable {
+        case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
-        case keymeTests(KeymeTestsFeature.Action)
         
+        case showResult(data: String)
         case succeeded
         case failed
     }
@@ -114,20 +117,28 @@ public struct OnboardingFeature: Reducer {
                 return .none
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)?nickname=키미"
-                state.keymeTests = KeymeTestsFeature.State(url: url)
+                let url = "https://keyme-frontend.vercel.app/test/\(5)?nickname=키미" // TODO: 
+                state.keymeTestsState = KeymeTestsFeature.State(url: url)
                 
-            case .keymeTests:
-                return .none
+            case .keymeTests(.presented(.showResult(let data))):
+                return .send(.showResult(data: data))
+                
+            case .showResult(data: let data):
+                state.resultData = data
                 
             case .succeeded, .failed:
                 return .none
                 
+            case .keymeTests(.dismiss):
+                break
+                
+            default:
+                break
             }
             
             return .none
         }
-        .ifLet(\.keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }

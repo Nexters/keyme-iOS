@@ -27,7 +27,7 @@ public struct KeymeTestsView: View {
                         print("close")
                     }
                     .onTestSubmitted { testResultId in
-                        print(testResultId)
+                        viewStore.send(.showResult(data: "\(testResultId)"))
                     }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

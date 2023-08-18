@@ -22,39 +22,44 @@ public struct OnboardingView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                IfLetStore(
-                    self.store.scope(
-                        state: \.keymeTests,
-                        action: OnboardingFeature.Action.keymeTests
-                    ),
-                    then: { store in
-                        KeymeTestsView(store: store)
-                            .ignoresSafeArea(.all)
-                            .transition(.scale.animation(.easeIn))
-                    },
-                    else: {
-                        KeymeLottieView(asset: AnimationAsset.background,
-                                        loopMode: .loop)
-                        
-                        if viewStore.isBlackBackground {
-                            Rectangle()
-                                .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-                        } else {
-                            BackgroundBlurringView(style: .systemMaterialDark)
-                        }
-                        
-                        if viewStore.isLoop {
-                            KeymeLottieView(asset: viewStore.lottieType.lottie,
+                if let resultData = viewStore.resultData {
+                    Text("Done")
+                        .foregroundColor(.white)
+                } else {
+                    IfLetStore(
+                        self.store.scope(
+                            state: \.$keymeTestsState,
+                            action: OnboardingFeature.Action.keymeTests
+                        ),
+                        then: { store in
+                            KeymeTestsView(store: store)
+                                .ignoresSafeArea(.all)
+                                .transition(.scale.animation(.easeIn))
+                        },
+                        else: {
+                            KeymeLottieView(asset: AnimationAsset.background,
                                             loopMode: .loop)
-                        } else {
-                            KeymeLottieView(asset: viewStore.lottieType.lottie) {
-                                viewStore.send(.lottieEnded)
+                            
+                            if viewStore.isBlackBackground {
+                                Rectangle()
+                                    .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                            } else {
+                                BackgroundBlurringView(style: .systemMaterialDark)
                             }
+                            
+                            if viewStore.isLoop {
+                                KeymeLottieView(asset: viewStore.lottieType.lottie,
+                                                loopMode: .loop)
+                            } else {
+                                KeymeLottieView(asset: viewStore.lottieType.lottie) {
+                                    viewStore.send(.lottieEnded)
+                                }
+                            }
+                            
+                            splashView(viewStore)
                         }
-                        
-                        splashView(viewStore)
-                    }
-                )
+                    )
+                }
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .ignoresSafeArea()

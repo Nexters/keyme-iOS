@@ -13,14 +13,18 @@ public struct KeymeTestsFeature: Reducer {
     
     public struct State: Equatable {
         let url: String
+        var shouldCloseWindow: Bool = false
         
         public init(url: String) {
             self.url = url
         }
     }
     
-    public enum Action {
+    public enum Action: Equatable {
         case transition
+        case close
+        case submit(resultCode: String, testResultId: Int)
+        case showResult(data: String)
     }
     
     public init() { }
@@ -29,6 +33,12 @@ public struct KeymeTestsFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .transition:
+                return .none
+            case .close:
+                return .none
+            case .submit(let code, let id):
+                return .none
+            case .showResult(let data):
                 return .none
             }
         }
