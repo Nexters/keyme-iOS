@@ -26,7 +26,7 @@ public struct KeymeCardView: View {
                 .frame(height: 33)
             
             cardTopView()
-                .padding(Padding.insets(leading: 33))
+                .padding(Padding.insets(leading: 33, trailing: 33))
             
             Spacer()
             

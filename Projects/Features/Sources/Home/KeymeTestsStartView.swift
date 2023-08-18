@@ -75,7 +75,7 @@ public struct KeymeTestsStartView: View {
                 .frame(width: 280, height: 280)
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
-                .animation(.spring(response: 0.85).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.82).repeatForever(), value: viewStore.isAnimating)
             
             Circle()
                 .foregroundColor(viewStore.icon.color)
@@ -84,7 +84,8 @@ public struct KeymeTestsStartView: View {
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
             KFImageManager.shared.toImage(url:viewStore.icon.image)
-                .frame(width: 24, height: 24)
+                .frame(width: 30, height: 30)
+                .scaledToFit()
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
         }
