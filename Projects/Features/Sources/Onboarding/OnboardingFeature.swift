@@ -46,13 +46,15 @@ public enum LottieType: CaseIterable {
 }
 
 public struct OnboardingFeature: Reducer {
-    //    public enum State: Equatable {
-    //        case notDetermined
-    //        case completed
-    //        case needsOnboarding
-    //    }
+    public enum Status: Equatable {
+        case notDetermined
+        case completed
+        case needsOnboarding
+    }
     
     public struct State: Equatable {
+        public var status: Status = .notDetermined
+        
         public var keymeTests: KeymeTestsFeature.State?
         public var testId: Int = 0
         public var lottieType: LottieType = .splash1
@@ -60,7 +62,7 @@ public struct OnboardingFeature: Reducer {
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
-        
+
         public init() { }
     }
     
@@ -90,6 +92,7 @@ public struct OnboardingFeature: Reducer {
                 state.lottieType = LottieType.allCases[state.lottieIdx]
                 state.isLoop = false
                 state.isButtonShown = false
+                
             case .lottieEnded:
                 if state.lottieType == .splash3 {
                     state.lottieType = .question
@@ -103,18 +106,25 @@ public struct OnboardingFeature: Reducer {
                     state.isButtonShown = true
                     state.isLoop = true
                 }
+                
             case let .fetchOnboardingTests(.success(tests)):
                 state.testId = tests.testId
+                
             case .fetchOnboardingTests(.failure):
                 return .none
+                
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)?nickname=키미"
                 state.keymeTests = KeymeTestsFeature.State(url: url)
+                
             case .keymeTests:
                 return .none
+                
             case .succeeded, .failed:
                 return .none
+                
             }
+            
             return .none
         }
         .ifLet(\.keymeTests, action: /Action.keymeTests) {

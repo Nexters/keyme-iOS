@@ -22,17 +22,19 @@ public struct RootFeature: Reducer {
         @PresentationState public var onboardingStatus: OnboardingFeature.State?
         
         public init(isLoggedIn: Bool? = nil, doneOnboarding: Bool? = nil) {
+            onboardingStatus = .init()
+            
             if let isLoggedIn {
                 logInStatus = isLoggedIn ? .loggedIn : .loggedOut
             } else {
                 logInStatus = .notDetermined
             }
             
-//            if let doneOnboarding {
-//                onboardingStatus = doneOnboarding ? .completed : .needsOnboarding
-//            } else {
-//                onboardingStatus = .notDetermined
-//            }
+            if let doneOnboarding {
+                onboardingStatus?.status = doneOnboarding ? .completed : .needsOnboarding
+            } else {
+                onboardingStatus?.status = .notDetermined
+            }
         }
     }
     
@@ -63,12 +65,14 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .onboarding(.presented(let result)):
-//                switch result {
-//                case .succeeded:
-//                    state.onboardingStatus = .completed
-//                case .failed:
-//                    state.onboardingStatus = .needsOnboarding
-//                }
+                switch result {
+                case .succeeded:
+                    state.onboardingStatus?.status = .completed
+                case .failed:
+                    state.onboardingStatus?.status = .needsOnboarding
+                default:
+                    break
+                }
                 return .none
                 
             case .logInChecked(let result):
@@ -81,12 +85,12 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .onboardingChecked(.success(let result)):
-//                switch result {
-//                case true:
-//                    state.onboardingStatus = .completed
-//                case false:
-//                    state.onboardingStatus = .needsOnboarding
-//                }
+                switch result {
+                case true:
+                    state.onboardingStatus?.status = .completed
+                case false:
+                    state.onboardingStatus?.status = .needsOnboarding
+                }
                 return .none
                 
             case .checkLoginStatus:
@@ -100,9 +104,9 @@ public struct RootFeature: Reducer {
                     await send(.onboardingChecked(
                         TaskResult {
                             // TODO: API 갈아끼우기
-                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
+//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
 
-                            return true
+                            return false
                         }
                     ))
                 }

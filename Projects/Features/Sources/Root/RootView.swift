@@ -36,24 +36,27 @@ public struct RootView: View {
                     SignInView(store: store)
                 }
             }
-//            else if viewStore.onboardingStatus == .notDetermined {
-//                // 온보딩 상태를 로딩 중
-//                ProgressView()
-//            } else if viewStore.onboardingStatus == .needsOnboarding {
-//                // 가입했지만 온보딩을 하지 않고 종료했던 유저
-//                let onboardingStore = store.scope(
-//                    state: \.$onboardingStatus,
-//                    action: RootFeature.Action.onboarding)
-//
-//                IfLetStore(onboardingStore) { store in
-//                    OnboardingView(store: store)
-//                }
-//            }
+            else if viewStore.onboardingStatus?.status == .notDetermined {
+                // 온보딩 상태를 로딩 중
+                ProgressView()
+            } else if viewStore.onboardingStatus?.status == .needsOnboarding {
+                // 가입했지만 온보딩을 하지 않고 종료했던 유저
+                let onboardingStore = store.scope(
+                    state: \.$onboardingStatus,
+                    action: RootFeature.Action.onboarding)
+
+                IfLetStore(onboardingStore) { store in
+                    OnboardingView(store: store)
+                }
+            }
             else {
                 // 가입했고 온보딩을 진행한 유저
                 KeymeMainView(store: Store(
                     initialState: MainPageFeature.State(),
                     reducer: MainPageFeature()))
+                .onAppear {
+                    print("@@", viewStore.logInStatus, viewStore.onboardingStatus)
+                }
             }
         }
     }
