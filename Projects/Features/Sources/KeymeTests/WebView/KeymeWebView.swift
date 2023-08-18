@@ -9,13 +9,15 @@
 import SwiftUI
 import WebKit
 
+import Domain
+
 final class KeymeWebViewOption {
     var onCloseWebView: () -> Void
-    var onTestSubmitted: (_ testResultId: Int) -> Void
+    var onTestSubmitted: (_ testResult: KeymeWebViewModel) -> Void
     
     init(
         onCloseWebView: @escaping () -> Void = {},
-        onTestSubmitted: @escaping (_ testResultId: Int) -> Void = { _ in }
+        onTestSubmitted: @escaping (_ testResult: KeymeWebViewModel) -> Void = { _ in }
     ) {
         self.onCloseWebView = onCloseWebView
         self.onTestSubmitted = onTestSubmitted
@@ -31,23 +33,24 @@ public struct KeymeWebView: UIViewRepresentable {
         self.option = .init()
         self.url = url
         self.webView = WKWebView(frame: CGRect.zero, configuration: WKWebViewConfiguration())
-
+        
         if
             let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
             let url = URL(string: encodedUrl)
         {
             webView.load(URLRequest(url: url))
-
+            
         }
     }
     
     public func makeUIView(context: Context) -> WKWebView {
         // This is the important part
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
+        webView.customUserAgent = "KEYME"
         webView.backgroundColor = .black
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
-    
+        
         return webView
     }
     
@@ -81,8 +84,12 @@ public struct KeymeWebView: UIViewRepresentable {
                     option.onCloseWebView()
                     
                 case "SEND_TEST_RESULT":
-                    if let testResultId = messageBody["data"] as? Int {
-                        option.onTestSubmitted(testResultId)
+                    if let data = messageBody["data"] as? [String: Any] {
+                        let decoder = JSONDecoder()
+                        guard let jsonData = try? JSONSerialization.data(withJSONObject: data),
+                              let testResult = try? decoder.decode(KeymeWebViewModel.self, from: jsonData) else { return }
+                        
+                        option.onTestSubmitted(testResult)
                     }
                     
                 default:
@@ -101,7 +108,7 @@ public extension KeymeWebView {
         return self
     }
     
-    func onTestSubmitted(_ handler: @escaping (_ testResultId: Int) -> Void) -> Self {
+    func onTestSubmitted(_ handler: @escaping (_ testResult: KeymeWebViewModel) -> Void) -> Self {
         self.option.onTestSubmitted = handler
         return self
     }
