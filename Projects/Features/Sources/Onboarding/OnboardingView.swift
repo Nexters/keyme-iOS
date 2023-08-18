@@ -23,7 +23,7 @@ public struct OnboardingView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
                 if let resultData = viewStore.resultData {
-                    Text("Done")
+                    Text("결과아이디: \(resultData)")
                         .foregroundColor(.white)
                 } else {
                     IfLetStore(
@@ -34,29 +34,36 @@ public struct OnboardingView: View {
                         then: { store in
                             KeymeTestsView(store: store)
                                 .ignoresSafeArea(.all)
-                                .transition(.scale.animation(.easeIn))
+                                .transition(
+                                    .scale.combined(with: .opacity)
+                                    .animation(Animation.customInteractiveSpring(duration: 1)))
                         },
                         else: {
-                            KeymeLottieView(asset: AnimationAsset.background,
-                                            loopMode: .loop)
-                            
-                            if viewStore.isBlackBackground {
-                                Rectangle()
-                                    .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-                            } else {
-                                BackgroundBlurringView(style: .systemMaterialDark)
-                            }
-                            
-                            if viewStore.isLoop {
-                                KeymeLottieView(asset: viewStore.lottieType.lottie,
+                            ZStack {
+                                KeymeLottieView(asset: AnimationAsset.background,
                                                 loopMode: .loop)
-                            } else {
-                                KeymeLottieView(asset: viewStore.lottieType.lottie) {
-                                    viewStore.send(.lottieEnded)
+                                
+                                if viewStore.isBlackBackground {
+                                    Rectangle()
+                                        .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                                } else {
+                                    BackgroundBlurringView(style: .systemMaterialDark)
                                 }
+                                
+                                if viewStore.isLoop {
+                                    KeymeLottieView(asset: viewStore.lottieType.lottie,
+                                                    loopMode: .loop)
+                                } else {
+                                    KeymeLottieView(asset: viewStore.lottieType.lottie) {
+                                        viewStore.send(.lottieEnded)
+                                    }
+                                }
+                                
+                                splashView(viewStore)
                             }
-                            
-                            splashView(viewStore)
+                            .transition(
+                                .asymmetric(insertion: .identity, removal: .scale)
+                                .animation(Animation.customInteractiveSpring(duration: 1)))
                         }
                     )
                 }
@@ -75,7 +82,7 @@ public struct OnboardingView: View {
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
                 .padding(Padding.insets(leading: 16))
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .animation(.easeIn(duration: 0.4), value: viewStore.lottieType)
+                .animation(Animation.customInteractiveSpring(), value: viewStore.lottieType)
             
             Spacer()
             
@@ -104,7 +111,7 @@ public struct OnboardingView: View {
             .padding(Padding.insets(leading: 16, trailing: 16))
             .frame(height: 60)
             .opacity(viewStore.isButtonShown ? 1.0 : 0.0)
-            .animation(.easeIn(duration: 0.5), value: viewStore.isButtonShown)
+            .animation(Animation.customInteractiveSpring(), value: viewStore.isButtonShown)
             
             Spacer()
                 .frame(height: 54)

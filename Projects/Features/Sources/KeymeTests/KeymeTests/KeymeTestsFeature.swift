@@ -13,7 +13,6 @@ public struct KeymeTestsFeature: Reducer {
     
     public struct State: Equatable {
         let url: String
-        var shouldCloseWindow: Bool = false
         
         public init(url: String) {
             self.url = url

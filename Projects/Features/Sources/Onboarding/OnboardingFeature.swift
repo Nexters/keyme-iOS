@@ -57,15 +57,16 @@ public struct OnboardingFeature: Reducer {
         public var status: Status = .notDetermined
         
         public var testId: Int = 0
-        public var lottieType: LottieType = .splash1
-        public var lottieIdx: Int = 0
+        public var lottieType: LottieType = .splash1 // TODO:
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
         
         public var resultData: String?
 
-        public init() { }
+        public init() {
+//            keymeTestsState = .init(url: "https://www.naver.com")
+        }
     }
     
     public enum Action: Equatable {
@@ -91,8 +92,7 @@ public struct OnboardingFeature: Reducer {
                 if state.lottieType == .splash2 {
                     state.isBlackBackground = true
                 }
-                state.lottieIdx = (state.lottieIdx + 1) % LottieType.allCases.count
-                state.lottieType = LottieType.allCases[state.lottieIdx]
+                state.lottieType = state.lottieType.next()
                 state.isLoop = false
                 state.isButtonShown = false
                 
