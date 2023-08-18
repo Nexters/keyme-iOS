@@ -53,6 +53,7 @@ public struct RootView: View {
                     initialState: MainPageFeature.State()) {
                         MainPageFeature()
                     })
+                .transition(.opacity)
             }
         }
     }

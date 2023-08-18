@@ -28,6 +28,7 @@ public struct OnboardingView: View {
                         action: { .testResult($0) }
                     ), then: {
                         TestResultView(store: $0)
+                            .transition(.opacity)
                     }, else: {
                         IfLetStore(
                             self.store.scope(
