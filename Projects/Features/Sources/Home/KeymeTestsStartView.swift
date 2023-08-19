@@ -58,10 +58,12 @@ public struct KeymeTestsStartView: View {
     }
     
     func welcomeText(_ viewStore: ViewStore<KeymeTestsStartFeature.State, KeymeTestsStartFeature.Action>) -> some View {
-        Text.keyme("환영해요 \(viewStore.nickname ?? "키미")님!\n이제 문제를 풀어볼까요?", font: .heading1) // TODO: 닉변
-            .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(Padding.insets(leading: 16))
+        Text.keyme(
+            "환영해요 \(viewStore.nickname ?? "키미")님!\n이제 문제를 풀어볼까요?",
+            font: .heading1) // TODO: 닉변
+        .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Padding.insets(leading: 16))
     }
     
     func startTestsButton(_ viewStore: ViewStore<KeymeTestsStartFeature.State,
@@ -81,7 +83,7 @@ public struct KeymeTestsStartView: View {
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
-            KFImageManager.shared.toImage(url:viewStore.icon.image)
+            KFImageManager.shared.toImage(url: viewStore.icon.imageURL)
                 .frame(width: 30, height: 30)
                 .scaledToFit()
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)

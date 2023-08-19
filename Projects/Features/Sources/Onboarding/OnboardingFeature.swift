@@ -57,8 +57,8 @@ public struct OnboardingFeature: Reducer {
         public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
-        public var testId: Int = 0
-        public var lottieType: LottieType = .splash1 // TODO:
+        public var testId: Int = 4 // TODO: 바꾸기
+        public var lottieType: LottieType = .splash1
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
@@ -118,8 +118,8 @@ public struct OnboardingFeature: Reducer {
                 
             case .startButtonDidTap:
                 // TODO: url 주석단거로 바꾸기
-//                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
-                let url = "https://keyme-frontend.vercel.app/test/5"
+                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
+//                let url = "https://keyme-frontend.vercel.app/test/5"
                 state.keymeTestsState = KeymeTestsFeature.State(url: url)
                 
             case .keymeTests(.presented(.showResult(let data))):

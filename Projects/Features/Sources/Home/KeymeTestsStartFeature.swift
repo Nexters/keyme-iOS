@@ -16,7 +16,7 @@ public struct KeymeTestsStartFeature: Reducer {
         public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         public var nickname: String?
-        public var testId: Int = 0
+        public var testId: Int = 5 // TODO: change
         public var icon: IconModel = .EMPTY
         
         public init() { }
@@ -25,6 +25,7 @@ public struct KeymeTestsStartFeature: Reducer {
     public enum Action {
         case viewWillAppear
         case fetchDailyTests(TaskResult<KeymeTestsModel>)
+        case startAnimation([IconModel])
         case setIcon(IconModel)
         case startButtonDidTap
         case keymeTests(KeymeTestsFeature.Action)
@@ -41,28 +42,36 @@ public struct KeymeTestsStartFeature: Reducer {
             case .viewWillAppear:
                 return .run { send in
                     await send(.fetchDailyTests(
-                        TaskResult { try await self.keymeTestsClient.fetchDailyTests() }
+                        TaskResult {
+                            try await self.keymeTestsClient.fetchDailyTests()
+                        }
                     ))
                 }
                 
             case let .fetchDailyTests(.success(tests)):
                 state.nickname = tests.nickname
                 state.testId = tests.testId
-                state.isAnimating.toggle()
+                state.isAnimating = true
+                
+                return .send(.startAnimation(tests.icons))
+                
+            case .fetchDailyTests(.failure):
+                state.nickname = "키미" // TODO: 변경
+                return .send(.startAnimation([IconModel.EMPTY]))
+                
+            case .startAnimation(let icons):
                 return .run { send in
                     repeat {
-                        for icon in tests.icons {
+                        for icon in icons {
                             await send(.setIcon(icon))
                             try await self.clock.sleep(for: .seconds(1.595))
                         }
                     } while true
                 }
                 
-            case .fetchDailyTests(.failure):
-                state.nickname = nil
-                
             case let .setIcon(icon):
                 state.icon = icon
+                state.isAnimating = true
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"

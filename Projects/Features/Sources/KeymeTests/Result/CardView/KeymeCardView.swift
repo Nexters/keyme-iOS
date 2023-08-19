@@ -55,20 +55,19 @@ public struct KeymeCardView: View {
             Spacer()
                 .frame(height: 8)
             
-            Text.keyme("\(testResult.nickname)의 \(testResult.title) 정도는?", font: .heading1)
+            Text.keyme("\(testResult.nickname)의 애정표현 정도는?", font: .heading1)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
             
             Divider()
                 .background(.white.opacity(0.1))
             
-            HStack(alignment: .bottom) {
+            HStack {
                 Text.keyme("0\(testResult.score)", font: .checkResult)
                     .foregroundColor(.white.opacity(0.6))
                 
                 Text.keyme("점", font: .caption1)
                     .foregroundColor(.white.opacity(0.6))
-                    .padding(Padding.insets(bottom: 8))
                 
                 Spacer()
             }
@@ -88,9 +87,10 @@ public struct KeymeCardView: View {
                 
                 Circle()
                     .foregroundColor(testResult.icon.color)
-                    .frame(width: scoreToRadius(score: testResult.score), height: scoreToRadius(score: testResult.score))
+                    .frame(width: scoreToRadius(score: testResult.score),
+                           height: scoreToRadius(score: testResult.score))
                 
-                KFImageManager.shared.toImage(url: testResult.icon.image)
+                KFImageManager.shared.toImage(url: testResult.icon.imageURL)
                     .resizable()
                     .scaledToFit()
                     .frame(height: 40)

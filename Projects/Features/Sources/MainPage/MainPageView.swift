@@ -29,7 +29,7 @@ struct KeymeMainView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }) { _ in
             TabView(selection: $selectedTab) {
                 KeymeTestsStartView(store: Store(
                     initialState: KeymeTestsStartFeature.State()) {
@@ -71,25 +71,6 @@ struct KeymeMainView: View {
                 tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
                 tabBar.scrollEdgeAppearance = tabBar.standardAppearance
             }
-        }
-        .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
-            let tabBar = tabViewController.tabBar
-            
-            let barAppearance = UITabBarAppearance()
-            barAppearance.configureWithDefaultBackground()
-            barAppearance.backgroundColor = UIColor(Color.hex("232323"))
-            
-            let itemAppearance = UITabBarItemAppearance()
-            itemAppearance.selected.iconColor = .white
-            itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
-            itemAppearance.normal.iconColor = .gray
-            itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-            
-            tabBar.standardAppearance = barAppearance
-            tabBar.standardAppearance.inlineLayoutAppearance = itemAppearance
-            tabBar.standardAppearance.stackedLayoutAppearance = itemAppearance
-            tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
-            tabBar.scrollEdgeAppearance = tabBar.standardAppearance
         }
     }
 }

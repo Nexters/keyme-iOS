@@ -27,7 +27,7 @@ public extension ResultDTO {
         return TestResultModel(
             title: keyword,
             score: score,
-            icon: IconModel(image: category.iconUrl,
+            icon: IconModel(imageURL: category.iconUrl,
                             color: Color.hex(category.color))
         )
     }
