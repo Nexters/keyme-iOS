@@ -19,7 +19,7 @@ struct KeymeApp: App {
     }
 }
 
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -30,12 +30,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         KeymeAPIManager.shared.registerAuthorizationToken(
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhY2Nlc3NUb2tlbiIsImlhdCI6MTY5MTg0MjM1NiwiZXhwIjoxNjk0NDM0MzU2LCJtZW1iZXJJZCI6Miwicm9sZSI6IlJPTEVfVVNFUiJ9.bLUl_ObvXr2pkLGNBZYWbJgLZLo3P0xB2pawckRGYZM"
         )
-
+        
+        UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
             guard granted else { return }
             
             // 푸시토큰 애플 서버에 등록하기
-            self.getNotificationSettings()
+            
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                guard settings.authorizationStatus == .authorized else { return }
+                
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            }
         }
         return true
     }
@@ -54,12 +62,15 @@ extension AppDelegate: MessagingDelegate {
 }
 
 extension AppDelegate {
-    private func getNotificationSettings() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            guard settings.authorizationStatus == .authorized else { return }
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
-            }
-        }
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
+        Messaging.messaging().setAPNSToken(deviceToken, type: .unknown)
+
+        print("firebase Device Token: \(token)")
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("firebase Failed to register for remote notifications: \(error)")
     }
 }

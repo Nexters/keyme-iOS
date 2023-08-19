@@ -18,7 +18,7 @@ public final class KFImageManager {
     public func toImage(url: String) -> KFImage {
         return KFImage(URL(string: url))
             .placeholder {
-                Image(systemName: "x.circle.fill")
+                Image(systemName: "questionmark.circle.fill")
             }
             .retry(maxCount: 3, interval: .seconds(3))
             .onFailure { error in print("Kingfisher Error: \(error)") }
