@@ -60,7 +60,7 @@ public struct SegmentControlView<SegmentType: Identifiable, Content: View>: View
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.hex("232323"), lineWidth: 1)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
                 )
         }
     }

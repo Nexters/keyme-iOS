@@ -40,6 +40,13 @@ public class HapticManager {
         generator.notificationOccurred(.error)
     }
     
+    /// 통통
+    public func tongtong() {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(.success)
+    }
+    
     /// 톡
     public func tok() {
         let generator = UIImpactFeedbackGenerator(style: .rigid)

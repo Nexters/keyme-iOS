@@ -59,84 +59,76 @@ public struct CircleData {
 }
 
 // 네트워크 데이터
-//public extension CircleData {
-//    // MARK: - AppResult
-//    struct NetworkResult: Codable {
-//        let data: DataField
-//        
-//        struct DataField: Codable {
-//            let memberID: Int
-//            let results: [Result]
-//
-//            enum CodingKeys: String, CodingKey {
-//                case memberID = "memberId"
-//                case results
-//            }
-//        }
-//    }
-//}
-//
-//extension CircleData.NetworkResult {
-//    struct Result: Codable {
-//        let questionStatistic: QuestionStatistic
-//        let coordinate: Coordinate
-//    }
-//
-//    struct Coordinate: Codable {
-//        let x, y, r: Double
-//    }
-//
-//    struct QuestionStatistic: Codable {
-//        let questionID: Int
-//        let title, keyword: String
-//        let category: Category
-//        let avgScore: Int
-//
-//        enum CodingKeys: String, CodingKey {
-//            case questionID = "questionId"
-//            case title, keyword, category, avgScore
-//        }
-//    }
-//    
-//    struct Category: Codable {
-//        let iconURL: String
-//        let name, color: String
-//
-//        enum CodingKeys: String, CodingKey {
-//            case iconURL = "iconUrl"
-//            case name, color
-//        }
-//    }
-//}
-//
-//public extension CircleData.NetworkResult {
-//    func toCircleData() -> [CircleData] {
-//        return self.data.results.map { result -> CircleData in
-//            let coordinate = result.coordinate
-//            let questionStatistic = result.questionStatistic
-//            let category = questionStatistic.category
-//            
-//            let color = Color.hex(category.color)
-//            
-//            let icon = Image(systemName: "person")
-//            
-//            let metadata = CircleMetadata(
-//                icon: icon,
-//                keyword: questionStatistic.keyword,
-//                averageScore: Float(questionStatistic.avgScore),
-//                myScore: 0
-//            )
-//            
-//            return CircleData(
-//                color: color,
-//                xPoint: CGFloat(coordinate.x),
-//                yPoint: CGFloat(coordinate.y),
-//                radius: CGFloat(coordinate.r),
-//                metadata: metadata
-//            )
-//        }
-//    }
-//}
+public extension CircleData {
+    // MARK: - AppResult
+    struct NetworkResult: Codable {
+        let code: Int
+        let data: ResponseData
+    }
+}
+
+extension CircleData.NetworkResult {
+    struct ResponseData: Codable {
+        let memberId: Int
+        let results: [ResultItem]
+    }
+
+    struct ResultItem: Codable {
+        let questionStatistic: QuestionStatistic
+        let coordinate: Coordinate
+    }
+
+    struct QuestionStatistic: Codable {
+        let questionId: Int
+        let title: String
+        let keyword: String
+        let category: Category
+        let avgScore: Double
+        let ownerScore: Double
+    }
+
+    struct Category: Codable {
+        let iconUrl: String
+        let name: String
+        let color: String
+    }
+
+    struct Coordinate: Codable {
+        let x: Double
+        let y: Double
+        let r: Double
+    }
+}
+
+import Kingfisher
+
+public extension CircleData.NetworkResult {
+    func toCircleData() -> [CircleData] {
+        return self.data.results.map { result -> CircleData in
+            let coordinate = result.coordinate
+            let questionStatistic = result.questionStatistic
+            let category = questionStatistic.category
+            
+            let color = Color.hex(category.color)
+            
+            let metadata = CircleMetadata(
+                questionId: questionStatistic.questionId,
+                iconURL: URL(string: category.iconUrl),
+                keyword: questionStatistic.keyword,
+                averageScore: Float(questionStatistic.avgScore),
+                myScore: Float(questionStatistic.ownerScore)
+            )
+            
+            return CircleData(
+                color: color,
+                xPoint: CGFloat(coordinate.x),
+                yPoint: CGFloat(coordinate.y),
+                radius: CGFloat(coordinate.r),
+                metadata: metadata
+            )
+        }
+    }
+}
 
 extension CircleData: Equatable {
     public static func == (lhs: CircleData, rhs: CircleData) -> Bool {

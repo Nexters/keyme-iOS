@@ -29,6 +29,7 @@ extension CoreNetworkService: CoreNetworking {
                 case let .success(response) where 300... ~= response.statusCode:
                     continuation.resume(throwing: MoyaError.statusCode(response))
                 case let .failure(error):
+                    print(error)
                     continuation.resume(throwing: error)
                 default:
                     let unexpectedError = NSError(domain: "Unexpected Response", code: 0, userInfo: nil)

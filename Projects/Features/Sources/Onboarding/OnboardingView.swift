@@ -22,58 +22,67 @@ public struct OnboardingView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                if let resultData = viewStore.resultData {
-                    Text("결과아이디: \(resultData)")
-                        .foregroundColor(.white)
-                } else {
-                    IfLetStore(
-                        self.store.scope(
-                            state: \.$keymeTestsState,
-                            action: OnboardingFeature.Action.keymeTests
-                        ),
-                        then: { store in
-                            KeymeTestsView(store: store)
-                                .ignoresSafeArea(.all)
-                                .transition(
-                                    .scale.combined(with: .opacity)
-                                    .animation(Animation.customInteractiveSpring(duration: 1)))
-                        },
-                        else: {
-                            ZStack {
-                                KeymeLottieView(asset: AnimationAsset.background,
-                                                loopMode: .loop)
-                                
-                                if viewStore.isBlackBackground {
-                                    Rectangle()
-                                        .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-                                } else {
-                                    BackgroundBlurringView(style: .systemMaterialDark)
-                                }
-                                
-                                if viewStore.isLoop {
-                                    KeymeLottieView(asset: viewStore.lottieType.lottie,
-                                                    loopMode: .loop)
-                                } else {
-                                    KeymeLottieView(asset: viewStore.lottieType.lottie) {
-                                        viewStore.send(.lottieEnded)
-                                    }
-                                }
-                                
-                                splashView(viewStore)
+                IfLetStore(
+                    self.store.scope(
+                        state: \.testResultState,
+                        action: { .testResult($0) }
+                    ), then: {
+                        TestResultView(store: $0)
+                            .transition(.opacity)
+                    }, else: {
+                        IfLetStore(
+                            self.store.scope(
+                                state: \.$keymeTestsState,
+                                action: OnboardingFeature.Action.keymeTests
+                            ),
+                            then: { store in
+                                KeymeTestsView(store: store)
+                                    .ignoresSafeArea(.all)
+                                    .transition(
+                                        .scale.combined(with: .opacity)
+                                        .animation(Animation.customInteractiveSpring(duration: 1)))
+                            },
+                            else: {
+                                splashLottieView(viewStore)
                             }
-                            .transition(
-                                .asymmetric(insertion: .identity, removal: .scale)
-                                .animation(Animation.customInteractiveSpring(duration: 1)))
-                        }
-                    )
-                }
+                        )
+                    }
+                )
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
             .ignoresSafeArea()
         }
     }
     
-    func splashView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
+    func splashLottieView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
+        ZStack {
+            KeymeLottieView(asset: AnimationAsset.background,
+                            loopMode: .loop)
+            
+            if viewStore.isBlackBackground {
+                Rectangle()
+                    .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            } else {
+                BackgroundBlurringView(style: .systemMaterialDark)
+            }
+            
+            if viewStore.isLoop {
+                KeymeLottieView(asset: viewStore.lottieType.lottie,
+                                loopMode: .loop)
+            } else {
+                KeymeLottieView(asset: viewStore.lottieType.lottie) {
+                    viewStore.send(.lottieEnded)
+                }
+            }
+            
+            splashFrontView(viewStore)
+        }
+        .transition(
+            .asymmetric(insertion: .identity, removal: .scale)
+            .animation(Animation.customInteractiveSpring(duration: 1)))
+    }
+    
+    func splashFrontView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
         VStack {
             Spacer()
                 .frame(height: 119)
@@ -90,6 +99,7 @@ public struct OnboardingView: View {
                 Color.clear
                     .contentShape(Circle())
                     .onTapGesture {
+                        HapticManager.shared.tongtong()
                         viewStore.send(.startButtonDidTap)
                     }
             }
@@ -106,6 +116,7 @@ public struct OnboardingView: View {
                     .foregroundColor(.black)
             }
             .onTapGesture {
+                HapticManager.shared.tok()
                 viewStore.send(.nextButtonDidTap)
             }
             .padding(Padding.insets(leading: 16, trailing: 16))

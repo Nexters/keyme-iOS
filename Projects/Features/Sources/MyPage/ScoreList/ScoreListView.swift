@@ -35,20 +35,17 @@ struct ScoreListFeature: Reducer {
                 return .run { send in
                     try await Task.sleep(until: .now + .seconds(0.5), clock: .continuous)
                     await send(.saveScores(
-                        totalCount: 16,
-                        scores: [
-                            CharacterScore(score: 3, date: Date()),
-                            CharacterScore(score: 3, date: Date()),
-                            CharacterScore(score: 3, date: Date()),
-                            CharacterScore(score: 3, date: Date()),
-                            CharacterScore(score: 3, date: Date())
-                        ]
+                        totalCount: 42,
+                        scores: (0..<42).map { i in
+                            let randomInterval = TimeInterval(-2 * i)
+                            return CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(randomInterval + Double(Int.random(in: 0...1))))
+                        }
                     ))
                 }
                 
             case .saveScores(let totalCount, let data):
                 state.totalCount = totalCount
-                state.scores.append(contentsOf: data)
+                state.scores = data
             }
             return .none
         }
@@ -110,7 +107,7 @@ struct ScoreListView: View {
                                 let thirdToLast = viewStore.state.scores.dropLast(2).last,
                                 thirdToLast == scoreData
                             {
-                                viewStore.send(.loadScores)
+//                                viewStore.send(.loadScores)
                             }
                         }
                     }

@@ -31,7 +31,7 @@ public struct RootView: View {
                 let loginStore = store.scope(
                     state: \.$logInStatus,
                     action: RootFeature.Action.login)
-                
+
                 IfLetStore(loginStore) { store in
                     SignInView(store: store)
                 }
@@ -50,8 +50,10 @@ public struct RootView: View {
             } else {
                 // 가입했고 온보딩을 진행한 유저
                 KeymeMainView(store: Store(
-                    initialState: MainPageFeature.State(),
-                    reducer: MainPageFeature()))
+                    initialState: MainPageFeature.State()) {
+                        MainPageFeature()
+                    })
+                .transition(.opacity)
             }
         }
     }

@@ -54,29 +54,28 @@ public struct OnboardingFeature: Reducer {
     
     public struct State: Equatable {
         @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
+        public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
-        public var testId: Int = 0
-        public var lottieType: LottieType = .splash1 // TODO:
+        public var testId: Int = 17 // TODO: 바꾸기
+        public var lottieType: LottieType = .splash1
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
-        
-        public var resultData: String?
+        public var isShared: Bool = false
 
-        public init() {
-//            keymeTestsState = .init(url: "https://www.naver.com")
-        }
+        public init() { }
     }
     
     public enum Action: Equatable {
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
+        case testResult(TestResultFeature.Action)
         case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
         
-        case showResult(data: String)
+        case showResult(data: KeymeWebViewModel)
         case succeeded
         case failed
     }
@@ -102,7 +101,8 @@ public struct OnboardingFeature: Reducer {
                     state.isLoop = true
                     return .run { send in
                         await send(.fetchOnboardingTests(
-                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests() }
+                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests()
+                            }
                         ))
                     }
                 } else {
@@ -117,20 +117,28 @@ public struct OnboardingFeature: Reducer {
                 return .none
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(5)?nickname=키미" // TODO: 
+                // TODO: url 주석단거로 바꾸기
+                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
+//                let url = "https://keyme-frontend.vercel.app/test/5"
                 state.keymeTestsState = KeymeTestsFeature.State(url: url)
                 
             case .keymeTests(.presented(.showResult(let data))):
                 return .send(.showResult(data: data))
                 
             case .showResult(data: let data):
-                state.resultData = data
+                state.testResultState = TestResultFeature.State(
+                    testResultId: data.testResultId,
+                    testId: state.testId
+                )
                 
             case .succeeded, .failed:
                 return .none
                 
             case .keymeTests(.dismiss):
                 break
+                
+            case .testResult(.closeButtonDidTap):
+                state.status = .completed
                 
             default:
                 break
@@ -140,6 +148,9 @@ public struct OnboardingFeature: Reducer {
         }
         .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
+        }
+        .ifLet(\.testResultState, action: /Action.testResult) {
+            TestResultFeature()
         }
     }
 }

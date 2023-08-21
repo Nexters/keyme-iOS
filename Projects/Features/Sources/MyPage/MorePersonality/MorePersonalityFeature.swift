@@ -16,9 +16,7 @@ struct MorePersonalityFeature: Reducer {
         var personalities: [Personality]
         
         public init() {
-            self.personalities = [
-                Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5)
-            ]
+            self.personalities = []
         }
     }
     public enum Action: Equatable {
@@ -33,11 +31,11 @@ struct MorePersonalityFeature: Reducer {
                 return .run { send in
                     try await Task.sleep(until: .now + .seconds(0.5), clock: .continuous)
                     await send(.savePersonality([
-                        Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5),
-                        Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5),
-                        Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5),
-                        Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5),
-                        Personality(name: "닉네임", keyword: "꼰대력", averageScore: 3.5)
+                        Personality(name: "키미", keyword: "꼰대력", averageScore: 3.5),
+                        Personality(name: "키미", keyword: "꼰대력", averageScore: 3.5),
+                        Personality(name: "키미", keyword: "꼰대력", averageScore: 3.5),
+                        Personality(name: "키미", keyword: "꼰대력", averageScore: 3.5),
+                        Personality(name: "키미", keyword: "꼰대력", averageScore: 3.5)
                     ]))
                 }
                 

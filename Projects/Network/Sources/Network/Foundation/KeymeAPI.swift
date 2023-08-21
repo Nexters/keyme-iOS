@@ -17,7 +17,12 @@ public enum KeymeAPI {
 }
 
 public enum MyPage {
-    case statistics(Int)
+    case statistics(Int, RequestType)
+    
+    public enum RequestType: String {
+        case similar = "SIMILAR"
+        case different = "DIFFERENT"
+    }
 }
 
 extension KeymeAPI: BaseAPI {
@@ -29,7 +34,7 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .test:
             return "/api"
-        case .myPage(.statistics(let id)):
+        case .myPage(.statistics(let id, _)):
             return "/members/\(id)/statistics"
         case .registerPushToken:
             return "/members/devices"
@@ -51,8 +56,8 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .test:
             return .requestPlain
-        case .myPage(.statistics):
-            return .requestPlain
+        case .myPage(.statistics(_, let type)):
+            return .requestParameters(parameters: ["type": type.rawValue], encoding: URLEncoding.default)
         case .registerPushToken(let token):
             return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
         }

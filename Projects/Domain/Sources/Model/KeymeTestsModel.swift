@@ -18,21 +18,21 @@ public struct KeymeTestsModel: Equatable {
     public let icons: [IconModel]
 }
 
-public struct IconModel: Equatable {
-    public let image: String
+public struct IconModel: Equatable, Hashable {
+    public let imageURL: String
     public let color: Color
     
-    public static var EMPTY: IconModel = .init(image: "", color: Color.hex(""))
+    public static let EMPTY: IconModel = .init(imageURL: "", color: Color.hex(""))
 }
 
 public extension KeymeTestsDTO {
     func toIconModel() -> KeymeTestsModel {
         let nickname = data.owner.nickname
         let icons = data.questions.map {
-            IconModel(image: $0.category.iconUrl,
+            IconModel(imageURL: $0.category.iconUrl,
                       color: Color.hex($0.category.color))
         }
-        return KeymeTestsModel(nickname: nickname ?? "키미키미",
+        return KeymeTestsModel(nickname: nickname ?? "키미",
                                testId: data.testId,
                                icons: icons)
     }

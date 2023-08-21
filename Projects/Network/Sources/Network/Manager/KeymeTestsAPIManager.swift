@@ -18,8 +18,12 @@ public class KeymeTestsAPIManager {
     private var core: CoreNetworkService<KeymeTestsAPI>
     private let decoder = JSONDecoder()
 
-    init(core: CoreNetworkService<KeymeTestsAPI>) {
-        self.core = core
+    init() {
+        let loggerConfig = NetworkLoggerPlugin.Configuration(logOptions: .verbose)
+        let networkLogger = NetworkLoggerPlugin(configuration: loggerConfig)
+        let provider = MoyaProvider<KeymeTestsAPI>(plugins: [networkLogger])
+        
+        self.core = CoreNetworkService(provider: provider)
     }
 
     public func registerAuthorizationToken(_ token: String) {
@@ -48,5 +52,5 @@ extension KeymeTestsAPIManager: APIRequestable {
 }
 
 public extension KeymeTestsAPIManager {
-    static let shared = KeymeTestsAPIManager(core: .init(provider: .init()))
+    static let shared = KeymeTestsAPIManager()
 }

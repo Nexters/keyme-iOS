@@ -26,8 +26,8 @@ public struct KeymeTestsView: View {
                     .onCloseWebView {
                         print("close")
                     }
-                    .onTestSubmitted { testResultId in
-                        viewStore.send(.showResult(data: "\(testResultId)"))
+                    .onTestSubmitted { testResult in
+                        viewStore.send(.showResult(data: testResult))
                     }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
