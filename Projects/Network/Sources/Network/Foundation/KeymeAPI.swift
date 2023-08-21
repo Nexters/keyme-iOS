@@ -14,6 +14,7 @@ public enum KeymeAPI {
     case test
     case myPage(MyPage)
     case registerPushToken(String)
+    case auth(param: KeymeOAuthRequest)
 }
 
 public enum MyPage {
@@ -38,9 +39,11 @@ extension KeymeAPI: BaseAPI {
             return "/members/\(id)/statistics"
         case .registerPushToken:
             return "/members/devices"
+        case .auth:
+            return "/auth/login"
         }
     }
-
+    
     public var method: Moya.Method {
         switch self {
         case .test:
@@ -49,9 +52,11 @@ extension KeymeAPI: BaseAPI {
             return .get
         case .registerPushToken:
             return .post
+        case .auth:
+            return .post
         }
     }
-
+    
     public var task: Task {
         switch self {
         case .test:
@@ -60,13 +65,15 @@ extension KeymeAPI: BaseAPI {
             return .requestParameters(parameters: ["type": type.rawValue], encoding: URLEncoding.default)
         case .registerPushToken(let token):
             return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
+        case .auth(let param):
+            return .requestJSONEncodable(param)
         }
     }
-
+    
     public var headers: [String: String]? {
         return ["Content-type": "application/json"]
     }
-
+    
     public var sampleData: Data {
         """
         {

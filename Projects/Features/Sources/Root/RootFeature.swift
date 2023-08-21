@@ -3,6 +3,8 @@
 //  Features
 //
 //  Created by 이영빈 on 2023/08/10.
+//  Edited by 고도 on 2023/08/14.
+// 
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
@@ -54,14 +56,13 @@ public struct RootFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .login(.presented(let result)):
-                switch result {
-                case .succeeded:
-                    localStorage.set(true, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedIn
-                case .failed:
-                    localStorage.set(false, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedOut
-                }
+//                switch result {
+//                case .succeeded:
+//                    localStorage.set(true, forKey: .isLoggedIn)
+//                    state.logInStatus = .loggedIn
+//                case .failed:
+//                    localStorage.set(false, forKey: .isLoggedIn)
+//                    state.logInStatus = .loggedOut
                 return .none
                 
             case .onboarding(.presented(let result)):
