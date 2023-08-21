@@ -55,7 +55,7 @@ public struct KeymeCardView: View {
             Spacer()
                 .frame(height: 8)
             
-            Text.keyme("\(testResult.nickname)의 애정표현 정도는?", font: .heading1)
+            Text.keyme("\(testResult.nickname)의 \(testResult.title) 정도는?", font: .heading1)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
             

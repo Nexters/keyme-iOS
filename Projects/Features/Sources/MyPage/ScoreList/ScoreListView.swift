@@ -33,15 +33,13 @@ struct ScoreListFeature: Reducer {
             switch action {
             case .loadScores:
                 return .run { send in
-                    print("ACTION!")
                     try await Task.sleep(until: .now + .seconds(0.5), clock: .continuous)
                     await send(.saveScores(
-                        totalCount: 3,
-                        scores: [
-                            CharacterScore(score: Int.random(in: 1...5), date: Date()),
-                            CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(-70)),
-                            CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(-297))
-                        ]
+                        totalCount: 42,
+                        scores: (0..<42).map { i in
+                            let randomInterval = TimeInterval(-2 * i)
+                            return CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(randomInterval + Double(Int.random(in: 0...1))))
+                        }
                     ))
                 }
                 

@@ -16,7 +16,7 @@ public struct KeymeTestsStartFeature: Reducer {
         public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         public var nickname: String?
-        public var testId: Int = 5 // TODO: change
+        public var testId: Int = 18 // TODO: change
         public var icon: IconModel = .EMPTY
         
         public init() { }

@@ -63,7 +63,7 @@ extension KeymeTestsAPI: BaseAPI {
             "code": 200,
             "message": "요청에 성공했습니다.",
             "data": {
-                "testId": 4,
+                "testId": 17,
                 "testResultId": null,
                 "solvedCount": 0,
                 "title": "님은 돈관리를 잘한다",
@@ -116,7 +116,7 @@ extension KeymeTestsAPI: BaseAPI {
             "message": "요청에 성공했습니다.",
             "data": {
                 "testResultId": 391,
-                "testId": 4,
+                "testId": 17,
                 "matchRate": 0.0,
                 "results": [
                     {

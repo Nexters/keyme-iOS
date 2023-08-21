@@ -57,7 +57,7 @@ public struct OnboardingFeature: Reducer {
         public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
-        public var testId: Int = 4 // TODO: 바꾸기
+        public var testId: Int = 17 // TODO: 바꾸기
         public var lottieType: LottieType = .splash1
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
