@@ -15,7 +15,7 @@ import Network
 import ComposableArchitecture
 
 public struct RootFeature: Reducer {
-    @Dependency(\.localStorage) private var localStorage
+    @Dependency(\.userStorage) private var userStorage
     
     public init() {}
     
@@ -56,13 +56,14 @@ public struct RootFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .login(.presented(let result)):
-//                switch result {
-//                case .succeeded:
-//                    localStorage.set(true, forKey: .isLoggedIn)
-//                    state.logInStatus = .loggedIn
-//                case .failed:
-//                    localStorage.set(false, forKey: .isLoggedIn)
-//                    state.logInStatus = .loggedOut
+                switch result {
+                case .succeeded:
+                    userStorage.set(true, forKey: .isLoggedIn)
+                    state.logInStatus = .loggedIn
+                case .failed:
+                    userStorage.set(false, forKey: .isLoggedIn)
+                    state.logInStatus = .loggedOut
+                }
                 return .none
                 
             case .onboarding(.presented(let result)):
@@ -95,7 +96,7 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .checkLoginStatus:
-                let isLoggedIn = localStorage.get(.isLoggedIn) as? Bool ?? false
+                let isLoggedIn: Bool = userStorage.get(.isLoggedIn) ?? false
                 return .run { send in
                     await send(.logInChecked(isLoggedIn))
                 }
