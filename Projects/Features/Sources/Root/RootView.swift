@@ -31,7 +31,7 @@ public struct RootView: View {
                 let loginStore = store.scope(
                     state: \.$logInStatus,
                     action: RootFeature.Action.login)
-
+                
                 IfLetStore(loginStore) { store in
                     SignInView(store: store)
                 }
@@ -43,7 +43,7 @@ public struct RootView: View {
                 let onboardingStore = store.scope(
                     state: \.$onboardingStatus,
                     action: RootFeature.Action.onboarding)
-
+                
                 IfLetStore(onboardingStore) { store in
                     OnboardingView(store: store)
                 }
@@ -59,8 +59,8 @@ public struct RootView: View {
     }
 }
 
- struct RootView_Previews: PreviewProvider {
+struct RootView_Previews: PreviewProvider {
     static var previews: some View {
         RootView()
     }
- }
+}
