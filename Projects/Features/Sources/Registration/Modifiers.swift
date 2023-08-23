@@ -9,7 +9,7 @@
 import SwiftUI
 
 // 최대 글자 수를 넘기면 좌, 우로 떨리는 애니메이션
-struct ShakeTextFieldWhenIsFulled: ViewModifier {
+struct Shake: ViewModifier {
     @Binding var isShake: Bool
     
     func body(content: Content) -> some View {

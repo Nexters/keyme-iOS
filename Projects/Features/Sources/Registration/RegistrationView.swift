@@ -1,5 +1,5 @@
 //
-//  SettingPrivacyView.swift
+//  RegistrationView.swift
 //  Features
 //
 //  Created by 고도현 on 2023/08/12.
@@ -11,7 +11,7 @@ import PhotosUI
 
 /// 회원가입 이후, 프로필 이미지와 닉네임을 등록하는 페이지입니다.
 /// - 뷰의 상단부터 순차적으로 구현하였으며 각각의 컴포넌트별로 구분할 수 있게끔 주석을 달아놓았으니 참고하시면 됩니다.
-struct SettingPrivacyView: View {
+struct RegistrationView: View {
     // 닉네임 관련 프로퍼티
     @State private var nickname = "" // 사용자가 새롭게 입력한 닉네임
     @State private var beforeNickname = "" // 기존에 입력했던 닉네임
@@ -150,26 +150,28 @@ struct SettingPrivacyView: View {
 }
 
 // 닉네임에 대한 검증 여부를 보여주는 뷰
-struct ValidateNicknameView: View {
-    @Binding var isValid: Bool
-    
-    var body: some View {
-        HStack {
-            Image(systemName: isValid ? "checkmark.circle" : "xmark.circle")
-                .foregroundColor(isValid ? .green : .red)
-                .frame(width: 10, height: 10)
-            
-            Text(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.")
-                .font(.system(size: 12))
-                .foregroundColor(.gray)
-            
-            Spacer()
+extension RegistrationView {
+    struct ValidateNicknameView: View {
+        @Binding var isValid: Bool
+        
+        var body: some View {
+            HStack {
+                Image(systemName: isValid ? "checkmark.circle" : "xmark.circle")
+                    .foregroundColor(isValid ? .green : .red)
+                    .frame(width: 10, height: 10)
+                
+                Text(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray)
+                
+                Spacer()
+            }
+            .padding(8)
         }
-        .padding(8)
     }
 }
-
-struct RegistrationView_Previews: PreviewProvider {
+    
+struct SettingPrivacyView_Previews: PreviewProvider {
     static var previews: some View {
         SettingPrivacyView()
             .previewDevice(PreviewDevice(stringLiteral: "iPhone 14 Pro"))
