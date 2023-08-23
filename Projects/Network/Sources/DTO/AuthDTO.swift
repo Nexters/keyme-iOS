@@ -15,7 +15,7 @@ public struct AuthDTO: Decodable, Equatable {
     
     let code: Int
     let message: String
-    let data: UserData
+    public let data: UserData
     
     public init(code: Int, message: String, data: UserData) {
         self.code = code
@@ -31,15 +31,15 @@ public extension AuthDTO {
 }
 
 public struct UserData: Decodable {
-    let id: Int
-    let nickname: String?
-    let friendCode: String?
-    let profileImage: String?
-    let profileThumbnail: String?
-    let token: Token
+    public let id: Int
+    public let nickname: String?
+    public let friendCode: String?
+    public let profileImage: String?
+    public let profileThumbnail: String?
+    public let token: Token
 }
 
 public struct Token: Decodable {
-    let accessToken: String
+    public let accessToken: String
 }
 

@@ -42,12 +42,12 @@ extension CoreNetworkService: CoreNetworking {
         provider.requestPublisher(api)
     }
     
-    func registerAuthorizationToken(_ authorizationToken: String) {
+    func registerAuthorizationToken(_ authorizationToken: String?) {
         let loggerConfig = NetworkLoggerPlugin.Configuration(logOptions: .verbose)
         let networkLogger = NetworkLoggerPlugin(configuration: loggerConfig)
         
         let newProvider = MoyaProvider<APIType>(
-            endpointClosure: endpointClosure(with: authorizationToken),
+            endpointClosure: endpointClosure(with: authorizationToken ?? ""),
             plugins: [networkLogger])
         
         provider = newProvider

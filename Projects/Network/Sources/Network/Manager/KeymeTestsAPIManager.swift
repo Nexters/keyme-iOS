@@ -25,13 +25,13 @@ public class KeymeTestsAPIManager {
         
         self.core = CoreNetworkService(provider: provider)
     }
-
-    public func registerAuthorizationToken(_ token: String) {
-        core.registerAuthorizationToken(token)
-    }
 }
 
 extension KeymeTestsAPIManager: APIRequestable {
+    public func registerAuthorizationToken(_ token: String?) {
+        core.registerAuthorizationToken(token)
+    }
+    
     public func request<T: Decodable>(_ api: KeymeTestsAPI, object: T.Type) async throws -> T {
         let response = try await core.request(api)
         let decoded = try decoder.decode(T.self, from: response.data)

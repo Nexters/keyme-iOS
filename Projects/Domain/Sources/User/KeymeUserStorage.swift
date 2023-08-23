@@ -16,22 +16,22 @@ public final class KeymeUserStorage {
     @Dependency(\.localStorage) private var localStorage
 
     var nickname: String?
-    var isLoggedIn: Bool?
+    var acesssToken: String?
     
     public init() {
         self.nickname = self.get(.nickname)
-        self.isLoggedIn = self.get(.isLoggedIn) ?? false
+        self.acesssToken = self.get(.acesssToken)
     }
     
     public func get<T>(_ key: UserStorageKey) -> T? {
         return localStorage.get(key) as? T
     }
     
-    public func set<T>(_ value: T, forKey key: UserStorageKey) {
+    public func set<T>(_ value: T?, forKey key: UserStorageKey) {
         switch key {
-        case .isLoggedIn:
-            guard let flag = value as? Bool else { return }
-            self.isLoggedIn = flag
+        case .acesssToken:
+            guard let flag = value as? String else { return }
+            self.acesssToken = flag
         case .nickname:
             guard let name = value as? String else { return }
             self.nickname = name
@@ -43,12 +43,12 @@ public final class KeymeUserStorage {
 
 public extension KeymeUserStorage {
     enum UserStorageKey: StorageKeyType {
-        case isLoggedIn
+        case acesssToken
         case nickname
         
         var name: String {
             switch self {
-            case .isLoggedIn:
+            case .acesssToken:
                 return "UserStorageKey_isLoggedIn"
             case .nickname:
                 return "UserStorageKey_nickname"

@@ -16,6 +16,7 @@ import ComposableArchitecture
 
 public struct RootFeature: Reducer {
     @Dependency(\.userStorage) private var userStorage
+    @Dependency(\.keymeAPIManager) private var network
     
     public init() {}
     
@@ -56,25 +57,33 @@ public struct RootFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .login(.presented(.signInWithAppleResponse(let response))):
+                let token: String?
                 switch response {
-                case .success:
-                    userStorage.set(true, forKey: .isLoggedIn)
+                case .success(let body):
+                    token = body.data.token.accessToken
                 case .failure:
-                    userStorage.set(false, forKey: .isLoggedIn)
+                    token = nil
                 }
+                
+                userStorage.set(token, forKey: .acesssToken)
+                network.registerAuthorizationToken(token)
                 return .none
                 
             case .login(.presented(.signInWithKakaoResponse(let response))):
+                let token: String?
                 switch response {
-                case .success:
-                    userStorage.set(true, forKey: .isLoggedIn)
+                case .success(let body):
+                    token = body.data.token.accessToken
                 case .failure:
-                    userStorage.set(false, forKey: .isLoggedIn)
+                    token = nil
                 }
+                
+                userStorage.set(token, forKey: .acesssToken)
+                network.registerAuthorizationToken(token)
                 return .none
                 
             case .checkLoginStatus:
-                let isLoggedIn: Bool = userStorage.get(.isLoggedIn) ?? false
+                let isLoggedIn: Bool = userStorage.get(.acesssToken) == nil ? false : true
                 return .run { send in
                     await send(.logInChecked(isLoggedIn))
                 }
