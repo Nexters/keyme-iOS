@@ -8,13 +8,13 @@
 
 import Foundation
 
-struct ImageUploadDTO: Codable {
+public struct ImageUploadDTO: Codable {
     let code: Int
-    let data: ImageData
+    public let data: ImageData
     let message: String
     
-    struct ImageData: Codable {
-        let originalUrl: String
-        let thumbnailUrl: String
+    public struct ImageData: Codable {
+        public let originalUrl: String
+        public let thumbnailUrl: String
     }
 }

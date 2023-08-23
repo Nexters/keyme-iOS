@@ -8,16 +8,16 @@
 
 import Foundation
 
-struct MemberUpdateDTO: Codable {
+public struct MemberUpdateDTO: Codable {
     let code: Int
-    let data: MemberData
+    public let data: MemberData
     let message: String
     
-    struct MemberData: Codable {
-        let friendCode: String
-        let id: Int
-        let nickname: String
-        let profileImage: String
-        let profileThumbnail: String
+    public struct MemberData: Codable {
+        public let friendCode: String
+        public let id: Int
+        public let nickname: String
+        public let profileImage: String
+        public let profileThumbnail: String
     }
 }
