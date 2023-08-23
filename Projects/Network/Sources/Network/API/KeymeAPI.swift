@@ -14,31 +14,44 @@ public enum KeymeAPI {
     case test
     case myPage(MyPage)
     case registerPushToken(String)
-    case auth(param: KeymeOAuthRequest)
+    case auth(Authorization)
 }
 
-public enum MyPage {
-    case statistics(Int, RequestType)
+extension KeymeAPI {
+    public enum MyPage {
+        case statistics(Int, RequestType)
+        
+        public enum RequestType: String {
+            case similar = "SIMILAR"
+            case different = "DIFFERENT"
+        }
+    }
     
-    public enum RequestType: String {
-        case similar = "SIMILAR"
-        case different = "DIFFERENT"
+    public enum Authorization {
+        case signIn(oauthType: OauthType, accessToken: String)
+        
+        public enum OauthType: String {
+            case kakao = "KAKAO"
+            case apple = "APPLE"
+        }
     }
 }
 
 extension KeymeAPI: BaseAPI {
-    public var baseURL: URL {
-        return URL(string: "https://api.keyme.space")!
-    }
-
     public var path: String {
         switch self {
         case .test:
             return "/api"
+            
         case .myPage(.statistics(let id, _)):
             return "/members/\(id)/statistics"
+            
+        case .auth(.signIn):
+            return "/auth/login"
+            
         case .registerPushToken:
             return "/members/devices"
+            
         case .auth:
             return "/auth/login"
         }
@@ -50,6 +63,8 @@ extension KeymeAPI: BaseAPI {
             return .get
         case .myPage(.statistics):
             return .get
+        case .auth(.signIn):
+            return .post
         case .registerPushToken:
             return .post
         case .auth:
@@ -65,8 +80,13 @@ extension KeymeAPI: BaseAPI {
             return .requestParameters(parameters: ["type": type.rawValue], encoding: URLEncoding.default)
         case .registerPushToken(let token):
             return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
-        case .auth(let param):
-            return .requestJSONEncodable(param)
+        case .auth(.signIn(let oauthType, let accessToken)):
+            return .requestParameters(
+                parameters: [
+                    "oauthType": oauthType.rawValue,
+                    "token": accessToken
+                ],
+                encoding: JSONEncoding.prettyPrinted)
         }
     }
     
