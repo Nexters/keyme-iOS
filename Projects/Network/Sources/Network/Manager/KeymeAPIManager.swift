@@ -60,3 +60,21 @@ extension KeymeAPIManager: APIRequestable {
 public extension KeymeAPIManager {
     static let shared = KeymeAPIManager()
 }
+
+import ComposableArchitecture
+
+extension KeymeAPIManager: DependencyKey {
+    public static var liveValue = KeymeAPIManager()
+    public static var testValue: KeymeAPIManager {
+        let stubbingClosure = MoyaProvider<KeymeAPI>.immediatelyStub
+        let stubbingCoreService = CoreNetworkService<KeymeAPI>(provider: .init(stubClosure: stubbingClosure))
+        return KeymeAPIManager(core: stubbingCoreService)
+    }
+}
+
+extension DependencyValues {
+    public var keymeAPIManager: KeymeAPIManager {
+        get { self[KeymeAPIManager.self] }
+        set { self[KeymeAPIManager.self] = newValue }
+    }
+}

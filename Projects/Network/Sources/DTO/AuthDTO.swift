@@ -12,12 +12,25 @@ public struct AuthDTO: Decodable, Equatable {
     public static func == (lhs: AuthDTO, rhs: AuthDTO) -> Bool {
         lhs.data.id == rhs.data.id
     }
+    
     let code: Int
     let message: String
     let data: UserData
+    
+    public init(code: Int, message: String, data: UserData) {
+        self.code = code
+        self.message = message
+        self.data = data
+    }
 }
 
-struct UserData: Decodable {
+public extension AuthDTO {
+    static var mock: Self {
+        .init(code: 0, message: "", data: UserData(id: 0, nickname: "", friendCode: "", profileImage: "", profileThumbnail: "", token: Token(accessToken: "")))
+    }
+}
+
+public struct UserData: Decodable {
     let id: Int
     let nickname: String?
     let friendCode: String?
@@ -26,6 +39,7 @@ struct UserData: Decodable {
     let token: Token
 }
 
-struct Token: Decodable {
+public struct Token: Decodable {
     let accessToken: String
 }
+

@@ -22,6 +22,8 @@ public enum SignInError: Error {
 }
 
 public struct SignInFeature: Reducer {
+    @Dependency(\.keymeAPIManager) var network
+    
     public enum State: Equatable {
         case notDetermined
         case loggedIn
@@ -84,6 +86,7 @@ public struct SignInFeature: Reducer {
 extension SignInFeature {
     // 카카오 로그인 메서드
     /// Reducer Closure 내부에서 State를 직접 변경할 수 없어서 Async - Await를 활용하여 한 번 더 이벤트(signInWithKakaoResponse)를 발생시키도록 구현했습니다.
+    // TODO: 나중에 별개의 dependency로 분리할 것(테스트가 안 됨)
     private func signInWithKakao() async throws -> AuthDTO {
         let accessToken: String = try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
@@ -111,14 +114,14 @@ extension SignInFeature {
             }
         }
         
-        return try await KeymeAPIManager.shared.request(
+        return try await network.request(
             .auth(.signIn(oauthType: .kakao, accessToken: accessToken)),
             object: AuthDTO.self)
     }
 
     // 애플 로그인 메서드
     private func signInWithApple(identityToken: String) async throws -> AuthDTO {
-        try await KeymeAPIManager.shared.request(
+        try await network.request(
             .auth(.signIn(oauthType: .apple, accessToken: identityToken)),
             object: AuthDTO.self)
     }
