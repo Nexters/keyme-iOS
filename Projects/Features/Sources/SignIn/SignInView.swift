@@ -61,29 +61,11 @@ public struct SignInView: View {
                 },
                 onCompletion: { completion in
                     switch completion {
-                    case .success(let response):
-                        switch response.credential { // FIXME: 추후에 SignInFeature으로 이동
-                        case let appleIDCredential as ASAuthorizationAppleIDCredential:
-                            let user = appleIDCredential.user
-                            let fullName = appleIDCredential.fullName
-                            let name = (fullName?.familyName ?? "") + (fullName?.givenName ?? "")
-                            let email = appleIDCredential.email
-                            let identifyToken = String(data: appleIDCredential.identityToken!, encoding: .utf8)
-                            let authorizationCode = String(data: appleIDCredential.authorizationCode!, encoding: .utf8)
-                            let appleOAuth = AppleOAuthResponse(user: user,
-                                                        fullName: fullName,
-                                                        name: name,
-                                                        email: email,
-                                                        identifyToken: identifyToken,
-                                                        authorizationCode: authorizationCode)
-                            store.send(.signInWithApple(appleOAuth))
-                        default:
-                            store.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
-                        }
+                    case .success(let appleOAuth):
+                        store.send(.signInWithApple(appleOAuth))
                     case .failure:
                         store.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
                     }
-                    
                 })
             .signInWithAppleButtonStyle(.white)
             .frame(width: 312, height: 48)

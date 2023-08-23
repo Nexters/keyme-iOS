@@ -55,27 +55,40 @@ public struct RootFeature: Reducer {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .login(.presented(let result)):
-                switch result {
-                case .succeeded:
+            case .login(.presented(.signInWithAppleResponse(let response))):
+                switch response {
+                case .success:
                     userStorage.set(true, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedIn
-                case .failed:
+                case .failure:
                     userStorage.set(false, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedOut
                 }
                 return .none
                 
-            case .onboarding(.presented(let result)):
-                switch result {
-                case .succeeded:
-                    state.onboardingStatus?.status = .completed
-                case .failed:
-                    state.onboardingStatus?.status = .needsOnboarding
-                default:
-                    break
+            case .login(.presented(.signInWithKakaoResponse(let response))):
+                switch response {
+                case .success:
+                    userStorage.set(true, forKey: .isLoggedIn)
+                case .failure:
+                    userStorage.set(false, forKey: .isLoggedIn)
                 }
                 return .none
+                
+            case .checkLoginStatus:
+                let isLoggedIn: Bool = userStorage.get(.isLoggedIn) ?? false
+                return .run { send in
+                    await send(.logInChecked(isLoggedIn))
+                }
+                
+            case .checkOnboardingStatus:
+                return .run(priority: .userInitiated) { send in
+                    await send(.onboardingChecked(
+                        TaskResult {
+                            // TODO: API 갈아끼우기
+//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
+                            return false
+                        }
+                    ))
+                }
                 
             case .logInChecked(let result):
                 switch result {
@@ -94,24 +107,6 @@ public struct RootFeature: Reducer {
                     state.onboardingStatus?.status = .needsOnboarding
                 }
                 return .none
-                
-            case .checkLoginStatus:
-                let isLoggedIn: Bool = userStorage.get(.isLoggedIn) ?? false
-                return .run { send in
-                    await send(.logInChecked(isLoggedIn))
-                }
-                
-            case .checkOnboardingStatus:
-                return .run(priority: .userInitiated) { send in
-                    await send(.onboardingChecked(
-                        TaskResult {
-                            // TODO: API 갈아끼우기
-//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
-
-                            return false
-                        }
-                    ))
-                }
                 
             default:
                 return .none
