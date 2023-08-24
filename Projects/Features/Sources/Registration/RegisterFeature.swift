@@ -14,7 +14,7 @@ public struct RegistrationFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     @Dependency(\.continuousClock) var clock
     
-    enum CancelID { case checkNickname }
+    enum CancelID { case debouncedNicknameUpdate }
     
     public init() {}
     
@@ -57,7 +57,7 @@ public struct RegistrationFeature: Reducer {
                 state.nicknameTextFieldString = nicknameString
                 return .run { send in
                     try await withTaskCancellation(
-                        id: CancelID.checkNickname,
+                        id: CancelID.debouncedNicknameUpdate,
                         cancelInFlight: true
                     ) {
                         try await self.clock.sleep(for: .seconds(0.7))

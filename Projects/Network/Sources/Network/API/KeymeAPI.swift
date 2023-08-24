@@ -63,7 +63,7 @@ extension KeymeAPI: BaseAPI {
             return "/auth/login"
             
         case .registration(.checkDuplicatedNickname):
-            return "member/nickname" // TODO: asdf
+            return "members/verify-nickname"
             
         case .registration(.uploadImage):
             return "/images"

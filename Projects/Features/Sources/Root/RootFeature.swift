@@ -22,15 +22,27 @@ public struct RootFeature: Reducer {
     
     public struct State: Equatable {
         @PresentationState public var logInStatus: SignInFeature.State?
+        @PresentationState public var registrationState: RegistrationFeature.State?
         @PresentationState public var onboardingStatus: OnboardingFeature.State?
         
-        public init(isLoggedIn: Bool? = nil, doneOnboarding: Bool? = nil) {
+        public init(
+            isLoggedIn: Bool? = nil,
+            doneRegistration: Bool? = nil,
+            doneOnboarding: Bool? = nil
+        ) {
+            registrationState = .init()
             onboardingStatus = .init()
             
             if let isLoggedIn {
                 logInStatus = isLoggedIn ? .loggedIn : .loggedOut
             } else {
                 logInStatus = .notDetermined
+            }
+            
+            if let doneRegistration {
+                registrationState?.status = doneRegistration ? .complete : .needsRegister
+            } else {
+                registrationState?.status = .notDetermined
             }
             
             if let doneOnboarding {
@@ -43,50 +55,82 @@ public struct RootFeature: Reducer {
     
     public enum Action {
         case login(PresentationAction<SignInFeature.Action>)
+        case registration(PresentationAction<RegistrationFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
         case mainPage(MainPageFeature.Action)
         
         case onboardingChecked(TaskResult<Bool>)
-        case logInChecked(Bool)
-        
-        case checkOnboardingStatus
+                
         case checkLoginStatus
+        case checkRegistrationStatus
+        case checkOnboardingStatus
     }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .login(.presented(.signInWithAppleResponse(let response))):
-                let token: String?
                 switch response {
                 case .success(let body):
-                    token = body.data.token.accessToken
+                    let token = body.data.token.accessToken
+                    userStorage.set(token, forKey: .acesssToken)
+                    network.registerAuthorizationToken(token)
+                    
+                    if body.data.nickname == nil {
+                        state.registrationState?.status = .needsRegister
+                    } else {
+                        state.registrationState?.status = .complete
+                    }
+                    return .none
+
                 case .failure:
-                    token = nil
+                    return .none
                 }
-                
-                userStorage.set(token, forKey: .acesssToken)
-                network.registerAuthorizationToken(token)
-                return .none
                 
             case .login(.presented(.signInWithKakaoResponse(let response))):
-                let token: String?
                 switch response {
                 case .success(let body):
-                    token = body.data.token.accessToken
+                    let token = body.data.token.accessToken
+                    userStorage.set(token, forKey: .acesssToken)
+                    network.registerAuthorizationToken(token)
+                    
+                    if body.data.nickname == nil {
+                        state.registrationState?.status = .needsRegister
+                    } else {
+                        state.registrationState?.status = .complete
+                    }
+                    return .none
+
                 case .failure:
-                    token = nil
+                    return .none
                 }
-                
-                userStorage.set(token, forKey: .acesssToken)
-                network.registerAuthorizationToken(token)
-                return .none
                 
             case .checkLoginStatus:
-                let isLoggedIn: Bool = userStorage.get(.acesssToken) == nil ? false : true
-                return .run { send in
-                    await send(.logInChecked(isLoggedIn))
+                let accessToken: String? = userStorage.get(.acesssToken)
+                
+                if accessToken == nil {
+                    state.logInStatus = .loggedOut
+                } else {
+                    state.logInStatus = .loggedIn
+                    network.registerAuthorizationToken(accessToken)
                 }
+                
+                return .none
+                
+            case .registration(.presented(.finishRegisterResponse)):
+                // Do nothing currently
+                return .none
+            
+            case .checkRegistrationStatus:
+                let nickname: String? = userStorage.get(.nickname)
+                
+                if nickname == nil {
+                    state.registrationState?.status = .needsRegister
+                } else {
+                    state.registrationState?.status = .complete
+                }
+                
+                return .none
                 
             case .checkOnboardingStatus:
                 return .run(priority: .userInitiated) { send in
@@ -98,15 +142,6 @@ public struct RootFeature: Reducer {
                         }
                     ))
                 }
-                
-            case .logInChecked(let result):
-                switch result {
-                case true:
-                    state.logInStatus = .loggedIn
-                case false:
-                    state.logInStatus = .loggedOut
-                }
-                return .none
                 
             case .onboardingChecked(.success(let result)):
                 switch result {
@@ -123,6 +158,9 @@ public struct RootFeature: Reducer {
         }
         .ifLet(\.$logInStatus, action: /Action.login) {
             SignInFeature()
+        }
+        .ifLet(\.$registrationState, action: /Action.registration) {
+            RegistrationFeature()
         }
         .ifLet(\.$onboardingStatus, action: /Action.onboarding) {
             OnboardingFeature()
