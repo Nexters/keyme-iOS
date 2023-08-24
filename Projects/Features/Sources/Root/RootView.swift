@@ -23,7 +23,9 @@ public struct RootView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            SettingPrivacyView()
+            RegistrationView(store: Store(initialState: RegistrationFeature.State(), reducer: {
+                RegistrationFeature()
+            }))
 //            if viewStore.logInStatus == .notDetermined {
 //                // 여기 걸리면 에러임. 조심하셈.
 //                EmptyView()

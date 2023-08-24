@@ -12,6 +12,11 @@ import Network
 
 public struct RegistrationFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
+    @Dependency(\.continuousClock) var clock
+    
+    enum CancelID { case checkNickname }
+    
+    public init() {}
     
     public struct State: Equatable {
         var status: Status = .notDetermined
@@ -19,6 +24,8 @@ public struct RegistrationFeature: Reducer {
 
         var thumbnailURL: URL?
         var originalImageURL: URL?
+        
+        var nicknameTextFieldString: String = ""
         
         enum Status: Equatable {
             case notDetermined
@@ -28,6 +35,8 @@ public struct RegistrationFeature: Reducer {
     }
     
     public enum Action: Equatable {
+        case debouncedNicknameUpdate(text: String)
+        
         case checkDuplicatedNickname(String)
         case checkDuplicatedNicknameResponse(Bool)
         
@@ -41,6 +50,19 @@ public struct RegistrationFeature: Reducer {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .debouncedNicknameUpdate(let nicknameString):
+                state.nicknameTextFieldString = nicknameString
+                return .run { send in
+                    try await withTaskCancellation(
+                        id: CancelID.checkNickname,
+                        cancelInFlight: true
+                    ) {
+                        try await self.clock.sleep(for: .seconds(1))
+                        
+                        await send(.checkDuplicatedNickname(nicknameString))
+                    }
+                }
+                
             // MARK: checkDuplicatedNickname
             case .checkDuplicatedNickname(let nickname):
                 return .run(priority: .userInitiated) { send in
@@ -50,6 +72,7 @@ public struct RegistrationFeature: Reducer {
                     )
                     await send(.checkDuplicatedNicknameResponse(result))
                 }
+                
             case .checkDuplicatedNicknameResponse(let isNicknameDuplicated):
                 state.isNicknameDuplicated = isNicknameDuplicated
                 
