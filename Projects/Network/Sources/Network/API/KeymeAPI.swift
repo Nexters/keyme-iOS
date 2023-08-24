@@ -40,7 +40,7 @@ extension KeymeAPI {
     public enum Registration {
         case checkDuplicatedNickname(String)
         case uploadImage(Data)
-        case updateMemberDetails(nickname: String, profileImage: String, profileThumbnail: String)
+        case updateMemberDetails(nickname: String, profileImage: String?, profileThumbnail: String?)
     }
 }
 

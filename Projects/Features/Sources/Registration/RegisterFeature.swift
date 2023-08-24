@@ -21,6 +21,9 @@ public struct RegistrationFeature: Reducer {
     public struct State: Equatable {
         var status: Status = .notDetermined
         var isNicknameDuplicated: Bool?
+        var canRegister: Bool {
+            isNicknameDuplicated == false
+        }
 
         var thumbnailURL: URL?
         var originalImageURL: URL?
@@ -43,7 +46,7 @@ public struct RegistrationFeature: Reducer {
         case registerProfileImage(Data)
         case registerProfileImageResponse(thumbnailURL: URL, originalImageURL: URL)
         
-        case finishRegister(nickname: String, thumbnailURL: URL, originalImageURL: URL)
+        case finishRegister(nickname: String, thumbnailURL: URL?, originalImageURL: URL?)
         case finishRegisterResponse(id: Int, friendCode: String)
     }
     
@@ -104,8 +107,8 @@ public struct RegistrationFeature: Reducer {
                     let result = try await network.request(
                         .registration(.updateMemberDetails(
                             nickname: nickname,
-                            profileImage: thumbnailURL.absoluteString,
-                            profileThumbnail: originalImageURL.absoluteString)),
+                            profileImage: thumbnailURL?.absoluteString,
+                            profileThumbnail: originalImageURL?.absoluteString)),
                         object: MemberUpdateDTO.self)
                     
                     await send(

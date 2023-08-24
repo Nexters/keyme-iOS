@@ -24,7 +24,6 @@ public struct RegistrationView: View {
     @State private var nickname = "" // 사용자가 새롭게 입력한 닉네임
     @State private var beforeNickname = "" // 기존에 입력했던 닉네임
     @State private var isShake = false // 최대 글자 수를 넘긴 경우 좌, 우로 떨리는 애니메이션
-    @State private var isToggle = false // 다음 페이지로 넘어가기
     
     // 프로필 이미지 관련 프로퍼티들
     @State private var selectedImage: PhotosPickerItem?
@@ -39,12 +38,13 @@ public struct RegistrationView: View {
                 }
                 .onChange(of: selectedImage) { newImage in
                     Task(priority: .utility) {
-                        guard let data = try await newImage?.loadTransferable(type: Data.self) else {
+                        guard let imageData = try await newImage?.loadTransferable(type: Data.self) else {
                             // TODO: Throw error and show alert
                             return
                         }
                         
-                        DispatchQueue.main.async { selectedImageData = data }
+                        viewStore.send(.registerProfileImage(imageData))
+                        DispatchQueue.main.async { selectedImageData = imageData }
                     }
                 }
                 
@@ -95,30 +95,34 @@ public struct RegistrationView: View {
                 Spacer()
                 
                 // 다음 페이지로 넘어가기 위한 Button
-                Button(action: {}) {
+                Button(action: {
+                    viewStore.send(
+                        .finishRegister(
+                            nickname: viewStore.state.nicknameTextFieldString,
+                            thumbnailURL: viewStore.thumbnailURL,
+                            originalImageURL: viewStore.originalImageURL))
+                }) {
                     HStack {
                         Spacer()
                         
                         Text("다음")
                             .font(.system(size: 18))
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
                             .frame(height: 60)
                         
                         Spacer()
                     }
                 }
-                .background(isToggle ? .white : .gray)
+                .foregroundColor(.white)
+                .background(.black)
                 .cornerRadius(16)
-                .disabled(isToggle ? false : true)
+                .disabled(viewStore.canRegister ? false : true)
             }
             .padding(.horizontal, 16)
             
             // 사용자가 입력한 닉네임을 (클라이언트 단에서) 검증하는 부분
             .onChange(of: nickname) { newValue in
                 guard 1 <= newValue.count, newValue.count <= 6 else {
-                    isToggle = false
-                    
                     if newValue.count > 6 {  // 최대 글자 수를 넘겼으므로 Shake Start
                         isShake = true
                         nickname = beforeNickname // 최대 글자 수를 넘기기 전에 입력한 닉네임으로 고정
@@ -127,7 +131,6 @@ public struct RegistrationView: View {
                     return
                 }
                 
-                isToggle = true
                 isShake = false
                 beforeNickname = newValue
                 
