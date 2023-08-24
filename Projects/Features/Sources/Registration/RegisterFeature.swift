@@ -57,7 +57,7 @@ public struct RegistrationFeature: Reducer {
                         id: CancelID.checkNickname,
                         cancelInFlight: true
                     ) {
-                        try await self.clock.sleep(for: .seconds(1))
+                        try await self.clock.sleep(for: .seconds(0.7))
                         
                         await send(.checkDuplicatedNickname(nicknameString))
                     }

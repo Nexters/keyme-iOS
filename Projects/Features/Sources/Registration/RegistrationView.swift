@@ -23,7 +23,6 @@ public struct RegistrationView: View {
     // 닉네임 관련 프로퍼티
     @State private var nickname = "" // 사용자가 새롭게 입력한 닉네임
     @State private var beforeNickname = "" // 기존에 입력했던 닉네임
-    @State private var isValidNickname = false // 사용 가능한 닉네임인지?
     @State private var isShake = false // 최대 글자 수를 넘긴 경우 좌, 우로 떨리는 애니메이션
     @State private var isToggle = false // 다음 페이지로 넘어가기
     
@@ -36,13 +35,16 @@ public struct RegistrationView: View {
             VStack(spacing: 12) {
                 // 프로필 이미지를 등록하는 Circle
                 PhotosPicker(selection: $selectedImage, matching: .images, photoLibrary: .shared()) {
-                    profileImage
+                    profileImage(imageData: selectedImageData)
                 }
                 .onChange(of: selectedImage) { newImage in
-                    Task {
-                        if let data = try await newImage?.loadTransferable(type: Data.self) {
-                            selectedImageData = data
+                    Task(priority: .utility) {
+                        guard let data = try await newImage?.loadTransferable(type: Data.self) else {
+                            // TODO: Throw error and show alert
+                            return
                         }
+                        
+                        DispatchQueue.main.async { selectedImageData = data }
                     }
                 }
                 
@@ -73,8 +75,8 @@ public struct RegistrationView: View {
                     )
                     .modifier(Shake(isShake: $isShake))
                 
-                if !nickname.isEmpty {
-                    ValidateNicknameView(isValid: $isValidNickname)
+                if !nickname.isEmpty, let isValid = viewStore.isNicknameDuplicated {
+                    ValidateNicknameView(isValid: isValid)
                 }
                 
                 // 닉네임 관련 안내메세지
@@ -137,11 +139,11 @@ public struct RegistrationView: View {
 
 // 닉네임에 대한 검증 여부를 보여주는 뷰
 extension RegistrationView {
-    var profileImage: some View {
+    func profileImage(imageData: Data?) -> some View {
         ZStack(alignment: .bottomTrailing) {
             Group {
                 if
-                    let selectedImageData = selectedImageData,
+                    let selectedImageData = imageData,
                     let profileImage = UIImage(data: selectedImageData)
                 {
                     Image(uiImage: profileImage)
@@ -170,7 +172,7 @@ extension RegistrationView {
     }
     
     struct ValidateNicknameView: View {
-        @Binding var isValid: Bool
+        let isValid: Bool
         
         var body: some View {
             HStack {
@@ -178,8 +180,7 @@ extension RegistrationView {
                     .foregroundColor(isValid ? .green : .red)
                     .frame(width: 10, height: 10)
                 
-                Text(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.")
-                    .font(.system(size: 12))
+                Text.keyme(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.", font: .caption1)
                     .foregroundColor(.gray)
                 
                 Spacer()
