@@ -14,7 +14,7 @@ public struct MemberUpdateDTO: Codable {
     let message: String
     
     public struct MemberData: Codable {
-        public let friendCode: String
+        public let friendCode: String?
         public let id: Int
         public let nickname: String
         public let profileImage: String

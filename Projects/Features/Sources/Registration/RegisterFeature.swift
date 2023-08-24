@@ -20,9 +20,9 @@ public struct RegistrationFeature: Reducer {
     
     public struct State: Equatable {
         var status: Status = .notDetermined
-        var isNicknameDuplicated: Bool?
+        var isNicknameAvailable: Bool?
         var canRegister: Bool {
-            isNicknameDuplicated == false
+            return isNicknameAvailable == true
         }
 
         var thumbnailURL: URL?
@@ -71,13 +71,14 @@ public struct RegistrationFeature: Reducer {
                 return .run(priority: .userInitiated) { send in
                     let result = try await network.request(
                         .registration(.checkDuplicatedNickname(nickname)),
-                        object: Bool.self
+                        object: VerifyNicknameDTO.self
                     )
-                    await send(.checkDuplicatedNicknameResponse(result))
+                    
+                    await send(.checkDuplicatedNicknameResponse(result.data.valid))
                 }
                 
             case .checkDuplicatedNicknameResponse(let isNicknameDuplicated):
-                state.isNicknameDuplicated = isNicknameDuplicated
+                state.isNicknameAvailable = isNicknameDuplicated
                 
             // MARK: registerProfileImage
             case .registerProfileImage(let imageData):
@@ -114,7 +115,7 @@ public struct RegistrationFeature: Reducer {
                     await send(
                         .finishRegisterResponse(
                             id: result.data.id,
-                            friendCode: result.data.friendCode))
+                            friendCode: result.data.friendCode ?? "")) // TODO: 나중에 non-null 값 필요
                 }
                 
             case .finishRegisterResponse:

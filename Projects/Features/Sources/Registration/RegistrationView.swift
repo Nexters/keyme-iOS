@@ -6,6 +6,7 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Core
 import SwiftUI
 import PhotosUI
 
@@ -75,7 +76,7 @@ public struct RegistrationView: View {
                     )
                     .modifier(Shake(isShake: $isShake))
                 
-                if !nickname.isEmpty, let isValid = viewStore.isNicknameDuplicated {
+                if !nickname.isEmpty, let isValid = viewStore.isNicknameAvailable {
                     ValidateNicknameView(isValid: isValid)
                 }
                 
@@ -85,7 +86,7 @@ public struct RegistrationView: View {
                     .foregroundColor(.gray)
                     .cornerRadius(8)
                     .overlay(
-                        Text("친구들이 원할하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요.")
+                        Text("친구들이 원할하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요. \(viewStore.canRegister.description)")
                             .font(.system(size: 14))
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -114,13 +115,12 @@ public struct RegistrationView: View {
                     }
                 }
                 .foregroundColor(.white)
-                .background(.black)
+                .background(viewStore.canRegister ? .black : .gray)
                 .cornerRadius(16)
                 .disabled(viewStore.canRegister ? false : true)
             }
+            .modifier(DismissKeyboardOnTap())
             .padding(.horizontal, 16)
-            
-            // 사용자가 입력한 닉네임을 (클라이언트 단에서) 검증하는 부분
             .onChange(of: nickname) { newValue in
                 guard 1 <= newValue.count, newValue.count <= 6 else {
                     if newValue.count > 6 {  // 최대 글자 수를 넘겼으므로 Shake Start
