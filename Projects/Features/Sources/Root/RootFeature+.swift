@@ -19,7 +19,7 @@ import Network
 import SwiftUI
 
 extension RootFeature {
-    final class PushNotificationDelegate: NSObject {
+    final class UserNotificationCenterDelegateManager: NSObject {
         private var fcmToken: String?
         private let tokenSemaphore = DispatchSemaphore(value: 0)
 
@@ -65,7 +65,7 @@ extension RootFeature {
     }
 }
 
-extension RootFeature.PushNotificationDelegate: MessagingDelegate {
+extension RootFeature.UserNotificationCenterDelegateManager: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else {
             return
@@ -76,7 +76,7 @@ extension RootFeature.PushNotificationDelegate: MessagingDelegate {
     }
 }
 
-extension RootFeature.PushNotificationDelegate: UNUserNotificationCenterDelegate {
+extension RootFeature.UserNotificationCenterDelegateManager: UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()

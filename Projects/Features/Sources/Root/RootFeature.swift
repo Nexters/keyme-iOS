@@ -174,8 +174,8 @@ public struct RootFeature: Reducer {
                     }
                     
                     Task.detached(priority: .low) {
-                        let pushDelegate = PushNotificationDelegate()
-                        guard let token = await pushDelegate.waitForToken() else {
+                        let notificationDelegate = UserNotificationCenterDelegateManager()
+                        guard let token = await notificationDelegate.waitForToken() else {
                             print("ERROR TOEKN PUSH")
                             return
                         }
