@@ -16,6 +16,7 @@ import ComposableArchitecture
 
 public struct RootFeature: Reducer {
     @Dependency(\.userStorage) private var userStorage
+    @Dependency(\.keymeAPIManager) private var network
     
     public init() {}
     
@@ -55,27 +56,48 @@ public struct RootFeature: Reducer {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .login(.presented(let result)):
-                switch result {
-                case .succeeded:
-                    userStorage.set(true, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedIn
-                case .failed:
-                    userStorage.set(false, forKey: .isLoggedIn)
-                    state.logInStatus = .loggedOut
+            case .login(.presented(.signInWithAppleResponse(let response))):
+                let token: String?
+                switch response {
+                case .success(let body):
+                    token = body.data.token.accessToken
+                case .failure:
+                    token = nil
                 }
+                
+                userStorage.set(token, forKey: .acesssToken)
+                network.registerAuthorizationToken(token)
                 return .none
                 
-            case .onboarding(.presented(let result)):
-                switch result {
-                case .succeeded:
-                    state.onboardingStatus?.status = .completed
-                case .failed:
-                    state.onboardingStatus?.status = .needsOnboarding
-                default:
-                    break
+            case .login(.presented(.signInWithKakaoResponse(let response))):
+                let token: String?
+                switch response {
+                case .success(let body):
+                    token = body.data.token.accessToken
+                case .failure:
+                    token = nil
                 }
+                
+                userStorage.set(token, forKey: .acesssToken)
+                network.registerAuthorizationToken(token)
                 return .none
+                
+            case .checkLoginStatus:
+                let isLoggedIn: Bool = userStorage.get(.acesssToken) == nil ? false : true
+                return .run { send in
+                    await send(.logInChecked(isLoggedIn))
+                }
+                
+            case .checkOnboardingStatus:
+                return .run(priority: .userInitiated) { send in
+                    await send(.onboardingChecked(
+                        TaskResult {
+                            // TODO: API 갈아끼우기
+//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
+                            return false
+                        }
+                    ))
+                }
                 
             case .logInChecked(let result):
                 switch result {
@@ -94,24 +116,6 @@ public struct RootFeature: Reducer {
                     state.onboardingStatus?.status = .needsOnboarding
                 }
                 return .none
-                
-            case .checkLoginStatus:
-                let isLoggedIn: Bool = userStorage.get(.isLoggedIn) ?? false
-                return .run { send in
-                    await send(.logInChecked(isLoggedIn))
-                }
-                
-            case .checkOnboardingStatus:
-                return .run(priority: .userInitiated) { send in
-                    await send(.onboardingChecked(
-                        TaskResult {
-                            // TODO: API 갈아끼우기
-//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
-
-                            return false
-                        }
-                    ))
-                }
                 
             default:
                 return .none

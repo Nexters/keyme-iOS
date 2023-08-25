@@ -28,13 +28,13 @@ public class KeymeAPIManager {
     init(core: CoreNetworkService<KeymeAPI>) {
         self.core = core
     }
-
-    public func registerAuthorizationToken(_ token: String) {
-        core.registerAuthorizationToken(token)
-    }
 }
 
 extension KeymeAPIManager: CoreNetworking {
+    public func registerAuthorizationToken(_ token: String?) {
+        core.registerAuthorizationToken(token)
+    }
+    
     public func request(_ api: KeymeAPI) async throws -> Response {
         try await core.request(api)
     }
@@ -44,7 +44,7 @@ extension KeymeAPIManager: CoreNetworking {
     }
 }
 
-extension KeymeAPIManager: APIRequestable {    
+extension KeymeAPIManager: APIRequestable {
     public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) async throws -> T {
         let response = try await core.request(api)
         let decoded = try decoder.decode(T.self, from: response.data)
@@ -59,4 +59,23 @@ extension KeymeAPIManager: APIRequestable {
 
 public extension KeymeAPIManager {
     static let shared = KeymeAPIManager()
+}
+
+// MARK: Dependency 설정
+import ComposableArchitecture
+
+extension KeymeAPIManager: DependencyKey {
+    public static var liveValue = KeymeAPIManager()
+    public static var testValue: KeymeAPIManager {
+        let stubbingClosure = MoyaProvider<KeymeAPI>.immediatelyStub
+        let stubbingCoreService = CoreNetworkService<KeymeAPI>(provider: .init(stubClosure: stubbingClosure))
+        return KeymeAPIManager(core: stubbingCoreService)
+    }
+}
+
+extension DependencyValues {
+    public var keymeAPIManager: KeymeAPIManager {
+        get { self[KeymeAPIManager.self] }
+        set { self[KeymeAPIManager.self] = newValue }
+    }
 }

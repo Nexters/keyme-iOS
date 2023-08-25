@@ -21,7 +21,7 @@ struct CoreLocalStorage {
         storage.object(forKey: key.name)
     }
     
-    public func set(_ value: Any, forKey key: some StorageKeyType) {
+    public func set(_ value: Any?, forKey key: some StorageKeyType) {
         storage.set(value, forKey: key.name)
     }
 }

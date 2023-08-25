@@ -29,7 +29,6 @@ extension CoreNetworkService: CoreNetworking {
                 case let .success(response) where 300... ~= response.statusCode:
                     continuation.resume(throwing: MoyaError.statusCode(response))
                 case let .failure(error):
-                    print(error)
                     continuation.resume(throwing: error)
                 default:
                     let unexpectedError = NSError(domain: "Unexpected Response", code: 0, userInfo: nil)
@@ -43,12 +42,12 @@ extension CoreNetworkService: CoreNetworking {
         provider.requestPublisher(api)
     }
     
-    func registerAuthorizationToken(_ authorizationToken: String) {
+    func registerAuthorizationToken(_ authorizationToken: String?) {
         let loggerConfig = NetworkLoggerPlugin.Configuration(logOptions: .verbose)
         let networkLogger = NetworkLoggerPlugin(configuration: loggerConfig)
         
         let newProvider = MoyaProvider<APIType>(
-            endpointClosure: endpointClosure(with: authorizationToken),
+            endpointClosure: endpointClosure(with: authorizationToken ?? ""),
             plugins: [networkLogger])
         
         provider = newProvider

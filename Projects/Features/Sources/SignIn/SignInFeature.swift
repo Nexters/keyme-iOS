@@ -11,15 +11,18 @@
 import AuthenticationServices
 import ComposableArchitecture
 import Foundation
+
 import KakaoSDKUser
 import Network
+
+import SwiftUI
 
 public enum SignInError: Error {
     case noSignIn
 }
 
 public struct SignInFeature: Reducer {
-    @Dependency(\.localStorage) private var localStorage
+    @Dependency(\.keymeAPIManager) var network
     
     public enum State: Equatable {
         case notDetermined
@@ -29,58 +32,53 @@ public struct SignInFeature: Reducer {
     
     public enum Action: Equatable {
         case signInWithKakao
-        case signInWithKakaoResponse(TaskResult<Bool>)
+        case signInWithKakaoResponse(TaskResult<AuthDTO>)
         
-        case signInWithApple(AppleOAuthResponse)
-        case signInWithAppleResponse(TaskResult<Bool>)
-        //        case succeeded
-        //        case failed
+        case signInWithApple(ASAuthorization)
+        case signInWithAppleResponse(TaskResult<AuthDTO>)
     }
     
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            // MARK: - Kakao
             case .signInWithKakao:
                 return .run { send in
-                    await send(.signInWithKakaoResponse(
-                        TaskResult {
-                            try await signInWithKakao()
-                        }
-                    ))
+                    await send(.signInWithKakaoResponse(TaskResult { try await signInWithKakao() }))
                 }
                 
-            case .signInWithKakaoResponse(.success(true)): // 카카오 로그인 성공
+            case .signInWithKakaoResponse(.success): // 카카오 로그인 성공
                 state = .loggedIn
-                localStorage.set(true, forKey: .isLoggedIn)
                 return .none
                 
             case .signInWithKakaoResponse(.failure): // 카카오 로그인 실패
                 state = .loggedOut
                 return .none
                 
-            case .signInWithApple(let appleOAuth):
+            // MARK: - Apple
+            case .signInWithApple(let authorization):
+                guard
+                    let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                    let identityTokenData = appleIDCredential.identityToken,
+                    let identityToken = String(data: identityTokenData, encoding: .utf8)
+                else {
+                    return .none
+                }
+                
                 return .run { send in
                     await send(.signInWithAppleResponse(
-                        TaskResult {
-                            await signInWithApple(appleOAuth)
-                        }
+                        TaskResult { try await signInWithApple(identityToken: identityToken) }
                     ))
                 }
                 
-            case .signInWithAppleResponse(.success(true)): // 애플 로그인 성공
+            case .signInWithAppleResponse(.success): // 애플 로그인 성공
                 state = .loggedIn
-                localStorage.set(true, forKey: .isLoggedIn)
                 return .none
                 
             case .signInWithAppleResponse(.failure): // 애플 로그인 실패
                 state = .loggedOut
                 return .none
-                
-            default:
-                state = .loggedOut
             }
-            
-            return .none
         }
     }
 }
@@ -88,62 +86,43 @@ public struct SignInFeature: Reducer {
 extension SignInFeature {
     // 카카오 로그인 메서드
     /// Reducer Closure 내부에서 State를 직접 변경할 수 없어서 Async - Await를 활용하여 한 번 더 이벤트(signInWithKakaoResponse)를 발생시키도록 구현했습니다.
-    private func signInWithKakao() async throws -> Bool {
-        return try await withCheckedThrowingContinuation { continuation in
-            if (UserApi.isKakaoTalkLoginAvailable()) {
-                UserApi.shared.loginWithKakaoTalk { (token, error) in
-                    if let error = error {
-                        continuation.resume(throwing: SignInError.noSignIn)
-                    } else {
-                        continuation.resume(returning: true)
+    // TODO: 나중에 별개의 dependency로 분리할 것(테스트가 안 됨)
+    private func signInWithKakao() async throws -> AuthDTO {
+        let accessToken: String = try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                if (UserApi.isKakaoTalkLoginAvailable()) {
+                    UserApi.shared.loginWithKakaoTalk { (oauthToken, error) in
+                        if let error = error {
+                            continuation.resume(throwing: error)
+                        } else if let oauthToken {
+                            continuation.resume(returning: oauthToken.accessToken)
+                        } else {
+                            continuation.resume(throwing: SignInError.noSignIn)
+                        }
                     }
-                }
-            } else {
-                UserApi.shared.loginWithKakaoAccount() { (data, error) in
-                    if let error = error {
-                        continuation.resume(throwing: SignInError.noSignIn)
-                    } else {
-                        do {
-                            // 1. 카카오 API로 사용자 정보 가져오기
-                            let jsonData = try JSONEncoder().encode(data)
-                            let parsedData = try JSONDecoder().decode(KakaoOAuthResponse.self, from: jsonData)
-                            
-                            // 2. Keyme API로 사용자 토큰 확인하기
-                            Task {
-                                do {
-                                    let auth = KeymeOAuthRequest(oauthType: "KAKAO", token: parsedData.accessToken)
-                                    let result = try await KeymeAPIManager.shared.request(.auth(param: auth), object: KeymeOAuthResponse.self)
-                                    
-                                    if result.code == 200 {
-                                        return continuation.resume(returning: true)
-                                    } else {
-                                        return continuation.resume(throwing: SignInError.noSignIn)
-                                    }
-                                } catch { // 에러가 발생하면 실패 처리
-                                    return continuation.resume(throwing: SignInError.noSignIn)
-                                }
-                            }
-                        } catch { // 에러가 발생하면 실패 처리
+                } else {
+                    UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
+                        if let error = error {
+                            continuation.resume(throwing: error)
+                        } else if let oauthToken {
+                            continuation.resume(returning: oauthToken.accessToken)
+                        } else {
                             continuation.resume(throwing: SignInError.noSignIn)
                         }
                     }
                 }
             }
         }
+        
+        return try await network.request(
+            .auth(.signIn(oauthType: .kakao, accessToken: accessToken)),
+            object: AuthDTO.self)
     }
-    
-    private func signInWithApple(_ appleOAuth: AppleOAuthResponse) async -> Bool {
-        do {
-            let auth = KeymeOAuthRequest(oauthType: "APPLE", token: appleOAuth.identifyToken!) // FIXME: 강제 언래핑
-            let result = try await KeymeAPIManager.shared.request(.auth(param: auth), object: KeymeOAuthResponse.self)
-            
-            if result.code == 200 {
-                return true
-            } else {
-                return false
-            }
-        } catch {
-            return false
-        }
+
+    // 애플 로그인 메서드
+    private func signInWithApple(identityToken: String) async throws -> AuthDTO {
+        try await network.request(
+            .auth(.signIn(oauthType: .apple, accessToken: identityToken)),
+            object: AuthDTO.self)
     }
 }
