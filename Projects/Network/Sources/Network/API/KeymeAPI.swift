@@ -16,6 +16,7 @@ public enum KeymeAPI {
     case registerPushToken(String)
     case auth(Authorization)
     case registration(Registration)
+    case member(Member)
 }
 
 extension KeymeAPI {
@@ -41,6 +42,10 @@ extension KeymeAPI {
         case checkDuplicatedNickname(String)
         case uploadImage(Data)
         case updateMemberDetails(nickname: String, profileImage: String?, profileThumbnail: String?)
+    }
+    
+    public enum Member {
+        case fetch
     }
 }
 
@@ -70,19 +75,22 @@ extension KeymeAPI: BaseAPI {
             
         case .registration(.updateMemberDetails):
             return "/members"
+            
+        case .member(.fetch):
+            return "members"
         }
     }
     
     public var method: Moya.Method {
         switch self {
-        case .test, .myPage(.statistics):
+        case .test, .myPage(.statistics), .member(.fetch):
             return .get
             
         case .auth(.signIn), .registerPushToken, .registration(.checkDuplicatedNickname), .registration(.uploadImage):
             return .post
             
         case .registration(.updateMemberDetails):
-                   return .patch
+            return .patch
         }
     }
     
@@ -116,13 +124,16 @@ extension KeymeAPI: BaseAPI {
             return .uploadMultipart([multipartFormData])
         
         case .registration(.updateMemberDetails(let nickname, let profileImage, let profileThumbnail)):
-                  return .requestParameters(
-                    parameters: [
-                        "nickname": nickname,
-                        "profileImage": profileImage,
-                        "profileThumbnail": profileThumbnail
-                    ],
-                    encoding: JSONEncoding.default)
+            return .requestParameters(
+                parameters: [
+                    "nickname": nickname,
+                    "profileImage": profileImage as Any,
+                    "profileThumbnail": profileThumbnail as Any
+                ],
+                encoding: JSONEncoding.default)
+            
+        case .member(.fetch):
+            return .requestPlain
         }
     }
     
