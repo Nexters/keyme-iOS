@@ -57,10 +57,6 @@ extension KeymeAPIManager: APIRequestable {
     }
 }
 
-public extension KeymeAPIManager {
-    static let shared = KeymeAPIManager()
-}
-
 // MARK: Dependency 설정
 import ComposableArchitecture
 

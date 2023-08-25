@@ -21,6 +21,8 @@ struct Coordinate {
 }
 
 struct MyPageFeature: Reducer {
+    @Dependency(\.keymeAPIManager) private var network
+    
     struct State: Equatable {
         var selectedSegment: MyPageSegment = .similar
         var shownFirstTime = true
@@ -57,7 +59,7 @@ struct MyPageFeature: Reducer {
                 switch rate {
                 case .top5:
                     return .run { send in
-                        let response = try await KeymeAPIManager.shared.request(
+                        let response = try await network.request(
                             .myPage(.statistics(2, .similar)),
                             object: CircleData.NetworkResult.self)
                         
@@ -66,7 +68,7 @@ struct MyPageFeature: Reducer {
                     
                 case .low5:
                     return .run { send in
-                        let response = try await KeymeAPIManager.shared.request(
+                        let response = try await network.request(
                             .myPage(.statistics(2, .different)),
                             object: CircleData.NetworkResult.self)
                         
