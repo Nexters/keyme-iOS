@@ -21,7 +21,7 @@ extension ShortUrlAPI: TargetType {
     public var path: String {
         switch self {
         case .shortenURL:
-            return "/v4/shorten"
+            return "v4/shorten"
         }
     }
     
