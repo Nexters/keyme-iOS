@@ -84,7 +84,7 @@ public struct RootFeature: Reducer {
                         state.registrationState?.status = .complete
                     }
                     return .none
-
+                    
                 case .failure:
                     return .none
                 }
@@ -102,14 +102,13 @@ public struct RootFeature: Reducer {
                         state.registrationState?.status = .complete
                     }
                     return .none
-
+                    
                 case .failure:
                     return .none
                 }
                 
             case .checkLoginStatus:
                 let accessToken = userStorage.accessToken
-                
                 if accessToken == nil {
                     state.logInStatus = .loggedOut
                 } else {
@@ -122,7 +121,7 @@ public struct RootFeature: Reducer {
             case .registration(.presented(.finishRegisterResponse)):
                 // Do nothing currently
                 return .none
-            
+                
             case .checkRegistrationStatus:
                 let nickname: String? = userStorage.nickname
                 
@@ -172,6 +171,16 @@ public struct RootFeature: Reducer {
                     
                     if let profileThumbnailURL = URL(string: memberInformation.profileImage) {
                         userStorage.profileThumbnailURL = profileThumbnailURL
+                    }
+                    
+                    Task.detached(priority: .low) {
+                        let pushDelegate = PushNotificationDelegate()
+                        guard let token = await pushDelegate.waitForToken() else {
+                            print("ERROR TOEKN PUSH")
+                            return
+                        }
+                        
+                        _ = try await network.request(.registerPushToken(.register(token)))
                     }
                 }
                 
