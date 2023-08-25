@@ -64,6 +64,8 @@ public struct RootFeature: Reducer {
         case checkLoginStatus
         case checkRegistrationStatus
         case checkOnboardingStatus
+        
+        case updateMemberInformation
     }
     
     public var body: some ReducerOf<Self> {
@@ -147,10 +149,31 @@ public struct RootFeature: Reducer {
                 switch result {
                 case true:
                     state.onboardingStatus?.status = .completed
+                    // 온보딩 체크 끝나면 서버에 API 쳐서 유저 데이터 업데이트
+                    // 온보딩 체크는 앱 켜질 떄마다 될 거고 이게 사실상 앱 진입 전 마지막 과정이라서 여기서 업뎃
+                    return .send(.updateMemberInformation)
+                    
                 case false:
                     state.onboardingStatus?.status = .needsOnboarding
                 }
                 return .none
+                
+            case .updateMemberInformation:
+                return .run(priority: .userInitiated) { _ in
+                    let memberInformation = try await network.request(
+                        .member(.fetch),
+                        object: MemberUpdateDTO.self).data
+                    
+                    userStorage.nickname = memberInformation.nickname
+                    
+                    if let profileImageURL = URL(string: memberInformation.profileImage) {
+                        userStorage.profileImageURL = profileImageURL
+                    }
+                    
+                    if let profileThumbnailURL = URL(string: memberInformation.profileImage) {
+                        userStorage.profileThumbnailURL = profileThumbnailURL
+                    }
+                }
                 
             default:
                 return .none
