@@ -73,7 +73,7 @@ public struct RootFeature: Reducer {
                 switch response {
                 case .success(let body):
                     let token = body.data.token.accessToken
-                    userStorage.set(token, forKey: .acesssToken)
+                    userStorage.accessToken = token
                     network.registerAuthorizationToken(token)
                     
                     if body.data.nickname == nil {
@@ -91,7 +91,7 @@ public struct RootFeature: Reducer {
                 switch response {
                 case .success(let body):
                     let token = body.data.token.accessToken
-                    userStorage.set(token, forKey: .acesssToken)
+                    userStorage.accessToken = token
                     network.registerAuthorizationToken(token)
                     
                     if body.data.nickname == nil {
@@ -106,7 +106,7 @@ public struct RootFeature: Reducer {
                 }
                 
             case .checkLoginStatus:
-                let accessToken: String? = userStorage.get(.acesssToken)
+                let accessToken = userStorage.accessToken
                 
                 if accessToken == nil {
                     state.logInStatus = .loggedOut
@@ -122,7 +122,7 @@ public struct RootFeature: Reducer {
                 return .none
             
             case .checkRegistrationStatus:
-                let nickname: String? = userStorage.get(.nickname)
+                let nickname: String? = userStorage.nickname
                 
                 if nickname == nil {
                     state.registrationState?.status = .needsRegister

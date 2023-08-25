@@ -15,45 +15,45 @@ protocol StorageKeyType {
 public final class KeymeUserStorage {
     @Dependency(\.localStorage) private var localStorage
 
-    var nickname: String?
-    var acesssToken: String?
-    
-    public init() {
-        self.nickname = self.get(.nickname)
-        self.acesssToken = self.get(.acesssToken)
+    private func get(_ key: UserStorageKey) -> Any? {
+        localStorage.get(key)
     }
     
-    public func get<T>(_ key: UserStorageKey) -> T? {
-        return localStorage.get(key) as? T
-    }
-    
-    public func set<T>(_ value: T?, forKey key: UserStorageKey) {
-        switch key {
-        case .acesssToken:
-            guard let flag = value as? String else { return }
-            self.acesssToken = flag
-        case .nickname:
-            guard let name = value as? String else { return }
-            self.nickname = name
-        }
-        
+    private func set(_ value: Any?, forKey key: UserStorageKey) {
         localStorage.set(value, forKey: key)
+    }
+    
+    private enum UserStorageKey: String, StorageKeyType {
+        case accessToken
+        case nickname
+        case profileImageURL
+        case profileThumbnailURL
+
+        public var name: String {
+            return "UserStorageKey_\(self.rawValue)"
+        }
     }
 }
 
 public extension KeymeUserStorage {
-    enum UserStorageKey: StorageKeyType {
-        case acesssToken
-        case nickname
-        
-        var name: String {
-            switch self {
-            case .acesssToken:
-                return "UserStorageKey_isLoggedIn"
-            case .nickname:
-                return "UserStorageKey_nickname"
-            }
-        }
+    var accessToken: String? {
+        get { get(.accessToken) as? String }
+        set { set(newValue, forKey: .accessToken) }
+    }
+    
+    var nickname: String? {
+        get { get(.nickname) as? String }
+        set { set(newValue, forKey: .nickname) }
+    }
+    
+    var profileImageURL: URL? {
+        get { get(.profileImageURL) as? URL }
+        set { set(newValue, forKey: .profileImageURL) }
+    }
+
+    var profileThumbnailURL: URL? {
+        get { get(.profileThumbnailURL) as? URL }
+        set { set(newValue, forKey: .profileThumbnailURL) }
     }
 }
 
