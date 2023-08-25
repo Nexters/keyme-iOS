@@ -13,7 +13,11 @@ protocol StorageKeyType {
 }
 
 public final class KeymeUserStorage {
-    @Dependency(\.localStorage) private var localStorage
+    private let localStorage: CoreLocalStorage
+    
+    init(localStorage: CoreLocalStorage) {
+        self.localStorage = localStorage
+    }
 
     private func get(_ key: UserStorageKey) -> Any? {
         localStorage.get(key)
@@ -58,10 +62,9 @@ public extension KeymeUserStorage {
 }
 
 extension KeymeUserStorage: DependencyKey {
-    public static var liveValue = KeymeUserStorage()
-    public static var testValue: KeymeUserStorage {
-        KeymeUserStorage() // FIXME:
-    }
+    public static var liveValue = KeymeUserStorage(localStorage: CoreLocalStorage.liveValue)
+    public static var testValue = KeymeUserStorage(
+        localStorage: CoreLocalStorage.testValue(storage: .init(suiteName: "TestStorage")!))
 }
 
 extension DependencyValues {
