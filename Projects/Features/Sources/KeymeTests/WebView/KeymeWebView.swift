@@ -63,7 +63,8 @@ public struct KeymeWebView: UIViewRepresentable {
         Coordinator(parent: self, option: option)
     }
     
-    public class Coordinator: NSObject, WKScriptMessageHandler {
+    public final class Coordinator: NSObject, WKScriptMessageHandler {
+        private let decoder = JSONDecoder()
         let parent: KeymeWebView
         let option: KeymeWebViewOption
         
@@ -76,6 +77,8 @@ public struct KeymeWebView: UIViewRepresentable {
             _ userContentController: WKUserContentController,
             didReceive message: WKScriptMessage
         ) {
+            print("Received message from the web with name \(message.name): \(message.body)")
+            
             if message.name == "appInterface",
                let messageBody = message.body as? [String: Any],
                let command = messageBody["command"] as? String {
@@ -86,9 +89,14 @@ public struct KeymeWebView: UIViewRepresentable {
                     
                 case "SEND_TEST_RESULT":
                     if let data = messageBody["data"] as? [String: Any] {
-                        let decoder = JSONDecoder()
-                        guard let jsonData = try? JSONSerialization.data(withJSONObject: data),
-                              let testResult = try? decoder.decode(KeymeWebViewModel.self, from: jsonData) else { return }
+                        guard
+                            let jsonData = try? JSONSerialization.data(withJSONObject: data),
+                            let testResult = try? decoder.decode(KeymeWebViewModel.self, from: jsonData)
+                        else {
+                            print("Webview: Error while decoding")
+
+                            return
+                        }
                         
                         option.onTestSubmitted(testResult)
                     }
@@ -96,8 +104,6 @@ public struct KeymeWebView: UIViewRepresentable {
                 default:
                     print("Unknown command: \(command)")
                 }
-                
-                print("Received message from the web: \(message.body)")
             }
         }
     }

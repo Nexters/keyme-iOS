@@ -57,10 +57,12 @@ public struct RootFeature: Reducer {
         case login(PresentationAction<SignInFeature.Action>)
         case registration(PresentationAction<RegistrationFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
-        case mainPage(MainPageFeature.Action)
-        
         case onboardingChecked(TaskResult<Bool>)
-                
+
+        case mainPage(MainPageFeature.Action)
+
+        case checkUserStatus
+        
         case checkLoginStatus
         case checkRegistrationStatus
         case checkOnboardingStatus
@@ -107,6 +109,23 @@ public struct RootFeature: Reducer {
                     return .none
                 }
                 
+            case .checkUserStatus:
+                let accessToken = userStorage.accessToken
+                if accessToken == nil {
+                    state.logInStatus = .loggedOut
+                    
+                    return .none
+                } else {
+                    state.logInStatus = .loggedIn
+                    network.registerAuthorizationToken(accessToken)
+                    
+                    return .run { send in
+                        await send(.updateMemberInformation)
+                        await send(.checkRegistrationStatus)
+                        await send(.checkOnboardingStatus)
+                    }
+                }
+                
             case .checkLoginStatus:
                 let accessToken = userStorage.accessToken
                 if accessToken == nil {
@@ -148,10 +167,6 @@ public struct RootFeature: Reducer {
                 switch result {
                 case true:
                     state.onboardingStatus?.status = .completed
-                    // 온보딩 체크 끝나면 서버에 API 쳐서 유저 데이터 업데이트
-                    // 온보딩 체크는 앱 켜질 떄마다 될 거고 이게 사실상 앱 진입 전 마지막 과정이라서 여기서 업뎃
-                    return .send(.updateMemberInformation)
-                    
                 case false:
                     state.onboardingStatus?.status = .needsOnboarding
                 }

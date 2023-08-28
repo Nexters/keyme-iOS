@@ -52,12 +52,12 @@ public extension KeymeUserStorage {
     
     var profileImageURL: URL? {
         get { get(.profileImageURL) as? URL }
-        set { set(newValue, forKey: .profileImageURL) }
+        set { set(newValue?.absoluteString, forKey: .profileImageURL) }
     }
 
     var profileThumbnailURL: URL? {
         get { get(.profileThumbnailURL) as? URL }
-        set { set(newValue, forKey: .profileThumbnailURL) }
+        set { set(newValue?.absoluteString, forKey: .profileThumbnailURL) }
     }
 }
 

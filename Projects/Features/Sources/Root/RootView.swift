@@ -17,9 +17,7 @@ public struct RootView: View {
             RootFeature()
         }
         
-        store.send(.checkLoginStatus)
-        store.send(.checkRegistrationStatus)
-        store.send(.checkOnboardingStatus) // For 디버깅, 의도적으로 딜레이
+        store.send(.checkUserStatus)
     }
     
     public var body: some View {

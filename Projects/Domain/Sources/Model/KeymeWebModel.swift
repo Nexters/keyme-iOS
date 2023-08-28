@@ -9,7 +9,7 @@
 import Foundation
 
 public struct KeymeWebViewModel: Codable, Equatable {
-    public let matchRate: Int
+    public let matchRate: Float
     public let resultCode: String
     public let testResultId: Int
 }
