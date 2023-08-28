@@ -22,6 +22,7 @@ struct Coordinate {
 
 struct MyPageFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
+    @Dependency(\.userStorage) private var userStorage
     
     struct State: Equatable {
         var selectedSegment: MyPageSegment = .similar
@@ -58,18 +59,28 @@ struct MyPageFeature: Reducer {
             case .requestCircle(let rate):
                 switch rate {
                 case .top5:
+                    guard let userId = userStorage.userId else {
+                        // TODO: Throw
+                        return .none
+                    }
+                    
                     return .run { send in
                         let response = try await network.request(
-                            .myPage(.statistics(2, .similar)),
+                            .myPage(.statistics(userId, .similar)),
                             object: CircleData.NetworkResult.self)
                         
                         await send(.saveCircle(response.toCircleData(), rate))
                     }
                     
                 case .low5:
+                    guard let userId = userStorage.userId else {
+                        // TODO: Throw
+                        return .none
+                    }
+                    
                     return .run { send in
                         let response = try await network.request(
-                            .myPage(.statistics(2, .different)),
+                            .myPage(.statistics(userId, .different)),
                             object: CircleData.NetworkResult.self)
                         
                         await send(.saveCircle(response.toCircleData(), rate))

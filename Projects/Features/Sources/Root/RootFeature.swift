@@ -178,7 +178,12 @@ public struct RootFeature: Reducer {
                         .member(.fetch),
                         object: MemberUpdateDTO.self).data
                     
+                    userStorage.userId = memberInformation.id
                     userStorage.nickname = memberInformation.nickname
+                    
+                    if let friendCode = memberInformation.friendCode {
+                        userStorage.friendCode = friendCode
+                    }
                     
                     if let profileImageURL = URL(string: memberInformation.profileImage) {
                         userStorage.profileImageURL = profileImageURL

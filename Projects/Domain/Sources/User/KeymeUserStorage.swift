@@ -29,6 +29,8 @@ public final class KeymeUserStorage {
     
     private enum UserStorageKey: String, StorageKeyType {
         case accessToken
+        case userId
+        case friendCode
         case nickname
         case profileImageURL
         case profileThumbnailURL
@@ -43,6 +45,16 @@ public extension KeymeUserStorage {
     var accessToken: String? {
         get { get(.accessToken) as? String }
         set { set(newValue, forKey: .accessToken) }
+    }
+    
+    var userId: Int? {
+        get { get(.userId) as? Int }
+        set { set(newValue, forKey: .userId) }
+    }
+    
+    var friendCode: String? {
+        get { get(.friendCode) as? String }
+        set { set(newValue, forKey: .friendCode) }
     }
     
     var nickname: String? {
