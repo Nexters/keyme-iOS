@@ -7,7 +7,6 @@
 //
 
 import ComposableArchitecture
-import Core
 import Domain
 import DSKit
 import SwiftUI
@@ -16,13 +15,9 @@ struct MyPageView: View {
     @Namespace private var namespace
     
     private let store: StoreOf<MyPageFeature>
-    private let scoreListStore: StoreOf<ScoreListFeature>
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-        self.scoreListStore = Store(initialState: ScoreListFeature.State(), reducer: {
-            ScoreListFeature()
-        })
         
         store.send(.requestCircle(.top5))
         store.send(.requestCircle(.low5))
@@ -41,17 +36,24 @@ struct MyPageView: View {
                             state: \.scoreListState,
                             action: MyPageFeature.Action.scoreListAction)
                         
-                        ScoreListView(
-                            questionId: data.metadata.questionId,
-                            nickname: "키미",
-                            keyword: data.metadata.keyword,
-                            store: scoreListStore)
+                        if
+                            let userId = viewStore.userId,
+                            let nickname = viewStore.nickname
+                        {
+                            ScoreListView(
+                                ownerId: userId,
+                                questionId: data.metadata.questionId,
+                                nickname: nickname,
+                                keyword: data.metadata.keyword,
+                                store: scoreListStore)
+                        } else {
+                            // TODO: Show alert
+                        }
                     })
                 .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 .activateCircleBlink(viewStore.state.shownFirstTime)
                 .onCircleTapped { _ in
                     viewStore.send(.circleTapped)
-                    HapticManager.shared.tok()
                 }
                 .onCircleDismissed { _ in
                     withAnimation(Animation.customInteractiveSpring()) {

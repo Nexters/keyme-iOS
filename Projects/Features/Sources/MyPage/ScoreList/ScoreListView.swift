@@ -12,62 +12,20 @@ import SwiftUI
 import ComposableArchitecture
 import Domain
 import DSKit
-import Network
-
-struct ScoreListFeature: Reducer {
-    @Dependency(\.keymeAPIManager) private var network
-    
-    public struct State: Equatable {
-        var canFetch = true
-        var totalCount: Int?
-        var scores: [CharacterScore]
-        
-        public init(totalCount: Int? = nil, scores: [CharacterScore] = []) {
-            self.scores = []
-        }
-    }
-    
-    public enum Action: Equatable {
-        case loadScores(questionId: Int)
-        case saveScores(totalCount: Int, scores: [CharacterScore])
-    }
-    
-    public var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            switch action {
-            case .loadScores(let id):
-                state.canFetch = false
-
-                return .run { send in
-                    let questionScores = try await network.request(
-                        .question(.scores(questionId: id)), object: QuestionResultScoresDTO.self)
-                        .toCharacterScores()
-                    
-                    await send(.saveScores(
-                        totalCount: questionScores.count,
-                        scores: questionScores))
-                }
-                
-            case .saveScores(let totalCount, let data):
-                state.totalCount = totalCount
-                state.scores.append(contentsOf: data)
-                
-                state.canFetch = true
-            }
-            return .none
-        }
-    }
-}
 
 struct ScoreListView: View {
+    private let scoreFetchLimit = 20
+    
     private let formatter: RelativeDateTimeFormatter
     
+    private let ownerId: Int
     private let questionId: Int
     private let nickname: String
     private let keyword: String
     private let store: StoreOf<ScoreListFeature>
     
     init(
+        ownerId: Int,
         questionId: Int,
         nickname: String,
         keyword: String,
@@ -77,6 +35,7 @@ struct ScoreListView: View {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateTimeStyle = .named
         
+        self.ownerId = ownerId
         self.questionId = questionId
         self.nickname = nickname
         self.keyword = keyword
@@ -123,7 +82,11 @@ struct ScoreListView: View {
                                 thirdToLastItem == scoreData
                             {
                                 guard viewStore.canFetch else { return }
-                                viewStore.send(.loadScores(questionId: self.questionId))
+                                viewStore.send(
+                                    .loadScores(
+                                        ownerId: self.ownerId,
+                                        questionId: self.questionId,
+                                        limit: scoreFetchLimit))
                             }
                         }
                     }
@@ -132,7 +95,11 @@ struct ScoreListView: View {
             }
             .onAppear {
                 guard viewStore.canFetch else { return }
-                viewStore.send(.loadScores(questionId: self.questionId))
+                viewStore.send(
+                    .loadScores(
+                        ownerId: self.ownerId,
+                        questionId: self.questionId,
+                        limit: scoreFetchLimit))
             }
         }
     }

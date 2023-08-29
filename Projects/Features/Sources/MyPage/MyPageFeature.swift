@@ -6,6 +6,7 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Core
 import ComposableArchitecture
 import Domain
 import DSKit
@@ -22,7 +23,6 @@ struct Coordinate {
 
 struct MyPageFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
-    @Dependency(\.userStorage) private var userStorage
     
     struct State: Equatable {
         var selectedSegment: MyPageSegment = .similar
@@ -33,7 +33,17 @@ struct MyPageFeature: Reducer {
         var circleShown = false
         
         var scoreListState: ScoreListFeature.State = .init()
+        
+        @BindingState var userId = {
+            @Dependency(\.userStorage.userId) var userId
+            return userId
+        }()
+        @BindingState var nickname = {
+            @Dependency(\.userStorage.nickname) var nickname
+            return nickname
+        }()
     }
+
     enum Action: Equatable {
         case selectSegement(MyPageSegment)
         case requestCircle(MatchRate)
@@ -67,7 +77,7 @@ struct MyPageFeature: Reducer {
             case .requestCircle(let rate):
                 switch rate {
                 case .top5:
-                    guard let userId = userStorage.userId else {
+                    guard let userId = state.userId else {
                         // TODO: Throw
                         return .none
                     }
@@ -81,7 +91,7 @@ struct MyPageFeature: Reducer {
                     }
                     
                 case .low5:
-                    guard let userId = userStorage.userId else {
+                    guard let userId = state.userId else {
                         // TODO: Throw
                         return .none
                     }
@@ -110,6 +120,7 @@ struct MyPageFeature: Reducer {
                 return .none
                 
             case .circleTapped:
+                HapticManager.shared.tok()
                 state.circleShown = true
                 return .none
                 

@@ -10,13 +10,13 @@ import Moya
 import Foundation
 
 public enum QuestionAPI {
-    case scores(questionId: Int)
+    case scores(ownerId: Int, questionId: Int, limit: Int)
 }
 
 extension QuestionAPI: BaseAPI {
     public var path: String {
         switch self {
-        case .scores(let questionId):
+        case .scores(_, let questionId, _):
             return "questions/\(questionId)/result/scores"
         }
     }
@@ -53,8 +53,13 @@ extension QuestionAPI: BaseAPI {
     
     public var task: Task {
         switch self {
-        case .scores:
-            return .requestPlain
+        case let .scores(ownerId, _, limit):
+            return .requestParameters(
+                parameters: [
+                    "limit": limit,
+                    "ownerId": ownerId
+                ],
+                encoding: URLEncoding.queryString)
         }
     }
 }
