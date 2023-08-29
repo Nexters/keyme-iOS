@@ -15,6 +15,8 @@ public enum KeymeAPI {
     case myPage(MyPage)
     case registerPushToken(String)
     case auth(Authorization)
+    case registration(Registration)
+    case member(Member)
 }
 
 extension KeymeAPI {
@@ -35,6 +37,16 @@ extension KeymeAPI {
             case apple = "APPLE"
         }
     }
+    
+    public enum Registration {
+        case checkDuplicatedNickname(String)
+        case uploadImage(Data)
+        case updateMemberDetails(nickname: String, profileImage: String?, profileThumbnail: String?)
+    }
+    
+    public enum Member {
+        case fetch
+    }
 }
 
 extension KeymeAPI: BaseAPI {
@@ -54,21 +66,31 @@ extension KeymeAPI: BaseAPI {
             
         case .auth:
             return "/auth/login"
+            
+        case .registration(.checkDuplicatedNickname):
+            return "members/verify-nickname"
+            
+        case .registration(.uploadImage):
+            return "/images"
+            
+        case .registration(.updateMemberDetails):
+            return "/members"
+            
+        case .member(.fetch):
+            return "members"
         }
     }
     
     public var method: Moya.Method {
         switch self {
-        case .test:
+        case .test, .myPage(.statistics), .member(.fetch):
             return .get
-        case .myPage(.statistics):
-            return .get
-        case .auth(.signIn):
+            
+        case .auth(.signIn), .registerPushToken, .registration(.checkDuplicatedNickname), .registration(.uploadImage):
             return .post
-        case .registerPushToken:
-            return .post
-        case .auth:
-            return .post
+            
+        case .registration(.updateMemberDetails):
+            return .patch
         }
     }
     
@@ -76,10 +98,13 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .test:
             return .requestPlain
+            
         case .myPage(.statistics(_, let type)):
             return .requestParameters(parameters: ["type": type.rawValue], encoding: URLEncoding.default)
+            
         case .registerPushToken(let token):
             return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
+            
         case .auth(.signIn(let oauthType, let accessToken)):
             return .requestParameters(
                 parameters: [
@@ -87,6 +112,28 @@ extension KeymeAPI: BaseAPI {
                     "token": accessToken
                 ],
                 encoding: JSONEncoding.prettyPrinted)
+            
+        case .registration(.checkDuplicatedNickname(let nickname)):
+            return .requestJSONEncodable(nickname)
+            
+        case .registration(.uploadImage(let imageData)):
+            let multipartFormData = MultipartFormData(
+                provider: .data(imageData),
+                name: "profile_image")
+            
+            return .uploadMultipart([multipartFormData])
+        
+        case .registration(.updateMemberDetails(let nickname, let profileImage, let profileThumbnail)):
+            return .requestParameters(
+                parameters: [
+                    "nickname": nickname,
+                    "profileImage": profileImage as Any,
+                    "profileThumbnail": profileThumbnail as Any
+                ],
+                encoding: JSONEncoding.default)
+            
+        case .member(.fetch):
+            return .requestPlain
         }
     }
     
