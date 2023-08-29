@@ -39,10 +39,17 @@ struct MyPageView: View {
                     namespace: namespace,
                     data: viewStore.shownCircleDatalist,
                     detailViewBuilder: { data in
+                        let scoreListStore = store.scope(
+                            state: \.scoreListState,
+                            action: MyPageFeature.Action.scoreListAction)
+                        
                         ScoreListView(
                             nickname: "키미",
                             keyword: data.metadata.keyword,
                             store: scoreListStore)
+                        .onAppear {
+                            scoreListStore.send(.loadScores)
+                        }
                     })
                 .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 .activateCircleBlink(viewStore.state.shownFirstTime)

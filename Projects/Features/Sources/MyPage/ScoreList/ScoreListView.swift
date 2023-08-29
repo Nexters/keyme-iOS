@@ -15,6 +15,7 @@ import DSKit
 
 struct ScoreListFeature: Reducer {
     public struct State: Equatable {
+        var canFetch = true
         var totalCount: Int?
         var scores: [CharacterScore]
         
@@ -32,20 +33,26 @@ struct ScoreListFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .loadScores:
+                state.canFetch = false
+
                 return .run { send in
-                    try await Task.sleep(until: .now + .seconds(0.5), clock: .continuous)
                     await send(.saveScores(
-                        totalCount: 42,
-                        scores: (0..<42).map { i in
+                        totalCount: 120,
+                        scores: (0..<15).map { i in
                             let randomInterval = TimeInterval(-2 * i)
-                            return CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(randomInterval + Double(Int.random(in: 0...1))))
+                            return CharacterScore(
+                                score: Int.random(in: 1...5),
+                                date: Date().addingTimeInterval(randomInterval + Double(Int.random(in: 0...1)))
+                            )
                         }
                     ))
                 }
                 
             case .saveScores(let totalCount, let data):
                 state.totalCount = totalCount
-                state.scores = data
+                state.scores.append(contentsOf: data)
+                
+                state.canFetch = true
             }
             return .none
         }
@@ -104,15 +111,20 @@ struct ScoreListView: View {
                         .cornerRadius(16)
                         .onAppear {
                             if
-                                let thirdToLast = viewStore.state.scores.dropLast(2).last,
-                                thirdToLast == scoreData
+                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
+                                thirdToLastItem == scoreData
                             {
-//                                viewStore.send(.loadScores)
+                                guard viewStore.canFetch else { return }
+                                viewStore.send(.loadScores)
                             }
                         }
                     }
                 }
                 .padding(.horizontal, 17)
+            }
+            .onAppear {
+                guard viewStore.canFetch else { return }
+                viewStore.send(.loadScores)
             }
         }
     }

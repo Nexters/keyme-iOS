@@ -31,6 +31,8 @@ struct MyPageFeature: Reducer {
         var differentCircleDataList: [CircleData] = []
         var shownCircleDatalist: [CircleData] = []
         var circleShown = false
+        
+        var scoreListState: ScoreListFeature.State = .init()
     }
     enum Action: Equatable {
         case selectSegement(MyPageSegment)
@@ -39,10 +41,16 @@ struct MyPageFeature: Reducer {
         case markViewAsShown
         case circleTapped
         case circleDismissed
+        
+        case scoreListAction(ScoreListFeature.Action)
     }
     
     public var body: some ReducerOf<Self> {
-        Reduce { state, action in
+        Scope(state: \.scoreListState, action: /Action.scoreListAction) {
+            ScoreListFeature()
+        }
+        
+        Reduce { state, action in    
             switch action {
             case .selectSegement(let segment):
                 state.selectedSegment = segment
@@ -107,6 +115,10 @@ struct MyPageFeature: Reducer {
                 
             case .circleDismissed:
                 state.circleShown = false
+                return .none
+                
+            case .scoreListAction:
+                print("score")
                 return .none
             }
         }
