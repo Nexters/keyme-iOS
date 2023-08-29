@@ -6,6 +6,7 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Network
 import Foundation
 
 public struct CharacterScore: Identifiable, Equatable {
@@ -16,5 +17,13 @@ public struct CharacterScore: Identifiable, Equatable {
     public init(score: Int, date: Date) {
         self.score = score
         self.date = date
+    }
+}
+
+public extension QuestionResultScoresDTO {
+    func toCharacterScores() -> [CharacterScore] {
+        return self.data.results.map { resultItem in
+            CharacterScore(score: resultItem.score, date: resultItem.createdAt)
+        }
     }
 }

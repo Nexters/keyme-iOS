@@ -16,6 +16,7 @@ public enum KeymeAPI {
     case registration(RegistrationAPI)
     case member(MemberAPI)
     case test(KeymeTestsAPI)
+    case question(QuestionAPI)
 }
 
 extension KeymeAPI: BaseAPI {
@@ -32,6 +33,8 @@ extension KeymeAPI: BaseAPI {
         case .member(let api):
             return api.path
         case .test(let api):
+            return api.path
+        case .question(let api):
             return api.path
         }
     }
@@ -50,6 +53,8 @@ extension KeymeAPI: BaseAPI {
             return api.method
         case .test(let api):
             return api.method
+        case .question(let api):
+            return api.method
         }
     }
     
@@ -66,6 +71,8 @@ extension KeymeAPI: BaseAPI {
         case .member(let api):
             return api.task
         case .test(let api):
+            return api.task
+        case .question(let api):
             return api.task
         }
     }

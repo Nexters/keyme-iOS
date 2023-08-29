@@ -28,8 +28,6 @@ struct MyPageView: View {
         store.send(.requestCircle(.low5))
         
         store.send(.selectSegement(.similar))
-        
-        scoreListStore.send(.loadScores)
     }
     
     public var body: some View {
@@ -44,12 +42,10 @@ struct MyPageView: View {
                             action: MyPageFeature.Action.scoreListAction)
                         
                         ScoreListView(
+                            questionId: data.metadata.questionId,
                             nickname: "키미",
                             keyword: data.metadata.keyword,
                             store: scoreListStore)
-                        .onAppear {
-                            scoreListStore.send(.loadScores)
-                        }
                     })
                 .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 .activateCircleBlink(viewStore.state.shownFirstTime)
