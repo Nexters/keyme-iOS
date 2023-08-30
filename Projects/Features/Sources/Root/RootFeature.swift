@@ -24,6 +24,7 @@ public struct RootFeature: Reducer {
         @PresentationState public var logInStatus: SignInFeature.State?
         @PresentationState public var registrationState: RegistrationFeature.State?
         @PresentationState public var onboardingStatus: OnboardingFeature.State?
+        @PresentationState public var mainPageState: MainPageFeature.State?
         
         public init(
             isLoggedIn: Bool? = nil,
@@ -57,9 +58,8 @@ public struct RootFeature: Reducer {
         case login(PresentationAction<SignInFeature.Action>)
         case registration(PresentationAction<RegistrationFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
+        case mainPage(PresentationAction<MainPageFeature.Action>)
         case onboardingChecked(TaskResult<Bool>)
-
-        case mainPage(MainPageFeature.Action)
 
         case checkUserStatus
         
@@ -68,6 +68,7 @@ public struct RootFeature: Reducer {
         case checkOnboardingStatus
         
         case updateMemberInformation
+        case startMainPage(userId: Int, nickname: String)
     }
     
     public var body: some ReducerOf<Self> {
@@ -173,7 +174,7 @@ public struct RootFeature: Reducer {
                 return .none
                 
             case .updateMemberInformation:
-                return .run(priority: .userInitiated) { _ in
+                return .run(priority: .userInitiated) { send in
                     let memberInformation = try await network.request(
                         .member(.fetch),
                         object: MemberUpdateDTO.self).data
@@ -202,7 +203,15 @@ public struct RootFeature: Reducer {
                         
                         _ = try await network.request(.registerPushToken(.register(token)))
                     }
+                    
+                    await send(.startMainPage(
+                        userId: memberInformation.id,
+                        nickname: memberInformation.nickname))
                 }
+                
+            case .startMainPage(let userId, let nickname):
+                state.mainPageState = MainPageFeature.State(userId: userId, nickname: nickname)
+                return .none
                 
             default:
                 return .none
@@ -216,6 +225,9 @@ public struct RootFeature: Reducer {
         }
         .ifLet(\.$onboardingStatus, action: /Action.onboarding) {
             OnboardingFeature()
+        }
+        .ifLet(\.$mainPageState, action: /Action.mainPage) {
+            MainPageFeature()
         }
     }
 }

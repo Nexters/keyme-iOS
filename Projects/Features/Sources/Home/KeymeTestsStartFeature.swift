@@ -13,13 +13,16 @@ import Domain
 
 public struct KeymeTestsStartFeature: Reducer {
     public struct State: Equatable {
+        public let nickname: String
+        public var testId: Int?
+        
         public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
-        public var nickname: String?
-        public var testId: Int = 18 // TODO: change
         public var icon: IconModel = .EMPTY
         
-        public init() { }
+        public init(nickname: String) {
+            self.nickname = nickname
+        }
     }
     
     public enum Action {
@@ -49,14 +52,12 @@ public struct KeymeTestsStartFeature: Reducer {
                 }
                 
             case let .fetchDailyTests(.success(tests)):
-                state.nickname = tests.nickname
                 state.testId = tests.testId
                 state.isAnimating = true
                 
                 return .send(.startAnimation(tests.icons))
                 
             case .fetchDailyTests(.failure):
-                state.nickname = "키미" // TODO: 변경
                 return .send(.startAnimation([IconModel.EMPTY]))
                 
             case .startAnimation(let icons):

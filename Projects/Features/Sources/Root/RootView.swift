@@ -60,11 +60,14 @@ public struct RootView: View {
 //                }
 //            } else {
                 // 가입했고 온보딩을 진행한 유저
-                KeymeMainView(store: Store(
-                    initialState: MainPageFeature.State()) {
-                        MainPageFeature()
-                    })
-                .transition(.opacity)
+                let mainPageStore = store.scope(state: \.$mainPageState, action: RootFeature.Action.mainPage)
+                
+                IfLetStore(mainPageStore) { store in
+                    KeymeMainView(store: store)
+                        .transition(.opacity)
+                } else: {
+                    Text("앗 죄송!")
+                }
 //            }
         }
     }

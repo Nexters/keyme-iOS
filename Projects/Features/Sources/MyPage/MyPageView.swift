@@ -36,19 +36,12 @@ struct MyPageView: View {
                             state: \.scoreListState,
                             action: MyPageFeature.Action.scoreListAction)
                         
-                        if
-                            let userId = viewStore.userId,
-                            let nickname = viewStore.nickname
-                        {
-                            ScoreListView(
-                                ownerId: userId,
-                                questionId: data.metadata.questionId,
-                                nickname: nickname,
-                                keyword: data.metadata.keyword,
-                                store: scoreListStore)
-                        } else {
-                            // TODO: Show alert
-                        }
+                        ScoreListView(
+                            ownerId: viewStore.userId,
+                            questionId: data.metadata.questionId,
+                            nickname: viewStore.nickname,
+                            keyword: data.metadata.keyword,
+                            store: scoreListStore)
                     })
                 .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 .activateCircleBlink(viewStore.state.shownFirstTime)
@@ -89,7 +82,7 @@ struct MyPageView: View {
                         .padding(.horizontal, 17)
                         .padding(.top, 25)
                         
-                        Text.keyme("친구들이 생각하는\n키미님의 성격은?", font: .heading1) // TODO: Change nickname
+                        Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
                             .padding(17)
                             .transition(.opacity)
                     }

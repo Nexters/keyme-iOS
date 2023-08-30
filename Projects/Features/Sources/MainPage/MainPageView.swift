@@ -20,19 +20,17 @@ struct KeymeMainView: View {
         self.store = store
     }
     
-    private var myPageStore = Store(initialState: MyPageFeature.State()) {
-        MyPageFeature()
-    }
-    
     enum Tab: Int {
         case home, myPage
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { _ in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             TabView(selection: $selectedTab) {
                 KeymeTestsStartView(store: Store(
-                    initialState: KeymeTestsStartFeature.State()) {
+                    initialState: KeymeTestsStartFeature.State(
+                        nickname: viewStore.nickname
+                    )) {
                         KeymeTestsStartFeature()
                     })
                 .tabItem {
@@ -43,14 +41,19 @@ struct KeymeMainView: View {
                 }
                 .tag(Tab.home)
                 
-                MyPageView(store: myPageStore)
-                    .tabItem {
-                        myPageTabImage
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .aspectRatio(contentMode: .fit)
-                    }
-                    .tag(Tab.myPage)
+                MyPageView(store: Store(
+                    initialState: MyPageFeature.State(
+                        userId: viewStore.state.userId,
+                        nickname: viewStore.state.nickname)) {
+                            MyPageFeature()
+                        })
+                .tabItem {
+                    myPageTabImage
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .aspectRatio(contentMode: .fit)
+                }
+                .tag(Tab.myPage)
             }
             .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
                 let tabBar = tabViewController.tabBar

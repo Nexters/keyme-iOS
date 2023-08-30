@@ -34,14 +34,13 @@ struct MyPageFeature: Reducer {
         
         var scoreListState: ScoreListFeature.State = .init()
         
-        @BindingState var userId = {
-            @Dependency(\.userStorage.userId) var userId
-            return userId
-        }()
-        @BindingState var nickname = {
-            @Dependency(\.userStorage.nickname) var nickname
-            return nickname
-        }()
+        let userId: Int
+        let nickname: String
+        
+        init(userId: Int, nickname: String) {
+            self.userId = userId
+            self.nickname = nickname
+        }
     }
 
     enum Action: Equatable {
@@ -55,6 +54,10 @@ struct MyPageFeature: Reducer {
         case scoreListAction(ScoreListFeature.Action)
     }
     
+    // 마이페이지를 사용할 수 없는 케이스
+    // 1. 유저 아이디나 닉네임이 정의되지 않음 -> 에러페이지
+    // 2. 원 그래프가 아직 집계되지 않음 -> 빈 화면 페이지
+    // 3. 네트워크가 연결되지 않음
     public var body: some ReducerOf<Self> {
         Scope(state: \.scoreListState, action: /Action.scoreListAction) {
             ScoreListFeature()
@@ -75,13 +78,10 @@ struct MyPageFeature: Reducer {
                 
             // 서버 부하가 있으므로 웬만하면 한 번만 콜 할 것
             case .requestCircle(let rate):
+                let userId = state.userId
+
                 switch rate {
                 case .top5:
-                    guard let userId = state.userId else {
-                        // TODO: Throw
-                        return .none
-                    }
-                    
                     return .run { send in
                         let response = try await network.request(
                             .myPage(.statistics(userId, .similar)),
@@ -91,11 +91,6 @@ struct MyPageFeature: Reducer {
                     }
                     
                 case .low5:
-                    guard let userId = state.userId else {
-                        // TODO: Throw
-                        return .none
-                    }
-                    
                     return .run { send in
                         let response = try await network.request(
                             .myPage(.statistics(userId, .different)),
