@@ -27,31 +27,26 @@ struct KeymeMainView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             TabView(selection: $selectedTab) {
-                KeymeTestsStartView(store: Store(
-                    initialState: KeymeTestsStartFeature.State(
-                        nickname: viewStore.nickname
-                    )) {
-                        KeymeTestsStartFeature()
-                    })
+                KeymeTestsHomeView(store: Store(
+                    initialState: KeymeTestsHomeFeature.State(
+                        nickname: viewStore.nickname)
+                ) {
+                    KeymeTestsHomeFeature()
+                })
                 .tabItem {
                     homeTabImage
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .aspectRatio(contentMode: .fit)
                 }
                 .tag(Tab.home)
                 
                 MyPageView(store: Store(
                     initialState: MyPageFeature.State(
                         userId: viewStore.state.userId,
-                        nickname: viewStore.state.nickname)) {
-                            MyPageFeature()
-                        })
+                        nickname: viewStore.state.nickname)
+                ) {
+                    MyPageFeature()
+                })
                 .tabItem {
                     myPageTabImage
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .aspectRatio(contentMode: .fit)
                 }
                 .tag(Tab.myPage)
             }

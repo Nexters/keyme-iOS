@@ -14,14 +14,15 @@ import Domain
 public struct KeymeTestsStartFeature: Reducer {
     public struct State: Equatable {
         public let nickname: String
-        public var testId: Int?
+        public var testId: Int
         
         public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         public var icon: IconModel = .EMPTY
         
-        public init(nickname: String) {
+        public init(nickname: String, testId: Int) {
             self.nickname = nickname
+            self.testId = testId
         }
     }
     
