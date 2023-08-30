@@ -18,15 +18,15 @@ struct MyPageView: View {
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-        
+         
         store.send(.requestCircle(.top5))
         store.send(.requestCircle(.low5))
         
-        store.send(.selectSegement(.similar))
+        store.send(.view(.selectSegement(.similar)))
     }
     
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: \.view, send: MyPageFeature.Action.view) { viewStore in
             ZStack(alignment: .topLeading) {
                 CirclePackView(
                     namespace: namespace,
