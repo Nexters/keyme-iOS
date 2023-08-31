@@ -43,7 +43,7 @@ public struct RootView: View {
                     let loginStore = store.scope(
                         state: \.$logInStatus,
                         action: RootFeature.Action.login)
-                    
+
                     IfLetStore(loginStore) { store in
                         SignInView(store: store)
                     }
