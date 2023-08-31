@@ -10,6 +10,7 @@
 
 import AuthenticationServices
 import ComposableArchitecture
+import DSKit
 import SwiftUI
 import Network
 
@@ -21,16 +22,27 @@ public struct SignInView: View {
     }
     
     public var body: some View {
-        VStack(alignment: .center, spacing: 0) {
-            Spacer()
+        ZStack(alignment: .center) {
+            Text.keyme("KEYME", font: .checkResult)
+                .foregroundColor(.white)
+                .offset(y: -39)
             
-            KakaoLoginButton(store: store)
-            
-            AppleLoginButton(store: store)
-            
-            GuideMessageView()
+            VStack(alignment: .center, spacing: 30) {
+                Spacer()
+                
+                VStack(spacing: 16) {
+                    KakaoLoginButton(store: store)
+                        .frame(height: 48)
+                    
+                    AppleLoginButton(store: store)
+                        .frame(height: 48)
+                }
+                
+                GuideMessageView()
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 56)
         }
-        .padding()
     }
     
     // 카카오 로그인 버튼
@@ -45,7 +57,6 @@ public struct SignInView: View {
                     .resizable()
                     .scaledToFill()
             }
-            .frame(width: 312, height: 48)
             .cornerRadius(6)
         }
     }
@@ -68,9 +79,7 @@ public struct SignInView: View {
                     }
                 })
             .signInWithAppleButtonStyle(.white)
-            .frame(width: 312, height: 48)
             .cornerRadius(6)
-            .padding(.vertical)
         }
     }
     
@@ -99,7 +108,6 @@ public struct SignInView: View {
                 }
             }
             .font(.system(size: 11))
-            .frame(width: 265, height: 36)
         }
     }
 }
