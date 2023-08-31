@@ -7,6 +7,7 @@
 //
 
 import ComposableArchitecture
+import Domain
 import Network
 
 struct KeymeTestsHomeFeature: Reducer {
@@ -29,7 +30,7 @@ struct KeymeTestsHomeFeature: Reducer {
     
     enum Action {
         case fetchDailyTests
-        case showTestStartView(testId: Int)
+        case showTestStartView(testData: KeymeTestsModel)
         case startTest(PresentationAction<KeymeTestsStartFeature.Action>)
         
         enum View {}
@@ -41,14 +42,14 @@ struct KeymeTestsHomeFeature: Reducer {
             case .fetchDailyTests:
                 return .run { send in
                     let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
-                    let testId = fetchedTest.data.testId
+                    let testData = fetchedTest.toKeymeTestsModel()
                     
-                    await send(.showTestStartView(testId: testId))
+                    await send(.showTestStartView(testData: testData))
                 }
                 
-            case .showTestStartView(let testId):
-                state.view.dailyTestId = testId
-                state.testStartViewState = .init(nickname: state.view.nickname, testId: testId)
+            case .showTestStartView(let testData):
+                state.view.dailyTestId = testData.testId
+                state.testStartViewState = .init(nickname: state.view.nickname, testData: testData)
                 
             default:
                 break

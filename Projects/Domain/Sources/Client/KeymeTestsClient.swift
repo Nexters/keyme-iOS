@@ -35,12 +35,12 @@ private func getClient(with network: KeymeAPIManager) -> KeymeTestsClient {
             let api = KeymeAPI.test(.onboarding)
             let response = try await network.request(api, object: KeymeTestsDTO.self)
             
-            return response.toIconModel()
+            return response.toKeymeTestsModel()
         }, fetchDailyTests: {
             let api = KeymeAPI.test(.daily)
             let response = try await network.request(api, object: KeymeTestsDTO.self)
             
-            return response.toIconModel()
+            return response.toKeymeTestsModel()
         }, fetchTestResult: { testResultId in
             let api = KeymeAPI.test(.result(testResultId))
             let response = try await network.request(api, object: TestResultDTO.self)
