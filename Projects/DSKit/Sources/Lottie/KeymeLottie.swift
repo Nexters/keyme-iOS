@@ -27,7 +27,7 @@ public struct KeymeLottieView: UIViewRepresentable {
         
         lottieView.translatesAutoresizingMaskIntoConstraints = false
         lottieView.loopMode = loopMode
-        lottieView.contentMode = .scaleToFill
+        lottieView.contentMode = .scaleAspectFill
         lottieView.play(completion: { finished in
             if finished {
                 completion?()
