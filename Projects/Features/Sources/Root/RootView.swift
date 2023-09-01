@@ -16,41 +16,37 @@ public struct RootView: View {
     
     public init() {
         self.store = Store(initialState: RootFeature.State()) {
-            RootFeature()
+            RootFeature()._printChanges()
         }
         
-        store.send(.checkUserStatus)
+        store.send(.view(.checkUserStatus))
     }
     
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0.userStatus }, send: RootFeature.Action.view) { viewStore in
             ZStack {
                 // 애니메이션 부웅.. 부웅..
                 KeymeLottieView(asset: .background, loopMode: .autoReverse)
                     .ignoresSafeArea()
                 
-                if viewStore.logInStatus == .loggedIn {
+                if viewStore.state != .needSignIn {
                     BackgroundBlurringView(style: .dark)
                         .ignoresSafeArea()
-                        .transition(.opacity)
+                        .transition(.opacity.animation(.easeInOut))
                 }
                 
-                if viewStore.logInStatus == .notDetermined {
-                    // 여기 걸리면 에러임. 조심하셈.
-                    EmptyView()
-                } else if viewStore.logInStatus == .loggedOut {
+                switch viewStore.state {
+                case .needSignIn:
                     // 회원가입을 하지 않았거나 로그인을 하지 않은 유저
                     let loginStore = store.scope(
                         state: \.$logInStatus,
                         action: RootFeature.Action.login)
-
+                    
                     IfLetStore(loginStore) { store in
                         SignInView(store: store)
                     }
-                } else if viewStore.registrationState?.status == .notDetermined {
-                    // 개인정보 등록 상태를 로딩 중
-                    ProgressView()
-                } else if viewStore.registrationState?.status == .needsRegister {
+                    
+                case .needRegistration:
                     // 개인정보 등록
                     let registrationStore = store.scope(
                         state: \.$registrationState,
@@ -59,28 +55,32 @@ public struct RootView: View {
                     IfLetStore(registrationStore) { store in
                         RegistrationView(store: store)
                     }
-                } else if viewStore.onboardingStatus?.status == .notDetermined {
-                    // 온보딩 상태를 로딩 중
-                    ProgressView()
-                } else if viewStore.onboardingStatus?.status == .needsOnboarding {
+                
+                case .needOnboarding:
                     // 가입했지만 온보딩을 하지 않고 종료했던 유저
                     let onboardingStore = store.scope(
-                        state: \.$onboardingStatus,
+                        state: \.$onboardingState,
                         action: RootFeature.Action.onboarding)
                     
                     IfLetStore(onboardingStore) { store in
                         OnboardingView(store: store)
                     }
-                } else {
+                    
+                case .canUseApp:
                     // 가입했고 온보딩을 진행한 유저
-                    let mainPageStore = store.scope(state: \.$mainPageState, action: RootFeature.Action.mainPage)
+                    let mainPageStore = store.scope(
+                        state: \.$mainPageState,
+                        action: RootFeature.Action.mainPage)
                     
                     IfLetStore(mainPageStore) { store in
                         KeymeMainView(store: store)
-                            .transition(.opacity)
+                            .transition(.opacity.animation(.easeInOut))
                     } else: {
                         Text("에러")
                     }
+                    
+                case .notDetermined:
+                    EmptyView()
                 }
             }
         }

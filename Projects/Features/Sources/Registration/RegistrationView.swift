@@ -187,7 +187,7 @@ extension RegistrationView {
                 } else {
                     ZStack {
                         Circle()
-                            .foregroundColor(.black.opacity(0.8))
+                            .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
                             .frame(width: outercircleSize - 20, height: outercircleSize - 20)
                         
                         Image(systemName: "photo")

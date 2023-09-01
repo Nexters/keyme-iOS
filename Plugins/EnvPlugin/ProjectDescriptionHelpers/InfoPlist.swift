@@ -20,7 +20,15 @@ public extension Project {
             ]
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
-        "UIUserInterfaceStyle": "Light"
+        "UIUserInterfaceStyle": "Light",
+        "NSAppTransportSecurity": [
+            "NSExceptionDomains": [
+                "api.keyme.space": [
+                    "NSIncludesSubdomains": true,
+                    "NSExceptionMinimumTLSVersion": "TLSv1.2",
+                ],
+            ]
+        ]
     ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [
