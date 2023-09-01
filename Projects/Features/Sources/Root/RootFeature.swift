@@ -23,161 +23,58 @@ public struct RootFeature: Reducer {
     public struct State: Equatable {
         @PresentationState public var logInStatus: SignInFeature.State?
         @PresentationState public var registrationState: RegistrationFeature.State?
-        @PresentationState public var onboardingStatus: OnboardingFeature.State?
+        @PresentationState public var onboardingState: OnboardingFeature.State?
         @PresentationState public var mainPageState: MainPageFeature.State?
         
-        public init(
-            isLoggedIn: Bool? = nil,
-            doneRegistration: Bool? = nil,
-            doneOnboarding: Bool? = nil
-        ) {
-            registrationState = .init()
-            onboardingStatus = .init()
-            
-            if let isLoggedIn {
-                logInStatus = isLoggedIn ? .loggedIn : .loggedOut
-            } else {
-                logInStatus = .notDetermined
-            }
-            
-            if let doneRegistration {
-                registrationState?.status = doneRegistration ? .complete : .needsRegister
-            } else {
-                registrationState?.status = .notDetermined
-            }
-            
-            if let doneOnboarding {
-                onboardingStatus?.status = doneOnboarding ? .completed : .needsOnboarding
-            } else {
-                onboardingStatus?.status = .notDetermined
-            }
+        var userStatus: UserStatus = .notDetermined
+        
+        public enum UserStatus: Equatable {
+            case notDetermined
+            case needSignIn
+            case needRegistration
+            case needOnboarding
+            case canUseApp(userId: Int, nickname: String)
         }
     }
     
     public enum Action {
+        public enum View {
+            case checkUserStatus
+        }
+        case view(View)
+        
         case login(PresentationAction<SignInFeature.Action>)
         case registration(PresentationAction<RegistrationFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
         case mainPage(PresentationAction<MainPageFeature.Action>)
-        case onboardingChecked(TaskResult<Bool>)
-
-        case checkUserStatus
         
-        case checkLoginStatus
-        case checkRegistrationStatus
-        case checkOnboardingStatus
-        
-        case updateMemberInformation
-        case startMainPage(userId: Int, nickname: String)
+        case updateState(State.UserStatus)
+        case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?)
     }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .login(.presented(.signInWithAppleResponse(let response))):
-                switch response {
-                case .success(let body):
-                    let token = body.data.token.accessToken
-                    userStorage.accessToken = token
-                    network.registerAuthorizationToken(token)
-                    
-                    if body.data.nickname == nil {
-                        state.registrationState?.status = .needsRegister
-                    } else {
-                        state.registrationState?.status = .complete
-                    }
-                    return .none
-                    
-                case .failure:
-                    return .none
-                }
-                
-            case .login(.presented(.signInWithKakaoResponse(let response))):
-                switch response {
-                case .success(let body):
-                    let token = body.data.token.accessToken
-                    userStorage.accessToken = token
-                    network.registerAuthorizationToken(token)
-                    
-                    if body.data.nickname == nil {
-                        state.registrationState?.status = .needsRegister
-                    } else {
-                        state.registrationState?.status = .complete
-                    }
-                    return .none
-                    
-                case .failure:
-                    return .none
-                }
-                
-            case .checkUserStatus:
+            case .view(.checkUserStatus):
                 let accessToken = userStorage.accessToken
-                if accessToken == nil {
-                    state.logInStatus = .loggedOut
-                    
-                    return .none
-                } else {
-                    state.logInStatus = .loggedIn
+                if accessToken == nil { // 로그 아웃 상태
+                    return .send(.updateState(.needSignIn))
+                } else { // 로그인 상태
                     network.registerAuthorizationToken(accessToken)
-                    
-                    return .run { send in
-                        await send(.updateMemberInformation)
-                        await send(.checkRegistrationStatus)
-                        await send(.checkOnboardingStatus)
+                    return .send(.updateMemberInformation(withMemberData: nil))
+                }
+        
+            case .updateMemberInformation(let receviedMemberData):
+                return .run(priority: .userInitiated) { send in
+                    let memberInformation: MemberUpdateDTO.MemberData
+                    if let receviedMemberData {
+                        memberInformation = receviedMemberData
+                    } else {
+                        memberInformation = try await network.request(
+                            .member(.fetch),
+                            object: MemberUpdateDTO.self
+                        ).data
                     }
-                }
-                
-            case .checkLoginStatus:
-                let accessToken = userStorage.accessToken
-                if accessToken == nil {
-                    state.logInStatus = .loggedOut
-                } else {
-                    state.logInStatus = .loggedIn
-                    network.registerAuthorizationToken(accessToken)
-                }
-                
-                return .none
-                
-            case .registration(.presented(.finishRegisterResponse)):
-                // Do nothing currently
-                return .none
-                
-            case .checkRegistrationStatus:
-                let nickname: String? = userStorage.nickname
-                
-                if nickname == nil {
-                    state.registrationState?.status = .needsRegister
-                } else {
-                    state.registrationState?.status = .complete
-                }
-                
-                return .none
-                
-            case .checkOnboardingStatus:
-                return .run(priority: .userInitiated) { send in
-                    await send(.onboardingChecked(
-                        TaskResult {
-                            // TODO: API 갈아끼우기
-//                            try await Task.sleep(until: .now + .seconds(0.1), clock: .continuous)
-                            return false
-                        }
-                    ))
-                }
-                
-            case .onboardingChecked(.success(let result)):
-                switch result {
-                case true:
-                    state.onboardingStatus?.status = .completed
-                case false:
-                    state.onboardingStatus?.status = .needsOnboarding
-                }
-                return .none
-                
-            case .updateMemberInformation:
-                return .run(priority: .userInitiated) { send in
-                    let memberInformation = try await network.request(
-                        .member(.fetch),
-                        object: MemberUpdateDTO.self).data
                     
                     userStorage.userId = memberInformation.id
                     userStorage.nickname = memberInformation.nickname
@@ -194,24 +91,82 @@ public struct RootFeature: Reducer {
                         userStorage.profileThumbnailURL = profileThumbnailURL
                     }
                     
+                    if memberInformation.nickname == nil {
+                        await send(.updateState(.needRegistration))
+                    } else if memberInformation.isOnboardingClear == false {
+                        await send(.updateState(.needOnboarding))
+                    } else {
+                        await send(.updateState(.canUseApp(userId: memberInformation.id, nickname: memberInformation.nickname)))
+                    }
+                    
                     Task.detached(priority: .low) {
                         let notificationDelegate = UserNotificationCenterDelegateManager()
+                        
                         guard let token = await notificationDelegate.waitForToken() else {
-                            print("ERROR TOEKN PUSH")
+                            print("푸시토큰 등록 중 에러 발생")
                             return
                         }
                         
                         _ = try await network.request(.registerPushToken(.register(token)))
                     }
-                    
-                    await send(.startMainPage(
-                        userId: memberInformation.id,
-                        nickname: memberInformation.nickname))
                 }
                 
-            case .startMainPage(let userId, let nickname):
-                state.mainPageState = MainPageFeature.State(userId: userId, nickname: nickname)
+            case .updateState(let status):
+                state.userStatus = status
+                
+                switch status {
+                case .notDetermined:
+                    break
+                case .needSignIn:
+                    state.logInStatus = .loggedIn
+                case .needRegistration:
+                    state.registrationState = .init()
+                case .needOnboarding:
+                    state.onboardingState = .init()
+                case let .canUseApp(userId, nickname):
+                    state.mainPageState = .init(userId: userId, nickname: nickname)
+                }
+                
                 return .none
+                
+            // MARK: - Presentation actions
+            case .login(.presented(.signInWithAppleResponse(let response))):
+                switch response {
+                case .success(let body):
+                    let token = body.data.token.accessToken
+                    userStorage.accessToken = token
+                    network.registerAuthorizationToken(token)
+                    
+                    return .send(.updateMemberInformation(withMemberData: nil))
+                    
+                case .failure:
+                    return .none
+                }
+                
+            case .login(.presented(.signInWithKakaoResponse(let response))):
+                switch response {
+                case .success(let body):
+                    let token = body.data.token.accessToken
+                    userStorage.accessToken = token
+                    network.registerAuthorizationToken(token)
+                    
+                    return .send(.updateMemberInformation(withMemberData: nil))
+
+                case .failure:
+                    return .none
+                }
+                
+            case .registration(.presented(.finishRegisterResponse(let response))):
+                return .send(.updateMemberInformation(withMemberData: response.data))
+                
+            case .onboarding(.presented(.testResult(.closeButtonDidTap))):
+                guard let userId = userStorage.userId, let nickname = userStorage.nickname else {
+                    // 멤버 정보 수신 재시도
+                    // TODO: and show alert. 사실 있을 수 없는 케이스긴 함
+                    return .send(.updateMemberInformation(withMemberData: nil))
+                }
+                
+                return .send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
                 
             default:
                 return .none
@@ -223,11 +178,21 @@ public struct RootFeature: Reducer {
         .ifLet(\.$registrationState, action: /Action.registration) {
             RegistrationFeature()
         }
-        .ifLet(\.$onboardingStatus, action: /Action.onboarding) {
+        .ifLet(\.$onboardingState, action: /Action.onboarding) {
             OnboardingFeature()
         }
         .ifLet(\.$mainPageState, action: /Action.mainPage) {
             MainPageFeature()
+        }
+    }
+}
+
+private extension RootFeature {
+    func needsRegistration(forNickname nickname: String?) -> Bool {
+        if nickname == nil {
+            return true
+        } else {
+            return false
         }
     }
 }

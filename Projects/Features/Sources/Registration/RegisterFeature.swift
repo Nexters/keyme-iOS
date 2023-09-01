@@ -47,7 +47,7 @@ public struct RegistrationFeature: Reducer {
         case registerProfileImageResponse(thumbnailURL: URL, originalImageURL: URL)
         
         case finishRegister(nickname: String, thumbnailURL: URL?, originalImageURL: URL?)
-        case finishRegisterResponse(id: Int, friendCode: String)
+        case finishRegisterResponse(MemberUpdateDTO)
     }
     
     public var body: some Reducer<State, Action> {
@@ -112,10 +112,7 @@ public struct RegistrationFeature: Reducer {
                             profileThumbnail: originalImageURL?.absoluteString)),
                         object: MemberUpdateDTO.self)
                     
-                    await send(
-                        .finishRegisterResponse(
-                            id: result.data.id,
-                            friendCode: result.data.friendCode ?? "")) // TODO: 나중에 non-null 값 필요
+                    await send(.finishRegisterResponse(result))
                 }
                 
             case .finishRegisterResponse:
