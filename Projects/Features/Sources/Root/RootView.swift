@@ -32,7 +32,7 @@ public struct RootView: View {
                 if viewStore.state != .needSignIn {
                     BackgroundBlurringView(style: .dark)
                         .ignoresSafeArea()
-                        .transition(.opacity.animation(.easeInOut))
+                        .transition(.opacity.animation(Animation.customInteractiveSpring()))
                 }
                 
                 switch viewStore.state {
@@ -45,7 +45,9 @@ public struct RootView: View {
                     IfLetStore(loginStore) { store in
                         SignInView(store: store)
                     }
-                    
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+                    .zIndex(ViewZIndex.siginIn.rawValue)
+
                 case .needRegistration:
                     // 개인정보 등록
                     let registrationStore = store.scope(
@@ -55,7 +57,9 @@ public struct RootView: View {
                     IfLetStore(registrationStore) { store in
                         RegistrationView(store: store)
                     }
-                
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+                    .zIndex(ViewZIndex.registration.rawValue)
+                    
                 case .needOnboarding:
                     // 가입했지만 온보딩을 하지 않고 종료했던 유저
                     let onboardingStore = store.scope(
@@ -65,6 +69,8 @@ public struct RootView: View {
                     IfLetStore(onboardingStore) { store in
                         OnboardingView(store: store)
                     }
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+                    .zIndex(ViewZIndex.onboarding.rawValue)
                     
                 case .canUseApp:
                     // 가입했고 온보딩을 진행한 유저
@@ -74,16 +80,26 @@ public struct RootView: View {
                     
                     IfLetStore(mainPageStore) { store in
                         KeymeMainView(store: store)
-                            .transition(.opacity.animation(.easeInOut))
                     } else: {
                         Text("에러")
                     }
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+                    .zIndex(ViewZIndex.main.rawValue)
                     
                 case .notDetermined:
                     EmptyView()
                 }
             }
         }
+    }
+}
+
+private extension RootView {
+    enum ViewZIndex: CGFloat {
+        case siginIn = 4
+        case registration = 3
+        case onboarding = 2
+        case main = 1
     }
 }
 
