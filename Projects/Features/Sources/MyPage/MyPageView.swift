@@ -49,16 +49,17 @@ struct MyPageView: View {
                         viewStore.send(.circleDismissed)
                     }
                 }
-
+                
                 if !viewStore.state.circleShown {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
-                            Button(action: {}) {
+                            
+                            NavigationLink(destination: destinationView()) {
                                 DSKitAsset.Image.photoExport.swiftUIImage
                                     .resizable()
                                     .frame(width: 35, height: 35)
                             }
-                            
+
                             Spacer()
                             
                             Text.keyme("마이", font: .body3Semibold)
@@ -69,7 +70,7 @@ struct MyPageView: View {
                             
                             Spacer()
                             
-                            Button(action: {}) {
+                            NavigationLink(destination: destinationView()) {
                                 DSKitAsset.Image.setting.swiftUIImage
                                     .resizable()
                                     .frame(width: 24, height: 24)
@@ -105,6 +106,20 @@ struct MyPageView: View {
             store.send(.requestCircle(.low5))
             
             store.send(.view(.selectSegement(.similar)))
+        }
+    }
+}
+
+private extension MyPageView {
+    func destinationView() -> some View {
+        store.send(.view(.prepareSettingView))
+        
+        let store = store.scope(
+            state: \.settingViewState,
+            action: MyPageFeature.Action.settingViewAction)
+        
+        return IfLetStore(store) { store in
+            SettingView(store: store)
         }
     }
 }

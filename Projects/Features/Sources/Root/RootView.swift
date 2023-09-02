@@ -16,7 +16,7 @@ public struct RootView: View {
     
     public init() {
         self.store = Store(initialState: RootFeature.State()) {
-            RootFeature()._printChanges()
+            RootFeature()
         }
         
         store.send(.view(.checkUserStatus))

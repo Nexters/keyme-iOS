@@ -25,38 +25,40 @@ struct KeymeMainView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { _ in
-            TabView(selection: $selectedTab) {
-                KeymeTestsHomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
-                    .tabItem {
-                        homeTabImage
-                    }
-                    .tag(Tab.home)
-                
-                MyPageView(store: store.scope(state: \.myPage, action: MainPageFeature.Action.myPage))
-                    .tabItem {
-                        myPageTabImage
-                    }
-                    .tag(Tab.myPage)
-            }
-            .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
-                let tabBar = tabViewController.tabBar
-                
-                let barAppearance = UITabBarAppearance()
-                barAppearance.configureWithOpaqueBackground()
-                barAppearance.backgroundColor = UIColor(Color.hex("232323"))
-                
-                let itemAppearance = UITabBarItemAppearance()
-                itemAppearance.selected.iconColor = .white
-                itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
-                itemAppearance.normal.iconColor = .gray
-                itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
-                
-                tabBar.standardAppearance = barAppearance
-                tabBar.standardAppearance.inlineLayoutAppearance = itemAppearance
-                tabBar.standardAppearance.stackedLayoutAppearance = itemAppearance
-                tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
-                tabBar.scrollEdgeAppearance = tabBar.standardAppearance
+        NavigationStack {
+            WithViewStore(store, observe: { $0 }) { _ in
+                TabView(selection: $selectedTab) {
+                    KeymeTestsHomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
+                        .tabItem {
+                            homeTabImage
+                        }
+                        .tag(Tab.home)
+                    
+                    MyPageView(store: store.scope(state: \.myPage, action: MainPageFeature.Action.myPage))
+                        .tabItem {
+                            myPageTabImage
+                        }
+                        .tag(Tab.myPage)
+                }
+                .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
+                    let tabBar = tabViewController.tabBar
+                    
+                    let barAppearance = UITabBarAppearance()
+                    barAppearance.configureWithOpaqueBackground()
+                    barAppearance.backgroundColor = UIColor(Color.hex("232323"))
+                    
+                    let itemAppearance = UITabBarItemAppearance()
+                    itemAppearance.selected.iconColor = .white
+                    itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
+                    itemAppearance.normal.iconColor = .gray
+                    itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+                    
+                    tabBar.standardAppearance = barAppearance
+                    tabBar.standardAppearance.inlineLayoutAppearance = itemAppearance
+                    tabBar.standardAppearance.stackedLayoutAppearance = itemAppearance
+                    tabBar.standardAppearance.compactInlineLayoutAppearance = itemAppearance
+                    tabBar.scrollEdgeAppearance = tabBar.standardAppearance
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ public struct MyPageFeature: Reducer {
         var differentCircleDataList: [CircleData] = []
         var view: View
         var scoreListState: ScoreListFeature.State = .init()
+        var settingViewState: SettingFeature.State?
         
         struct View: Equatable {            
             let userId: Int
@@ -44,11 +45,13 @@ public struct MyPageFeature: Reducer {
         case requestCircle(MatchRate)
         case view(View)
         case scoreListAction(ScoreListFeature.Action)
+        case settingViewAction(SettingFeature.Action)
  
         public enum View: Equatable {
             case markViewAsShown
             case circleTapped
             case circleDismissed
+            case prepareSettingView
             case selectSegement(MyPageSegment)
         }
     }
@@ -123,10 +126,20 @@ public struct MyPageFeature: Reducer {
                 state.view.circleShown = false
                 return .none
                 
+            case .view(.prepareSettingView):
+                state.settingViewState = .init()
+                return .none
+                
             case .scoreListAction:
                 print("score")
                 return .none
+                
+            default:
+                return .none
             }
+        }
+        .ifLet(\.settingViewState, action: /Action.settingViewAction) {
+            SettingFeature()
         }
     }
 }
