@@ -54,13 +54,19 @@ public struct RegistrationFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .debouncedNicknameUpdate(let nicknameString):
+                guard !nicknameString.isEmpty else {
+                    return .none
+                }
+
                 state.nicknameTextFieldString = nicknameString
+                state.isNicknameAvailable = nil
+                
                 return .run { send in
                     try await withTaskCancellation(
                         id: CancelID.debouncedNicknameUpdate,
                         cancelInFlight: true
                     ) {
-                        try await self.clock.sleep(for: .seconds(0.7))
+                        try await self.clock.sleep(for: .seconds(0.3))
                         
                         await send(.checkDuplicatedNickname(nicknameString))
                     }
