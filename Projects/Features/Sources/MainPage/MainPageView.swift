@@ -25,30 +25,19 @@ struct KeymeMainView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }) { _ in
             TabView(selection: $selectedTab) {
-                KeymeTestsHomeView(store: Store(
-                    initialState: KeymeTestsHomeFeature.State(
-                        nickname: viewStore.nickname)
-                ) {
-                    KeymeTestsHomeFeature()
-                })
-                .tabItem {
-                    homeTabImage
-                }
-                .tag(Tab.home)
+                KeymeTestsHomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
+                    .tabItem {
+                        homeTabImage
+                    }
+                    .tag(Tab.home)
                 
-                MyPageView(store: Store(
-                    initialState: MyPageFeature.State(
-                        userId: viewStore.state.userId,
-                        nickname: viewStore.state.nickname)
-                ) {
-                    MyPageFeature()
-                })
-                .tabItem {
-                    myPageTabImage
-                }
-                .tag(Tab.myPage)
+                MyPageView(store: store.scope(state: \.myPage, action: MainPageFeature.Action.myPage))
+                    .tabItem {
+                        myPageTabImage
+                    }
+                    .tag(Tab.myPage)
             }
             .introspect(.tabView, on: .iOS(.v16, .v17)) { tabViewController in
                 let tabBar = tabViewController.tabBar

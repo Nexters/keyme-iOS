@@ -14,17 +14,10 @@ import Foundation
 import SwiftUI
 import Network
 
-struct Coordinate {
-    var x: Double
-    var y: Double
-    var r: Double
-    var color: Color
-}
-
-struct MyPageFeature: Reducer {
+public struct MyPageFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
-    struct State: Equatable {
+    public struct State: Equatable {
         var similarCircleDataList: [CircleData] = []
         var differentCircleDataList: [CircleData] = []
         var view: View
@@ -45,14 +38,14 @@ struct MyPageFeature: Reducer {
         }
     }
 
-    enum Action: Equatable {
+    public enum Action: Equatable {
         case saveCircle([CircleData], MatchRate)
         case showCircle(MyPageSegment)
         case requestCircle(MatchRate)
         case view(View)
         case scoreListAction(ScoreListFeature.Action)
  
-        enum View: Equatable {
+        public enum View: Equatable {
             case markViewAsShown
             case circleTapped
             case circleDismissed
@@ -138,9 +131,16 @@ struct MyPageFeature: Reducer {
     }
 }
 
-extension MyPageFeature {
+public extension MyPageFeature {
     enum MatchRate {
         case top5
         case low5
+    }
+    
+    struct Coordinate {
+        var x: Double
+        var y: Double
+        var r: Double
+        var color: Color
     }
 }
