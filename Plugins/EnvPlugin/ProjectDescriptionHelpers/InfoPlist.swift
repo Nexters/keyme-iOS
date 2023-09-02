@@ -28,7 +28,8 @@ public extension Project {
                     "NSExceptionMinimumTLSVersion": "TLSv1.2",
                 ],
             ]
-        ]
+        ],
+        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink"]
     ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [
