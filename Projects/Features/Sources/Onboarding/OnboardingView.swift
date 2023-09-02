@@ -99,7 +99,7 @@ public struct OnboardingView: View {
                 Color.clear
                     .contentShape(Circle())
                     .onTapGesture {
-                        HapticManager.shared.tongtong()
+                        HapticManager.shared.boong()
                         viewStore.send(.startButtonDidTap)
                     }
             }

@@ -87,13 +87,21 @@ public struct SignInView: View {
     }
     
     struct GuideMessageView: View {
+        let serviceTermURLString = "https://keyme.notion.site/Keyme-b1f3902d8fe04b97be6d8835119887cd?pvs=4"
+        let privacyTermURLString = "https://keyme.notion.site/Keyme-46bef61be1204fc594a49e85e5913a39?pvs=4"
+        
         var body: some View {
             VStack(spacing: 8) {
                 Text("가입 시, 키미의 다음 사항에 동의하는 것으로 간주합니다.")
                     .foregroundColor(.gray)
                 
                 HStack(spacing: 4) {
-                    Button(action: {}) {
+                    Button(action: {
+                        guard let serviceTermURL = URL(string: serviceTermURLString) else {
+                            return
+                        }
+                        UIApplication.shared.open(serviceTermURL)
+                    }) {
                         Text("서비스 이용약관")
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -102,7 +110,12 @@ public struct SignInView: View {
                     Text("및")
                         .foregroundColor(.gray)
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        guard let privacyTermURL = URL(string: privacyTermURLString) else {
+                            return
+                        }
+                        UIApplication.shared.open(privacyTermURL)
+                    }) {
                         Text("개인정보 정책")
                             .fontWeight(.bold)
                             .foregroundColor(.white)
