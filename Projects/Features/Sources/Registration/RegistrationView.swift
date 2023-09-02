@@ -142,9 +142,6 @@ public struct RegistrationView: View {
                 .padding(.bottom, 20)
                 .disabled(viewStore.state.canRegister ? false : true)
             }
-            .onTapGesture {
-                isTextFieldFocused = false
-            }
             .padding(.horizontal, 16)
             .onChange(of: nickname) { newValue in
                 guard 1 <= newValue.count, newValue.count <= 6 else {
@@ -163,6 +160,10 @@ public struct RegistrationView: View {
             }
             .fullFrame()
             .ignoresSafeArea(.keyboard, edges: .bottom)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isTextFieldFocused = false
         }
     }
 }
