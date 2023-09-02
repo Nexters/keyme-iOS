@@ -115,6 +115,7 @@ public struct RegistrationView: View {
 
                 // 다음 페이지로 넘어가기 위한 Button
                 Button(action: {
+                    HapticManager.shared.boong()
                     viewStore.send(
                         .finishRegister(
                             nickname: viewStore.nicknameTextFieldString,
