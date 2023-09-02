@@ -78,10 +78,7 @@ public struct RootFeature: Reducer {
                     
                     userStorage.userId = memberInformation.id
                     userStorage.nickname = memberInformation.nickname
-                    
-                    if let friendCode = memberInformation.friendCode {
-                        userStorage.friendCode = friendCode
-                    }
+                    userStorage.friendCode = memberInformation.friendCode
                     
                     if let profileImageURL = URL(string: memberInformation.profileImage) {
                         userStorage.profileImageURL = profileImageURL
@@ -91,12 +88,14 @@ public struct RootFeature: Reducer {
                         userStorage.profileThumbnailURL = profileThumbnailURL
                     }
                     
-                    if memberInformation.nickname == nil {
-                        await send(.updateState(.needRegistration))
-                    } else if memberInformation.isOnboardingClear == false {
-                        await send(.updateState(.needOnboarding))
+                    if let userId = memberInformation.id, let nickname = memberInformation.nickname {
+                        if memberInformation.isOnboardingClear == false {
+                            await send(.updateState(.needOnboarding))
+                        } else {
+                            await send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
+                        }
                     } else {
-                        await send(.updateState(.canUseApp(userId: memberInformation.id, nickname: memberInformation.nickname)))
+                        await send(.updateState(.needRegistration))
                     }
                     
                     Task.detached(priority: .low) {
