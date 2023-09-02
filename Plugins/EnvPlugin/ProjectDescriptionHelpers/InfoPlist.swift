@@ -16,10 +16,14 @@ public extension Project {
         "CFBundleURLTypes": [
             [
                 "CFBundleTypeRole": "Editor",
-                "CFBundleURLSchemes": ["keyme"]
+                "CFBundleURLSchemes": [
+                    "keyme",
+                    "kakao$(KAKAO_API_KEY)"
+                ]
             ]
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
+        "KAKAO_API_KEY": "$(KAKAO_API_KEY)",
         "UIUserInterfaceStyle": "Light",
         "NSAppTransportSecurity": [
             "NSExceptionDomains": [

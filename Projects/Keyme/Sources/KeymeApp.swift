@@ -8,22 +8,22 @@ import FirebaseMessaging
 import Features
 import Network
 
-import KakaoSDKAuth
 import KakaoSDKCommon
+import KakaoSDKAuth
 
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
-    let KAKAO_PRIVATE_KEY = "" // 🚨 SECRET 🚨 
-    
-    init() {
-        KakaoSDK.initSDK(appKey: KAKAO_PRIVATE_KEY)
-    }
-    
     var body: some Scene {
         WindowGroup {
             RootView()
+                .onOpenURL { url in
+                    print(url)
+                    if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                        _ = AuthController.handleOpenUrl(url: url)
+                    }
+                }
         }
     }
 }
@@ -33,6 +33,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        if let kakaoAPIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_API_KEY") as? String {
+            KakaoSDK.initSDK(appKey: kakaoAPIKey)
+        }
+        
         FirebaseApp.configure()
         
         UNUserNotificationCenter.current().delegate = self
@@ -49,18 +53,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
         return true
-    }
-    
-    func application(
-        _ app: UIApplication,
-        open url: URL,
-        options: [UIApplication.OpenURLOptionsKey : Any] = [:]
-    ) -> Bool {
-        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-            return AuthController.handleOpenUrl(url: url)
-        }
-        
-        return false
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
