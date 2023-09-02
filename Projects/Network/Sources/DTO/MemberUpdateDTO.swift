@@ -15,9 +15,9 @@ public struct MemberUpdateDTO: Codable, Equatable {
     
     public struct MemberData: Codable, Equatable {
         public let friendCode: String?
-        public let id: Int
+        public let id: Int?
         public let isOnboardingClear: Bool
-        public let nickname: String
+        public let nickname: String?
         public let profileImage: String
         public let profileThumbnail: String
     }
