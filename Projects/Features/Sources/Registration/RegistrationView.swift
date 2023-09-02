@@ -87,7 +87,10 @@ public struct RegistrationView: View {
                         RoundedRectangle(cornerRadius: 4)
                             .stroke(.white.opacity(0.3), lineWidth: 1)
                     )
-                    .background(.black.opacity(0.4))
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(.black.opacity(0.4))
+                    )
                     .modifier(Shake(isShake: $isShake))
                 
                 if
@@ -111,8 +114,8 @@ public struct RegistrationView: View {
                             .lineSpacing(10)
                             .foregroundColor(.white)
                     )
-                    .padding(.vertical, 24)
-
+                    .padding(.bottom, 64)
+                
                 // 다음 페이지로 넘어가기 위한 Button
                 Button(action: {
                     HapticManager.shared.boong()
