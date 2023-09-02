@@ -9,6 +9,7 @@
 //
 
 import AuthenticationServices
+import Core
 import ComposableArchitecture
 import DSKit
 import SwiftUI
@@ -52,6 +53,7 @@ public struct SignInView: View {
         var body: some View {
             Button(action: {
                 store.send(.signInWithKakao)
+                HapticManager.shared.boong()
             }) {
                 Image("kakao_login")
                     .resizable()
@@ -68,6 +70,7 @@ public struct SignInView: View {
         var body: some View {
             SignInWithAppleButton(
                 onRequest: { request in
+                    HapticManager.shared.boong()
                     request.requestedScopes = [.fullName, .email]
                 },
                 onCompletion: { completion in
