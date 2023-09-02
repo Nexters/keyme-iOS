@@ -18,11 +18,6 @@ struct MyPageView: View {
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-         
-        store.send(.requestCircle(.top5))
-        store.send(.requestCircle(.low5))
-        
-        store.send(.view(.selectSegement(.similar)))
     }
     
     public var body: some View {
@@ -89,6 +84,12 @@ struct MyPageView: View {
                     .foregroundColor(.white)
                 }
             }
+        }
+        .onAppear {
+            store.send(.requestCircle(.top5))
+            store.send(.requestCircle(.low5))
+            
+            store.send(.view(.selectSegement(.similar)))
         }
     }
 }

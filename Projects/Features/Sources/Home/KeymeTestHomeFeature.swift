@@ -10,11 +10,11 @@ import ComposableArchitecture
 import Domain
 import Network
 
-struct KeymeTestsHomeFeature: Reducer {
+public struct KeymeTestsHomeFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     // 테스트를 아직 풀지 않았거나, 풀었거나 2가지 케이스만 존재
-    struct State: Equatable {
+    public struct State: Equatable {
         @PresentationState var testStartViewState: KeymeTestsStartFeature.State?
         var view: View
         
@@ -28,7 +28,7 @@ struct KeymeTestsHomeFeature: Reducer {
         }
     }
     
-    enum Action {
+    public enum Action {
         case fetchDailyTests
         case showTestStartView(testData: KeymeTestsModel)
         case startTest(PresentationAction<KeymeTestsStartFeature.Action>)
@@ -36,7 +36,7 @@ struct KeymeTestsHomeFeature: Reducer {
         enum View {}
     }
     
-    var body: some ReducerOf<Self> {
+    public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .fetchDailyTests:

@@ -11,7 +11,7 @@ import ComposableArchitecture
 import Domain
 import Network
 
-struct ScoreListFeature: Reducer {
+public struct ScoreListFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     public struct State: Equatable {
