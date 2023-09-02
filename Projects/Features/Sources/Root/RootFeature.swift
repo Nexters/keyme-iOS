@@ -89,7 +89,7 @@ public struct RootFeature: Reducer {
                     }
                     
                     if let userId = memberInformation.id, let nickname = memberInformation.nickname {
-                        if memberInformation.isOnboardingClear == false {
+                        if memberInformation.isOnboardingClear != true {
                             await send(.updateState(.needOnboarding))
                         } else {
                             await send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
