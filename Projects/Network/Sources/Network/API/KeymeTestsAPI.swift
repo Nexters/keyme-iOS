@@ -49,11 +49,6 @@ extension KeymeTestsAPI: BaseAPI {
         }
     }
     
-    public var headers: [String : String]? {
-        // TODO: token 받아서 넣기
-        return ["Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhY2Nlc3NUb2tlbiIsImlhdCI6MTY5MTg0MjM1NiwiZXhwIjoxNjk0NDM0MzU2LCJtZW1iZXJJZCI6Miwicm9sZSI6IlJPTEVfVVNFUiJ9.bLUl_ObvXr2pkLGNBZYWbJgLZLo3P0xB2pawckRGYZM"]
-    }
-    
     public var sampleData: Data {
         switch self {
         case .onboarding, .daily:

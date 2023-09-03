@@ -6,6 +6,7 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Core
 import ComposableArchitecture
 import Domain
 import DSKit
@@ -21,53 +22,76 @@ struct Coordinate {
 }
 
 struct MyPageFeature: Reducer {
+    @Dependency(\.keymeAPIManager) private var network
+    
     struct State: Equatable {
-        var selectedSegment: MyPageSegment = .similar
-        var shownFirstTime = true
         var similarCircleDataList: [CircleData] = []
         var differentCircleDataList: [CircleData] = []
-        var shownCircleDatalist: [CircleData] = []
-        var circleShown = false
+        var view: View
+        var scoreListState: ScoreListFeature.State = .init()
+        
+        struct View: Equatable {            
+            let userId: Int
+            let nickname: String
+            
+            var circleShown = false
+            var selectedSegment: MyPageSegment = .similar
+            var shownFirstTime = true
+            var shownCircleDatalist: [CircleData] = []
+        }
+        
+        init(userId: Int, nickname: String) {
+            self.view = View(userId: userId, nickname: nickname)
+        }
     }
+
     enum Action: Equatable {
-        case selectSegement(MyPageSegment)
-        case requestCircle(MatchRate)
         case saveCircle([CircleData], MatchRate)
-        case markViewAsShown
-        case circleTapped
-        case circleDismissed
+        case showCircle(MyPageSegment)
+        case requestCircle(MatchRate)
+        case view(View)
+        case scoreListAction(ScoreListFeature.Action)
+ 
+        enum View: Equatable {
+            case markViewAsShown
+            case circleTapped
+            case circleDismissed
+            case selectSegement(MyPageSegment)
+        }
     }
     
+    // 마이페이지를 사용할 수 없는 케이스
+    // 1. 원 그래프가 아직 집계되지 않음 -> 빈 화면 페이지
+    // 2. 네트워크가 연결되지 않음 -> 네트워크 미연결 안내
     public var body: some ReducerOf<Self> {
-        Reduce { state, action in
+        Scope(state: \.scoreListState, action: /Action.scoreListAction) {
+            ScoreListFeature()
+        }
+        
+        Reduce { state, action in    
             switch action {
-            case .selectSegement(let segment):
-                state.selectedSegment = segment
-                switch segment {
-                case .different :
-                    state.shownCircleDatalist = state.differentCircleDataList
-                case .similar :
-                    state.shownCircleDatalist = state.similarCircleDataList
-                }
-                
-                return .none
-                
+            case .view(.selectSegement(let segment)):
+                state.view.selectedSegment = segment
+                return .send(.showCircle(state.view.selectedSegment))
+
             // 서버 부하가 있으므로 웬만하면 한 번만 콜 할 것
             case .requestCircle(let rate):
+                let userId = state.view.userId
+
                 switch rate {
                 case .top5:
-                    return .run { send in
-                        let response = try await KeymeAPIManager.shared.request(
-                            .myPage(.statistics(2, .similar)),
+                    return .run(priority: .userInitiated) { send in
+                        let response = try await network.request(
+                            .myPage(.statistics(userId, .similar)),
                             object: CircleData.NetworkResult.self)
                         
                         await send(.saveCircle(response.toCircleData(), rate))
                     }
                     
                 case .low5:
-                    return .run { send in
-                        let response = try await KeymeAPIManager.shared.request(
-                            .myPage(.statistics(2, .different)),
+                    return .run(priority: .userInitiated) { send in
+                        let response = try await network.request(
+                            .myPage(.statistics(userId, .different)),
                             object: CircleData.NetworkResult.self)
                         
                         await send(.saveCircle(response.toCircleData(), rate))
@@ -82,18 +106,32 @@ struct MyPageFeature: Reducer {
                     state.differentCircleDataList = data
                 }
                 
+                return .send(.showCircle(state.view.selectedSegment))
+                
+            case .showCircle(let segment):
+                switch segment {
+                case .similar:
+                    state.view.shownCircleDatalist = state.similarCircleDataList
+                case .different:
+                    state.view.shownCircleDatalist = state.differentCircleDataList
+                }
                 return .none
                 
-            case .markViewAsShown:
-                state.shownFirstTime = false
+            case .view(.markViewAsShown):
+                state.view.shownFirstTime = false
                 return .none
                 
-            case .circleTapped:
-                state.circleShown = true
+            case .view(.circleTapped):
+                HapticManager.shared.tok()
+                state.view.circleShown = true
                 return .none
                 
-            case .circleDismissed:
-                state.circleShown = false
+            case .view(.circleDismissed):
+                state.view.circleShown = false
+                return .none
+                
+            case .scoreListAction:
+                print("score")
                 return .none
             }
         }

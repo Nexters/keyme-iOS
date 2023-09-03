@@ -11,13 +11,22 @@ import ComposableArchitecture
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
-        public init() { }
+        let userId: Int
+        let nickname: String
+        
+        public init(userId: Int, nickname: String) {
+            self.userId = userId
+            self.nickname = nickname
+        }
     }
     
-    public enum Action { }
+    public enum Action {
+        case logout
+        case changeNickname(String)
+    }
     
     public var body: some Reducer<State, Action> {
-        Reduce { _, action in
+        Reduce { _, _ in
             return .none
         }
     }

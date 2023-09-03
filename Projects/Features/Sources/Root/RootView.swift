@@ -17,8 +17,7 @@ public struct RootView: View {
             RootFeature()
         }
         
-        store.send(.checkLoginStatus)
-        store.send(.checkOnboardingStatus) // For 디버깅, 의도적으로 3초 딜레이
+        store.send(.checkUserStatus)
     }
     
     public var body: some View {
@@ -35,6 +34,18 @@ public struct RootView: View {
                 IfLetStore(loginStore) { store in
                     SignInView(store: store)
                 }
+            } else if viewStore.registrationState?.status == .notDetermined {
+                // 개인정보 등록 상태를 로딩 중
+                ProgressView()
+            } else if viewStore.registrationState?.status == .needsRegister {
+                // 개인정보 등록
+                let registrationStore = store.scope(
+                    state: \.$registrationState,
+                    action: RootFeature.Action.registration)
+
+                IfLetStore(registrationStore) { store in
+                    RegistrationView(store: store)
+                }
             } else if viewStore.onboardingStatus?.status == .notDetermined {
                 // 온보딩 상태를 로딩 중
                 ProgressView()
@@ -49,18 +60,21 @@ public struct RootView: View {
                 }
             } else {
                 // 가입했고 온보딩을 진행한 유저
-                KeymeMainView(store: Store(
-                    initialState: MainPageFeature.State()) {
-                        MainPageFeature()
-                    })
-                .transition(.opacity)
+                let mainPageStore = store.scope(state: \.$mainPageState, action: RootFeature.Action.mainPage)
+                
+                IfLetStore(mainPageStore) { store in
+                    KeymeMainView(store: store)
+                        .transition(.opacity)
+                } else: {
+                    Text("에러")
+                }
             }
         }
     }
 }
 
- struct RootView_Previews: PreviewProvider {
+struct RootView_Previews: PreviewProvider {
     static var previews: some View {
         RootView()
     }
- }
+}

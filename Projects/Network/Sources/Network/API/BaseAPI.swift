@@ -21,7 +21,7 @@ extension BaseAPI {
         return URL(string: baseURL)!
     }
     
-//    public var headers: [String: String]? {
-//        return ["Content-type": "application/json"]
-//    }
+    public var headers: [String: String]? {
+        return ["Content-type": "application/json"]
+    }
 }

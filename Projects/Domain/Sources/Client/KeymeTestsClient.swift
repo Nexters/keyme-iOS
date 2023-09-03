@@ -25,29 +25,30 @@ extension DependencyValues {
 }
 
 extension KeymeTestsClient: DependencyKey {
-    public static var liveValue = KeymeTestsClient(
+    public static var liveValue = getClient(with: KeymeAPIManager.liveValue)
+    public static var testValue = getClient(with: KeymeAPIManager.testValue)
+}
+
+private func getClient(with network: KeymeAPIManager) -> KeymeTestsClient {
+     KeymeTestsClient(
         fetchOnboardingTests: {
-            let api = KeymeTestsAPI.onboarding
-            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
-            var response = try await KeymeTestsAPIManager.shared.request(api, object: KeymeTestsDTO.self)
+            let api = KeymeAPI.test(.onboarding)
+            let response = try await network.request(api, object: KeymeTestsDTO.self)
             
-            return response.toIconModel()
+            return response.toKeymeTestsModel()
         }, fetchDailyTests: {
-            let api = KeymeTestsAPI.daily
-            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: KeymeTestsDTO.self)
-            var response = try await KeymeTestsAPIManager.shared.request(api, object: KeymeTestsDTO.self)
+            let api = KeymeAPI.test(.daily)
+            let response = try await network.request(api, object: KeymeTestsDTO.self)
             
-            return response.toIconModel()
+            return response.toKeymeTestsModel()
         }, fetchTestResult: { testResultId in
-            let api = KeymeTestsAPI.result(testResultId)
-            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: TestResultDTO.self)
-            var response = try await KeymeTestsAPIManager.shared.request(api, object: TestResultDTO.self)
+            let api = KeymeAPI.test(.result(testResultId))
+            let response = try await network.request(api, object: TestResultDTO.self)
             
             return response.data.results.map { $0.toModel() }
         }, postTestResult: { resultCode in
-            let api = KeymeTestsAPI.register(resultCode)
-            //            var response = try await KeymeTestsAPIManager.shared.requestWithSampleData(api, object: BaseDTO<String>.self)
-            var response = try await KeymeTestsAPIManager.shared.request(api, object: BaseDTO<String>.self)
+            let api = KeymeAPI.test(.register(resultCode))
+            let response = try await network.request(api, object: BaseDTO<String>.self)
             
             return response.message
         }

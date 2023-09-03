@@ -21,5 +21,5 @@ protocol CoreNetworking<APIType> {
     func request(_ api: APIType) -> AnyPublisher<Response, MoyaError>
     
     /// 인증토큰 헤더에 넣어주는 메서드
-    func registerAuthorizationToken(_ authorizationToken: String)
+    func registerAuthorizationToken(_ authorizationToken: String?)
 }
