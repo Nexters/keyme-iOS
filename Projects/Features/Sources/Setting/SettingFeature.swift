@@ -27,7 +27,9 @@ public struct SettingFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .logout:
+                print("logout from setting")
                 return .none
+                
             case .withdrawal:
                 // TODO: Call api
                 return .none

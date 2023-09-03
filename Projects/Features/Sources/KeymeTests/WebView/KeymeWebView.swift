@@ -41,7 +41,6 @@ public struct KeymeWebView: UIViewRepresentable {
         {
             var request = URLRequest(url: url)
             request.setValue(accessToken, forHTTPHeaderField: "Authorization")
-            
             webView.load(request)
         }
     }

@@ -21,8 +21,8 @@ public struct MyPageFeature: Reducer {
         var similarCircleDataList: [CircleData] = []
         var differentCircleDataList: [CircleData] = []
         var view: View
-        var scoreListState: ScoreListFeature.State = .init()
-        var settingViewState: SettingFeature.State?
+        @Box var scoreListState: ScoreListFeature.State
+        @Box var settingViewState: SettingFeature.State?
         
         struct View: Equatable {            
             let userId: Int
@@ -36,6 +36,8 @@ public struct MyPageFeature: Reducer {
         
         init(userId: Int, nickname: String) {
             self.view = View(userId: userId, nickname: nickname)
+            self._scoreListState = .init(.init())
+            self._settingViewState = .init(nil)
         }
     }
 
