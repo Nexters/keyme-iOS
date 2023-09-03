@@ -22,7 +22,7 @@ public struct KeymeTestsView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                KeymeWebView(url: viewStore.url)
+                KeymeWebView(url: viewStore.url, accessToken: viewStore.authorizationToken ?? "") // TODO: handle it 
                     .onCloseWebView {
                         print("close")
                     }

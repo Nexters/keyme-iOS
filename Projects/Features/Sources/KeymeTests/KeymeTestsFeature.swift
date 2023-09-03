@@ -15,6 +15,10 @@ public struct KeymeTestsFeature: Reducer {
     
     public struct State: Equatable {
         let url: String
+        var authorizationToken: String? {
+            @Dependency(\.keymeAPIManager.authorizationToken) var authorizationToken
+            return authorizationToken
+        }
         
         public init(url: String) {
             self.url = url

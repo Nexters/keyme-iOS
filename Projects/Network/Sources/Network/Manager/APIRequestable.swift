@@ -28,4 +28,7 @@ public protocol APIRequestable<APIType> {
     
     /// 인증토큰 헤더에 넣어주는 메서드
     func registerAuthorizationToken(_ token: String?)
+    
+    /// 인증토큰
+    var authorizationToken: String? { get }
 }

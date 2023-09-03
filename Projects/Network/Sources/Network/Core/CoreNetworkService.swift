@@ -12,6 +12,7 @@ import Foundation
 import Moya
 
 public class CoreNetworkService<APIType: TargetType> {
+    private var token: String?
     public private(set) var provider: MoyaProvider<APIType>
     
     init(provider: MoyaProvider<APIType>) {
@@ -20,6 +21,10 @@ public class CoreNetworkService<APIType: TargetType> {
 }
 
 extension CoreNetworkService: CoreNetworking {
+    var authorizationToken: String? {
+        self.token
+    }
+    
     func request(_ api: APIType) async throws -> Response {
         try await withCheckedThrowingContinuation { continuation in
             provider.request(api) { result in
@@ -51,6 +56,7 @@ extension CoreNetworkService: CoreNetworking {
             plugins: [networkLogger])
         
         provider = newProvider
+        token = authorizationToken
     }
 }
 

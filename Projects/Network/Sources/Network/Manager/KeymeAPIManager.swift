@@ -32,6 +32,10 @@ public class KeymeAPIManager {
 }
 
 extension KeymeAPIManager: CoreNetworking {
+    public var authorizationToken: String? {
+        core.authorizationToken
+    }
+    
     public func registerAuthorizationToken(_ token: String?) {
         core.registerAuthorizationToken(token)
     }
