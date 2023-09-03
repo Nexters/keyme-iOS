@@ -13,56 +13,30 @@ import ComposableArchitecture
 import Domain
 import DSKit
 
-struct ScoreListFeature: Reducer {
-    public struct State: Equatable {
-        var totalCount: Int?
-        var scores: [CharacterScore]
-        
-        public init(totalCount: Int? = nil, scores: [CharacterScore] = []) {
-            self.scores = []
-        }
-    }
-    
-    public enum Action: Equatable {
-        case loadScores
-        case saveScores(totalCount: Int, scores: [CharacterScore])
-    }
-    
-    public var body: some ReducerOf<Self> {
-        Reduce { state, action in
-            switch action {
-            case .loadScores:
-                return .run { send in
-                    try await Task.sleep(until: .now + .seconds(0.5), clock: .continuous)
-                    await send(.saveScores(
-                        totalCount: 42,
-                        scores: (0..<42).map { i in
-                            let randomInterval = TimeInterval(-2 * i)
-                            return CharacterScore(score: Int.random(in: 1...5), date: Date().addingTimeInterval(randomInterval + Double(Int.random(in: 0...1))))
-                        }
-                    ))
-                }
-                
-            case .saveScores(let totalCount, let data):
-                state.totalCount = totalCount
-                state.scores = data
-            }
-            return .none
-        }
-    }
-}
-
 struct ScoreListView: View {
+    private let scoreFetchLimit = 20
+    
     private let formatter: RelativeDateTimeFormatter
+    
+    private let ownerId: Int
+    private let questionId: Int
     private let nickname: String
     private let keyword: String
     private let store: StoreOf<ScoreListFeature>
     
-    init(nickname: String, keyword: String, store: StoreOf<ScoreListFeature>) {
+    init(
+        ownerId: Int,
+        questionId: Int,
+        nickname: String,
+        keyword: String,
+        store: StoreOf<ScoreListFeature>
+    ) {
         self.formatter = RelativeDateTimeFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateTimeStyle = .named
         
+        self.ownerId = ownerId
+        self.questionId = questionId
         self.nickname = nickname
         self.keyword = keyword
         self.store = store
@@ -104,15 +78,28 @@ struct ScoreListView: View {
                         .cornerRadius(16)
                         .onAppear {
                             if
-                                let thirdToLast = viewStore.state.scores.dropLast(2).last,
-                                thirdToLast == scoreData
+                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
+                                thirdToLastItem == scoreData
                             {
-//                                viewStore.send(.loadScores)
+                                guard viewStore.canFetch else { return }
+                                viewStore.send(
+                                    .loadScores(
+                                        ownerId: self.ownerId,
+                                        questionId: self.questionId,
+                                        limit: scoreFetchLimit))
                             }
                         }
                     }
                 }
                 .padding(.horizontal, 17)
+            }
+            .onAppear {
+                guard viewStore.canFetch else { return }
+                viewStore.send(
+                    .loadScores(
+                        ownerId: self.ownerId,
+                        questionId: self.questionId,
+                        limit: scoreFetchLimit))
             }
         }
     }

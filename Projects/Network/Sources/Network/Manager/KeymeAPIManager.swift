@@ -27,6 +27,7 @@ public class KeymeAPIManager {
     
     init(core: CoreNetworkService<KeymeAPI>) {
         self.core = core
+        decoder.dateDecodingStrategy = .iso8601
     }
 }
 

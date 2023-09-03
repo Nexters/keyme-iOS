@@ -7,7 +7,6 @@
 //
 
 import ComposableArchitecture
-import Core
 import Domain
 import DSKit
 import SwiftUI
@@ -16,31 +15,31 @@ struct MyPageView: View {
     @Namespace private var namespace
     
     private let store: StoreOf<MyPageFeature>
-    private let scoreListStore: StoreOf<ScoreListFeature>
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-        self.scoreListStore = Store(initialState: ScoreListFeature.State(), reducer: {
-            ScoreListFeature()
-        })
-        
+         
         store.send(.requestCircle(.top5))
         store.send(.requestCircle(.low5))
         
-        store.send(.selectSegement(.similar))
-        
-        scoreListStore.send(.loadScores)
+        store.send(.view(.selectSegement(.similar)))
     }
     
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: \.view, send: MyPageFeature.Action.view) { viewStore in
             ZStack(alignment: .topLeading) {
                 CirclePackView(
                     namespace: namespace,
                     data: viewStore.shownCircleDatalist,
                     detailViewBuilder: { data in
+                        let scoreListStore = store.scope(
+                            state: \.scoreListState,
+                            action: MyPageFeature.Action.scoreListAction)
+                        
                         ScoreListView(
-                            nickname: "키미",
+                            ownerId: viewStore.userId,
+                            questionId: data.metadata.questionId,
+                            nickname: viewStore.nickname,
                             keyword: data.metadata.keyword,
                             store: scoreListStore)
                     })
@@ -48,7 +47,6 @@ struct MyPageView: View {
                 .activateCircleBlink(viewStore.state.shownFirstTime)
                 .onCircleTapped { _ in
                     viewStore.send(.circleTapped)
-                    HapticManager.shared.tok()
                 }
                 .onCircleDismissed { _ in
                     withAnimation(Animation.customInteractiveSpring()) {
@@ -84,7 +82,7 @@ struct MyPageView: View {
                         .padding(.horizontal, 17)
                         .padding(.top, 25)
                         
-                        Text.keyme("친구들이 생각하는\n키미님의 성격은?", font: .heading1) // TODO: Change nickname
+                        Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
                             .padding(17)
                             .transition(.opacity)
                     }

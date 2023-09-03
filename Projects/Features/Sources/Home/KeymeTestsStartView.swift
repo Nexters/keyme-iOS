@@ -24,46 +24,24 @@ public struct KeymeTestsStartView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack {
-                IfLetStore(
-                    self.store.scope(
-                        state: \.keymeTests,
-                        action: KeymeTestsStartFeature.Action.keymeTests
-                    ),
-                    then: { store in
-                        KeymeTestsView(store: store)
-                            .ignoresSafeArea(.all)
-                            .transition(.scale.animation(.easeIn))
-                    },
-                    else: {
-                        Spacer()
-                            .frame(height: 75)
-                        
-                        welcomeText(viewStore)
-                        
-                        Spacer()
-                        
-                        startTestsButton(viewStore)
-                            .onTapGesture {
-                                viewStore.send(.startButtonDidTap)
-                            }
-                        
-                        Spacer()
-                    }
-                )
-            }
-            .frame(maxWidth: .infinity)
-            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            IfLetStore(
+                self.store.scope(
+                    state: \.keymeTests,
+                    action: KeymeTestsStartFeature.Action.keymeTests
+                ),
+                then: { store in
+                    KeymeTestsView(store: store)
+                        .ignoresSafeArea(.all)
+                        .transition(.scale.animation(.easeIn))
+                },
+                else: {
+                    startTestsButton(viewStore)
+                        .onTapGesture {
+                            viewStore.send(.startButtonDidTap)
+                        }
+                }
+            )
         }
-    }
-    
-    func welcomeText(_ viewStore: ViewStore<KeymeTestsStartFeature.State, KeymeTestsStartFeature.Action>) -> some View {
-        Text.keyme(
-            "환영해요 \(viewStore.nickname ?? "키미")님!\n이제 문제를 풀어볼까요?",
-            font: .heading1) // TODO: 닉변
-        .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Padding.insets(leading: 16))
     }
     
     func startTestsButton(_ viewStore: ViewStore<KeymeTestsStartFeature.State,
