@@ -47,6 +47,10 @@ public struct KeymeTestsStartFeature: Reducer {
                 return .send(.startAnimation(state.testData.icons))
                 
             case .startAnimation(let icons):
+                guard state.isAnimating == false else {
+                    return .none
+                }
+                
                 return .run { send in
                     repeat {
                         for icon in icons {
@@ -58,7 +62,6 @@ public struct KeymeTestsStartFeature: Reducer {
                 
             case let .setIcon(icon):
                 state.icon = icon
-                state.isAnimating = true
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"

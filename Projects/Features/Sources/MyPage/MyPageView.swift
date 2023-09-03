@@ -53,7 +53,6 @@ struct MyPageView: View {
                 if !viewStore.state.circleShown {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
-                            
                             NavigationLink(destination: destinationView()) {
                                 DSKitAsset.Image.photoExport.swiftUIImage
                                     .resizable()

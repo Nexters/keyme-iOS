@@ -40,7 +40,6 @@ public struct KeymeWebView: UIViewRepresentable {
             let url = URL(string: encodedUrl)
         {
             webView.load(URLRequest(url: url))
-            
         }
     }
     

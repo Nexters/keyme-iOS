@@ -19,7 +19,6 @@ public struct KeymeTestsStartView: View {
     
     public init(store: StoreOf<KeymeTestsStartFeature>) {
         self.store = store
-        store.send(.viewWillAppear)
     }
     
     public var body: some View {
@@ -42,6 +41,9 @@ public struct KeymeTestsStartView: View {
                 }
             )
         }
+        .onAppear {
+            store.send(.viewWillAppear)
+        }
     }
     
     func startTestsButton(_ viewStore: ViewStore<KeymeTestsStartFeature.State,
@@ -53,7 +55,7 @@ public struct KeymeTestsStartView: View {
                 .frame(width: 280, height: 280)
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
-                .animation(.spring(response: 0.85).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
             Circle()
                 .foregroundColor(viewStore.icon.color)

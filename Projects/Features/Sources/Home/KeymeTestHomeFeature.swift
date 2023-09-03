@@ -57,5 +57,8 @@ public struct KeymeTestsHomeFeature: Reducer {
             
             return .none
         }
+        .ifLet(\.$testStartViewState, action: /Action.startTest) {
+            KeymeTestsStartFeature()
+        }
     }
 }
