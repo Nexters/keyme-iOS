@@ -1,5 +1,5 @@
 //
-//  RegisterPushTokenAPI.swift
+//  PushTokenAPI.swift
 //  Network
 //
 //  Created by 이영빈 on 2023/08/25.
@@ -9,11 +9,11 @@
 import Foundation
 import Moya
 
-public enum RegisterPushTokenAPI {
+public enum PushTokenAPI {
     case register(String)
 }
 
-extension RegisterPushTokenAPI: BaseAPI {
+extension PushTokenAPI: BaseAPI {
     public var path: String {
         switch self {
         case .register:

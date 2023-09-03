@@ -11,7 +11,7 @@ import Moya
 
 public enum KeymeAPI {
     case myPage(MyPageAPI)
-    case registerPushToken(RegisterPushTokenAPI)
+    case registerPushToken(PushTokenAPI)
     case auth(AuthorizationAPI)
     case registration(RegistrationAPI)
     case member(MemberAPI)
