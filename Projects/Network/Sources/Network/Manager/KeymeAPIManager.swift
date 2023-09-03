@@ -27,6 +27,7 @@ public class KeymeAPIManager {
     
     init(core: CoreNetworkService<KeymeAPI>) {
         self.core = core
+        decoder.dateDecodingStrategy = .iso8601
     }
 }
 
@@ -55,10 +56,6 @@ extension KeymeAPIManager: APIRequestable {
     public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) -> AnyPublisher<T, MoyaError> {
         core.request(api).map(T.self)
     }
-}
-
-public extension KeymeAPIManager {
-    static let shared = KeymeAPIManager()
 }
 
 // MARK: Dependency 설정

@@ -13,7 +13,6 @@ import Network
 import Kingfisher
 
 public struct KeymeTestsModel: Equatable {
-    public let nickname: String
     public let testId: Int
     public let icons: [IconModel]
 }
@@ -26,14 +25,12 @@ public struct IconModel: Equatable, Hashable {
 }
 
 public extension KeymeTestsDTO {
-    func toIconModel() -> KeymeTestsModel {
-        let nickname = data.owner.nickname
+    func toKeymeTestsModel() -> KeymeTestsModel {
         let icons = data.questions.map {
             IconModel(imageURL: $0.category.iconUrl,
                       color: Color.hex($0.category.color))
         }
-        return KeymeTestsModel(nickname: nickname ?? "키미",
-                               testId: data.testId,
-                               icons: icons)
+        
+        return KeymeTestsModel(testId: data.testId, icons: icons)
     }
 }

@@ -49,10 +49,6 @@ extension KeymeTestsAPI: BaseAPI {
         }
     }
     
-    public var headers: [String: String]? {
-        return ["Content-type": "application/json"]
-    }
-    
     public var sampleData: Data {
         switch self {
         case .onboarding, .daily:

@@ -17,9 +17,7 @@ public struct RootView: View {
             RootFeature()
         }
         
-        store.send(.checkLoginStatus)
-        store.send(.checkRegistrationStatus)
-        store.send(.checkOnboardingStatus) // For 디버깅, 의도적으로 딜레이
+        store.send(.checkUserStatus)
     }
     
     public var body: some View {
@@ -44,7 +42,7 @@ public struct RootView: View {
                 let registrationStore = store.scope(
                     state: \.$registrationState,
                     action: RootFeature.Action.registration)
-                
+
                 IfLetStore(registrationStore) { store in
                     RegistrationView(store: store)
                 }
@@ -62,11 +60,14 @@ public struct RootView: View {
                 }
             } else {
                 // 가입했고 온보딩을 진행한 유저
-                KeymeMainView(store: Store(
-                    initialState: MainPageFeature.State()) {
-                        MainPageFeature()
-                    })
-                .transition(.opacity)
+                let mainPageStore = store.scope(state: \.$mainPageState, action: RootFeature.Action.mainPage)
+                
+                IfLetStore(mainPageStore) { store in
+                    KeymeMainView(store: store)
+                        .transition(.opacity)
+                } else: {
+                    Text("에러")
+                }
             }
         }
     }

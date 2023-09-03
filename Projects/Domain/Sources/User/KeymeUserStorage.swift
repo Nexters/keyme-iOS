@@ -29,6 +29,8 @@ public final class KeymeUserStorage {
     
     private enum UserStorageKey: String, StorageKeyType {
         case accessToken
+        case userId
+        case friendCode
         case nickname
         case profileImageURL
         case profileThumbnailURL
@@ -45,6 +47,16 @@ public extension KeymeUserStorage {
         set { set(newValue, forKey: .accessToken) }
     }
     
+    var userId: Int? {
+        get { get(.userId) as? Int }
+        set { set(newValue, forKey: .userId) }
+    }
+    
+    var friendCode: String? {
+        get { get(.friendCode) as? String }
+        set { set(newValue, forKey: .friendCode) }
+    }
+    
     var nickname: String? {
         get { get(.nickname) as? String }
         set { set(newValue, forKey: .nickname) }
@@ -52,12 +64,12 @@ public extension KeymeUserStorage {
     
     var profileImageURL: URL? {
         get { get(.profileImageURL) as? URL }
-        set { set(newValue, forKey: .profileImageURL) }
+        set { set(newValue?.absoluteString, forKey: .profileImageURL) }
     }
 
     var profileThumbnailURL: URL? {
         get { get(.profileThumbnailURL) as? URL }
-        set { set(newValue, forKey: .profileThumbnailURL) }
+        set { set(newValue?.absoluteString, forKey: .profileThumbnailURL) }
     }
 }
 

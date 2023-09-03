@@ -24,6 +24,7 @@ public struct RootFeature: Reducer {
         @PresentationState public var logInStatus: SignInFeature.State?
         @PresentationState public var registrationState: RegistrationFeature.State?
         @PresentationState public var onboardingStatus: OnboardingFeature.State?
+        @PresentationState public var mainPageState: MainPageFeature.State?
         
         public init(
             isLoggedIn: Bool? = nil,
@@ -57,15 +58,17 @@ public struct RootFeature: Reducer {
         case login(PresentationAction<SignInFeature.Action>)
         case registration(PresentationAction<RegistrationFeature.Action>)
         case onboarding(PresentationAction<OnboardingFeature.Action>)
-        case mainPage(MainPageFeature.Action)
-        
+        case mainPage(PresentationAction<MainPageFeature.Action>)
         case onboardingChecked(TaskResult<Bool>)
-                
+
+        case checkUserStatus
+        
         case checkLoginStatus
         case checkRegistrationStatus
         case checkOnboardingStatus
         
         case updateMemberInformation
+        case startMainPage(userId: Int, nickname: String)
     }
     
     public var body: some ReducerOf<Self> {
@@ -84,7 +87,7 @@ public struct RootFeature: Reducer {
                         state.registrationState?.status = .complete
                     }
                     return .none
-
+                    
                 case .failure:
                     return .none
                 }
@@ -102,14 +105,30 @@ public struct RootFeature: Reducer {
                         state.registrationState?.status = .complete
                     }
                     return .none
-
+                    
                 case .failure:
                     return .none
                 }
                 
+            case .checkUserStatus:
+                let accessToken = userStorage.accessToken
+                if accessToken == nil {
+                    state.logInStatus = .loggedOut
+                    
+                    return .none
+                } else {
+                    state.logInStatus = .loggedIn
+                    network.registerAuthorizationToken(accessToken)
+                    
+                    return .run { send in
+                        await send(.updateMemberInformation)
+                        await send(.checkRegistrationStatus)
+                        await send(.checkOnboardingStatus)
+                    }
+                }
+                
             case .checkLoginStatus:
                 let accessToken = userStorage.accessToken
-                
                 if accessToken == nil {
                     state.logInStatus = .loggedOut
                 } else {
@@ -122,7 +141,7 @@ public struct RootFeature: Reducer {
             case .registration(.presented(.finishRegisterResponse)):
                 // Do nothing currently
                 return .none
-            
+                
             case .checkRegistrationStatus:
                 let nickname: String? = userStorage.nickname
                 
@@ -149,22 +168,23 @@ public struct RootFeature: Reducer {
                 switch result {
                 case true:
                     state.onboardingStatus?.status = .completed
-                    // 온보딩 체크 끝나면 서버에 API 쳐서 유저 데이터 업데이트
-                    // 온보딩 체크는 앱 켜질 떄마다 될 거고 이게 사실상 앱 진입 전 마지막 과정이라서 여기서 업뎃
-                    return .send(.updateMemberInformation)
-                    
                 case false:
                     state.onboardingStatus?.status = .needsOnboarding
                 }
                 return .none
                 
             case .updateMemberInformation:
-                return .run(priority: .userInitiated) { _ in
+                return .run(priority: .userInitiated) { send in
                     let memberInformation = try await network.request(
                         .member(.fetch),
                         object: MemberUpdateDTO.self).data
                     
+                    userStorage.userId = memberInformation.id
                     userStorage.nickname = memberInformation.nickname
+                    
+                    if let friendCode = memberInformation.friendCode {
+                        userStorage.friendCode = friendCode
+                    }
                     
                     if let profileImageURL = URL(string: memberInformation.profileImage) {
                         userStorage.profileImageURL = profileImageURL
@@ -173,7 +193,25 @@ public struct RootFeature: Reducer {
                     if let profileThumbnailURL = URL(string: memberInformation.profileImage) {
                         userStorage.profileThumbnailURL = profileThumbnailURL
                     }
+                    
+                    Task.detached(priority: .low) {
+                        let notificationDelegate = UserNotificationCenterDelegateManager()
+                        guard let token = await notificationDelegate.waitForToken() else {
+                            print("ERROR TOEKN PUSH")
+                            return
+                        }
+                        
+                        _ = try await network.request(.registerPushToken(.register(token)))
+                    }
+                    
+                    await send(.startMainPage(
+                        userId: memberInformation.id,
+                        nickname: memberInformation.nickname))
                 }
+                
+            case .startMainPage(let userId, let nickname):
+                state.mainPageState = MainPageFeature.State(userId: userId, nickname: nickname)
+                return .none
                 
             default:
                 return .none
@@ -187,6 +225,9 @@ public struct RootFeature: Reducer {
         }
         .ifLet(\.$onboardingStatus, action: /Action.onboarding) {
             OnboardingFeature()
+        }
+        .ifLet(\.$mainPageState, action: /Action.mainPage) {
+            MainPageFeature()
         }
     }
 }
