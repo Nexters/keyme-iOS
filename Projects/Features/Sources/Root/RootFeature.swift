@@ -2,14 +2,11 @@
 //  RootFeature.swift
 //  Features
 //
-//  Created by 이영빈 on 2023/08/10.
-//  Edited by 고도 on 2023/08/14.
-// 
+//  Created by 이영빈 on 2023/09/04.
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
 import Foundation
-
 import Domain
 import Network
 import ComposableArchitecture
@@ -20,21 +17,12 @@ public struct RootFeature: Reducer {
     
     public init() {}
     
-    public struct State: Equatable {
-        @PresentationState public var logInStatus: SignInFeature.State?
-        @PresentationState public var registrationState: RegistrationFeature.State?
-        @PresentationState public var onboardingState: OnboardingFeature.State?
-        @PresentationState public var mainPageState: MainPageFeature.State?
-        
-        var userStatus: UserStatus = .notDetermined
-        
-        public enum UserStatus: Equatable {
-            case notDetermined
-            case needSignIn
-            case needRegistration
-            case needOnboarding
-            case canUseApp(userId: Int, nickname: String)
-        }
+    public enum State: Equatable {
+        case notDetermined
+        case needSignIn(SignInFeature.State)
+        case needRegistration(RegistrationFeature.State)
+        case needOnboarding(OnboardingFeature.State)
+        case canUseApp(MainPageFeature.State)
     }
     
     public enum Action {
@@ -43,12 +31,12 @@ public struct RootFeature: Reducer {
         }
         case view(View)
         
-        case login(PresentationAction<SignInFeature.Action>)
-        case registration(PresentationAction<RegistrationFeature.Action>)
-        case onboarding(PresentationAction<OnboardingFeature.Action>)
-        case mainPage(PresentationAction<MainPageFeature.Action>)
+        case login(SignInFeature.Action)
+        case registration(RegistrationFeature.Action)
+        case onboarding(OnboardingFeature.Action)
+        case mainPage(MainPageFeature.Action)
         
-        case updateState(State.UserStatus)
+        case updateState(State)
         case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?)
     }
     
@@ -58,12 +46,12 @@ public struct RootFeature: Reducer {
             case .view(.checkUserStatus):
                 let accessToken = userStorage.accessToken
                 if accessToken == nil { // 로그 아웃 상태
-                    return .send(.updateState(.needSignIn))
+                    return .send(.updateState(.needSignIn(.loggedOut)))
                 } else { // 로그인 상태
                     network.registerAuthorizationToken(accessToken)
                     return .send(.updateMemberInformation(withMemberData: nil))
                 }
-        
+                
             case .updateMemberInformation(let receviedMemberData):
                 return .run(priority: .userInitiated) { send in
                     let memberInformation: MemberUpdateDTO.MemberData
@@ -90,12 +78,13 @@ public struct RootFeature: Reducer {
                     
                     if let userId = memberInformation.id, let nickname = memberInformation.nickname {
                         if memberInformation.isOnboardingClear != true {
-                            await send(.updateState(.needOnboarding))
+                            await send(.updateState(.needOnboarding(OnboardingFeature.State())))
                         } else {
-                            await send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
+                            await send(.updateState(
+                                .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                         }
                     } else {
-                        await send(.updateState(.needRegistration))
+                        await send(.updateState(.needRegistration(RegistrationFeature.State())))
                     }
                     
                     Task.detached(priority: .low) {
@@ -110,26 +99,12 @@ public struct RootFeature: Reducer {
                     }
                 }
                 
-            case .updateState(let status):
-                state.userStatus = status
-                
-                switch status {
-                case .notDetermined:
-                    break
-                case .needSignIn:
-                    state.logInStatus = .loggedIn
-                case .needRegistration:
-                    state.registrationState = .init()
-                case .needOnboarding:
-                    state.onboardingState = .init()
-                case let .canUseApp(userId, nickname):
-                    state.mainPageState = .init(userId: userId, nickname: nickname)
-                }
-                
+            case .updateState(let receivedState):
+                state = receivedState
                 return .none
                 
             // MARK: - Presentation actions
-            case .login(.presented(.signInWithAppleResponse(let response))):
+            case .login(.signInWithAppleResponse(let response)):
                 switch response {
                 case .success(let body):
                     let token = body.data.token.accessToken
@@ -142,7 +117,7 @@ public struct RootFeature: Reducer {
                     return .none
                 }
                 
-            case .login(.presented(.signInWithKakaoResponse(let response))):
+            case .login(.signInWithKakaoResponse(let response)):
                 switch response {
                 case .success(let body):
                     let token = body.data.token.accessToken
@@ -150,41 +125,40 @@ public struct RootFeature: Reducer {
                     network.registerAuthorizationToken(token)
                     
                     return .send(.updateMemberInformation(withMemberData: nil))
-
+                    
                 case .failure:
                     return .none
                 }
                 
-            case .registration(.presented(.finishRegisterResponse(let response))):
+            case .registration(.finishRegisterResponse(let response)):
                 return .send(.updateMemberInformation(withMemberData: response.data))
                 
-            case .onboarding(.presented(.testResult(.closeButtonDidTap))):
+            case .onboarding(.testResult(.closeButtonDidTap)):
                 guard let userId = userStorage.userId, let nickname = userStorage.nickname else {
                     // 멤버 정보 수신 재시도
                     // TODO: and show alert. 사실 있을 수 없는 케이스긴 함
                     return .send(.updateMemberInformation(withMemberData: nil))
                 }
                 
-                return .send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
+                return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
-            case .mainPage(.presented(.myPage(.settingViewAction(.logout)))):
-                print("logout from rootview")
-                return .none
+            case .mainPage(.myPage(.settingViewAction(.logout))):
+                return .send(.updateState(.needSignIn(.loggedOut)))
                 
             default:
                 return .none
             }
         }
-        .ifLet(\.$logInStatus, action: /Action.login) {
+        .ifCaseLet(/State.needSignIn, action: /Action.login) {
             SignInFeature()
         }
-        .ifLet(\.$registrationState, action: /Action.registration) {
+        .ifCaseLet(/State.needRegistration, action: /Action.registration) {
             RegistrationFeature()
         }
-        .ifLet(\.$onboardingState, action: /Action.onboarding) {
+        .ifCaseLet(/State.needOnboarding, action: /Action.onboarding) {
             OnboardingFeature()
         }
-        .ifLet(\.$mainPageState, action: /Action.mainPage) {
+        .ifCaseLet(/State.canUseApp, action: /Action.mainPage) {
             MainPageFeature()
         }
     }
