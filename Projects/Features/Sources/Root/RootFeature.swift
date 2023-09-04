@@ -103,7 +103,7 @@ public struct RootFeature: Reducer {
                 state = receivedState
                 return .none
                 
-            // MARK: - Presentation actions
+            // MARK: - Child actions
             case .login(.signInWithAppleResponse(let response)):
                 switch response {
                 case .success(let body):
@@ -136,13 +136,13 @@ public struct RootFeature: Reducer {
             case .onboarding(.testResult(.closeButtonDidTap)):
                 guard let userId = userStorage.userId, let nickname = userStorage.nickname else {
                     // 멤버 정보 수신 재시도
-                    // TODO: and show alert. 사실 있을 수 없는 케이스긴 함
                     return .send(.updateMemberInformation(withMemberData: nil))
                 }
                 
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
-            case .mainPage(.myPage(.settingViewAction(.logout))):
+            case .mainPage(.myPage(.setting(.logout))):
+                userStorage.accessToken = nil
                 return .send(.updateState(.needSignIn(.loggedOut)))
                 
             default:

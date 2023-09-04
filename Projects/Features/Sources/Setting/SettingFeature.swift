@@ -13,7 +13,9 @@ import Network
 
 public struct SettingFeature: Reducer {
     
-    public struct State: Equatable {}
+    public struct State: Equatable {
+        var isPushNotificationEnabled: Bool = true
+    }
     
     public enum Action: Equatable {
         case logout
@@ -33,6 +35,7 @@ public struct SettingFeature: Reducer {
             case .withdrawal:
                 // TODO: Call api
                 return .none
+                
             case .setPushNotification:
                 return .none
             }

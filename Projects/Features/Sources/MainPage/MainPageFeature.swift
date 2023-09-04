@@ -37,7 +37,7 @@ public struct MainPageFeature: Reducer {
         
         Reduce { _, action in
             switch action {
-            case .myPage(.settingViewAction(.logout)):
+            case .myPage(.setting(.logout)):
                 print("logout from mainpage")
             default:
                 break

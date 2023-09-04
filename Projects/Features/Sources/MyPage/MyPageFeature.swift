@@ -47,7 +47,7 @@ public struct MyPageFeature: Reducer {
         case requestCircle(MatchRate)
         case view(View)
         case scoreListAction(ScoreListFeature.Action)
-        case settingViewAction(SettingFeature.Action)
+        case setting(SettingFeature.Action)
  
         public enum View: Equatable {
             case markViewAsShown
@@ -140,7 +140,7 @@ public struct MyPageFeature: Reducer {
                 return .none
             }
         }
-        .ifLet(\.settingViewState, action: /Action.settingViewAction) {
+        .ifLet(\.settingViewState, action: /Action.setting) {
             SettingFeature()
         }
     }
