@@ -17,7 +17,7 @@ struct KeymeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            SwitchingRootView()
                 .onOpenURL { url in
                     print(url)
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
