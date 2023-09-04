@@ -1,6 +1,6 @@
 //
-//  NotificationManager.swift
-//  Core
+//  PushNotificationManager.swift
+//  Feature
 //
 //  Created by 이영빈 on 2023/09/04.
 //  Copyright © 2023 team.humanwave. All rights reserved.
@@ -16,27 +16,19 @@ import FirebaseMessaging
 import UserNotifications
 import Network
 
-public final class NotificationManager: NSObject {
+public final class PushNotificationManager: NSObject {
     public private(set) var isPushNotificationGranted: Bool = false
     private let userNotificationCenter = UNUserNotificationCenter.current()
-    
-    private var application: UIApplication?
+    private var application: UIApplication = .shared
     
     private var fcmToken: String?
     private let tokenSemaphore = DispatchSemaphore(value: 0)
     
-    func setApplication(_ application: UIApplication) {
-        self.application = application
-    }
-    
     /// 쓰레드 블로킹이라 웬만하면 비동기로 처리하세요. 까딱하다 앱 작살남
-    func registerPushNotification() async -> String? {
-        guard let application else {
-            print("UIApplication 등록하고 쓰세요! (푸시알림 매니저 올림)")
-            return nil
-        }
-        
+    public func registerPushNotification() async -> String? {
         userNotificationCenter.delegate = self
+        Messaging.messaging().delegate = self
+
         do {
             isPushNotificationGranted = try await userNotificationCenter.requestAuthorization(
                 options: [.alert, .badge, .sound])
@@ -58,23 +50,17 @@ public final class NotificationManager: NSObject {
         }
     }
     
-    func unregisterPushNotification() {
-        guard let application else {
-            print("UIApplication 등록하고 쓰세요! (푸시알림 매니저 올림)")
-            return
-        }
-        
+    public func unregisterPushNotification() {
         DispatchQueue.main.async {
-            application.unregisterForRemoteNotifications()
+            self.application.unregisterForRemoteNotifications()
         }
     }
 
     private func waitForToken(for application: UIApplication) async -> String? {
-        Messaging.messaging().delegate = self
         
-        DispatchQueue.main.async {
-            application.registerForRemoteNotifications()
-        }
+//        DispatchQueue.main.async {
+            await application.registerForRemoteNotifications()
+//        }
         
         return await withCheckedContinuation { continuation in
             // If the token has already been received before this method was called
@@ -96,21 +82,9 @@ public final class NotificationManager: NSObject {
     }
 }
 
-extension NotificationManager: UNUserNotificationCenterDelegate {
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-        let token = tokenParts.joined()
-        Messaging.messaging().setAPNSToken(deviceToken, type: .unknown)
-        
-        print("firebase Device Token: \(token)")
-    }
-    
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("firebase Failed to register for remote notifications: \(error)")
-    }
-}
+extension PushNotificationManager: UNUserNotificationCenterDelegate {}
 
-extension NotificationManager: MessagingDelegate {
+extension PushNotificationManager: MessagingDelegate {
     public func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else {
             return
@@ -121,13 +95,13 @@ extension NotificationManager: MessagingDelegate {
     }
 }
 
-extension NotificationManager: DependencyKey {
-    public static var liveValue = NotificationManager()
+extension PushNotificationManager: DependencyKey {
+    public static var liveValue = PushNotificationManager()
 }
 
 extension DependencyValues {
-    var notificationManager: NotificationManager {
-        get { self[NotificationManager.self] }
-        set { self[NotificationManager.self] = newValue }
+    public var notificationManager: PushNotificationManager {
+        get { self[PushNotificationManager.self] }
+        set { self[PushNotificationManager.self] = newValue }
     }
 }

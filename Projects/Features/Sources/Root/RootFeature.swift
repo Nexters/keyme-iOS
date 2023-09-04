@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Network
 import ComposableArchitecture
+import SwiftUI
 
 public struct RootFeature: Reducer {
     @Dependency(\.userStorage) private var userStorage
@@ -39,6 +40,7 @@ public struct RootFeature: Reducer {
         
         case updateState(State)
         case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?)
+        case registerPushNotification
     }
     
     public var body: some ReducerOf<Self> {
@@ -88,18 +90,23 @@ public struct RootFeature: Reducer {
                         await send(.updateState(.needRegistration(RegistrationFeature.State())))
                     }
                     
-                    Task.detached(priority: .low) {
-                        guard let token = await notificationManager.registerPushNotification() else {
-                            print("푸시토큰 등록 중 에러 발생")
-                            return
-                        }
-                        
-                        _ = try await network.request(.registerPushToken(.register(token)))
-                    }
+                    await send(.registerPushNotification)
                 }
                 
             case .updateState(let receivedState):
                 state = receivedState
+                return .none
+                
+            case .registerPushNotification:
+                Task {
+                    guard let token = await notificationManager.registerPushNotification() else {
+                        print("푸시토큰 등록 중 에러 발생")
+                        return
+                    }
+
+                    _ = try await network.request(.registerPushToken(.register(token)))
+                }
+                
                 return .none
                 
             // MARK: - Child actions
@@ -140,7 +147,7 @@ public struct RootFeature: Reducer {
                 
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
-            case .mainPage(.myPage(.setting(.logout))):
+            case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
                 userStorage.accessToken = nil
                 return .send(.updateState(.needSignIn(.loggedOut)))
                 

@@ -22,7 +22,7 @@ public struct MyPageFeature: Reducer {
         var differentCircleDataList: [CircleData] = []
         var view: View
         @Box var scoreListState: ScoreListFeature.State
-        @Box var settingViewState: SettingFeature.State?
+        @PresentationState var settingViewState: SettingFeature.State?
         
         struct View: Equatable {            
             let userId: Int
@@ -37,7 +37,6 @@ public struct MyPageFeature: Reducer {
         init(userId: Int, nickname: String) {
             self.view = View(userId: userId, nickname: nickname)
             self._scoreListState = .init(.init())
-            self._settingViewState = .init(nil)
         }
     }
 
@@ -47,7 +46,7 @@ public struct MyPageFeature: Reducer {
         case requestCircle(MatchRate)
         case view(View)
         case scoreListAction(ScoreListFeature.Action)
-        case setting(SettingFeature.Action)
+        case setting(PresentationAction<SettingFeature.Action>)
  
         public enum View: Equatable {
             case markViewAsShown
@@ -129,7 +128,8 @@ public struct MyPageFeature: Reducer {
                 return .none
                 
             case .view(.prepareSettingView):
-                state.settingViewState = .init()
+                print("@@ init from mypage")
+                state.settingViewState = SettingFeature.State()
                 return .none
                 
             case .scoreListAction:
@@ -140,7 +140,7 @@ public struct MyPageFeature: Reducer {
                 return .none
             }
         }
-        .ifLet(\.settingViewState, action: /Action.setting) {
+        .ifLet(\.$settingViewState, action: /Action.setting) {
             SettingFeature()
         }
     }

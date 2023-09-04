@@ -30,6 +30,7 @@ public struct RootView: View {
                 .ignoresSafeArea()
             
             SwitchStore(store) { state in
+                // 블러 깔 것인지 판단(로그인 아니면 깐다)
                 if case .needSignIn = state {
                     EmptyView()
                 } else {

@@ -22,7 +22,7 @@ struct SettingView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, send: SettingFeature.Action.view) { viewStore in
             ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .ignoresSafeArea()
@@ -37,13 +37,10 @@ struct SettingView: View {
                         Divider()
                         
                         section(title: "마케팅 정보 수신 동의") {
-                            HStack {
-                                item(text: "푸시 알림")
-                                
-                                Spacer()
-                                
-                                Toggle("", isOn: .constant(true))
-                            }
+                            pushNotificationToggleButton(
+                                isOn: viewStore.binding(
+                                    get: \.isPushNotificationEnabled,
+                                    send: .togglePushNotification))
                         }
                     }
                     .fullFrame()
@@ -87,6 +84,16 @@ private extension SettingView {
             )
         }) {
             item(text: "서비스 탈퇴").frame(minWidth: 0, maxWidth: .infinity)
+        }
+    }
+    
+    func pushNotificationToggleButton(isOn binding: Binding<Bool>) -> some View {
+        HStack {
+            item(text: "푸시 알림")
+            
+            Spacer()
+            
+            Toggle("", isOn: binding)
         }
     }
     

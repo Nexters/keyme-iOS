@@ -29,6 +29,8 @@ struct KeymeApp: App {
 }
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    @Dependency(\.notificationManager) var notificationManager
+    
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -36,8 +38,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if let kakaoAPIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_API_KEY") as? String {
             KakaoSDK.initSDK(appKey: kakaoAPIKey)
         }
-        
         FirebaseApp.configure()
+
+        Task { await notificationManager.registerPushNotification() }
+
         return true
     }
 }

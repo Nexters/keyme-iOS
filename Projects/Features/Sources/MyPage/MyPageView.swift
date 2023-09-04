@@ -53,12 +53,12 @@ struct MyPageView: View {
                 if !viewStore.state.circleShown {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
-                            NavigationLink(destination: destinationView()) {
+                            Button(action: { viewStore.send(.prepareSettingView) }) {
                                 DSKitAsset.Image.photoExport.swiftUIImage
                                     .resizable()
                                     .frame(width: 35, height: 35)
                             }
-
+                            
                             Spacer()
                             
                             Text.keyme("마이", font: .body3Semibold)
@@ -69,7 +69,7 @@ struct MyPageView: View {
                             
                             Spacer()
                             
-                            NavigationLink(destination: destinationView()) {
+                            Button(action: { viewStore.send(.prepareSettingView) }) {
                                 DSKitAsset.Image.setting.swiftUIImage
                                     .resizable()
                                     .frame(width: 24, height: 24)
@@ -99,6 +99,9 @@ struct MyPageView: View {
                     .foregroundColor(.white)
                 }
             }
+            .navigationDestination(
+                store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
+                destination: { SettingView(store: $0) })
         }
         .onAppear {
             store.send(.requestCircle(.top5))
@@ -109,16 +112,14 @@ struct MyPageView: View {
     }
 }
 
-private extension MyPageView {
-    func destinationView() -> some View {
-        store.send(.view(.prepareSettingView))
-        
-        let store = store.scope(
-            state: \.settingViewState,
-            action: MyPageFeature.Action.setting)
-        
-        return IfLetStore(store) { store in
-            SettingView(store: store)
-        }
-    }
-}
+//private extension MyPageView {
+//    func destinationView() -> some View {
+//        let store = store.scope(
+//            state: \.settingViewState,
+//            action: MyPageFeature.Action.setting)
+//
+//        return IfLetStore(store) { store in
+//            SettingView(store: store)
+//        }
+//    }
+//}
