@@ -29,13 +29,15 @@ public struct SwitchingRootView: View {
             KeymeLottieView(asset: .background, loopMode: .autoReverse)
                 .ignoresSafeArea()
             
-            if showBlurringBackground {
-                BackgroundBlurringView(style: .dark)
-                    .ignoresSafeArea()
-                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
-            }
-            
             SwitchStore(store) { state in
+                if case .needSignIn = state {
+                    EmptyView()  
+                } else {
+                    BackgroundBlurringView(style: .dark)
+                        .ignoresSafeArea()
+                        .transition(.opacity.animation(Animation.customInteractiveSpring()))
+                }
+                
                 switch state {
                 case .needSignIn:
                     CaseLet(
@@ -46,9 +48,6 @@ public struct SwitchingRootView: View {
                     }
                     .zIndex(ViewZIndex.siginIn.rawValue)
                     .transition(.opacity.animation(Animation.customInteractiveSpring()))
-                    .onDisappear {
-                        showBlurringBackground = true
-                    }
                     
                 case .needRegistration:
                     CaseLet(
