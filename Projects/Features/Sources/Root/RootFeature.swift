@@ -13,6 +13,7 @@ import ComposableArchitecture
 
 public struct RootFeature: Reducer {
     @Dependency(\.userStorage) private var userStorage
+    @Dependency(\.notificationManager) private var notificationManager
     @Dependency(\.keymeAPIManager) private var network
     
     public init() {}
@@ -88,9 +89,7 @@ public struct RootFeature: Reducer {
                     }
                     
                     Task.detached(priority: .low) {
-                        let notificationDelegate = UserNotificationCenterDelegateManager()
-                        
-                        guard let token = await notificationDelegate.waitForToken() else {
+                        guard let token = await notificationManager.registerPushNotification() else {
                             print("푸시토큰 등록 중 에러 발생")
                             return
                         }

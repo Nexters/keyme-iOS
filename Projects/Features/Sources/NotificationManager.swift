@@ -52,22 +52,30 @@ public final class NotificationManager: NSObject {
                 return nil
             }
             
-            DispatchQueue.main.async {
-                application.registerForRemoteNotifications()
-            }
-            
-            return await waitForToken()
+            return await waitForToken(for: application)
         } catch {
             return nil
         }
     }
     
     func unregisterPushNotification() {
+        guard let application else {
+            print("UIApplication 등록하고 쓰세요! (푸시알림 매니저 올림)")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            application.unregisterForRemoteNotifications()
+        }
     }
 
-    private func waitForToken() async -> String? {
+    private func waitForToken(for application: UIApplication) async -> String? {
         Messaging.messaging().delegate = self
-
+        
+        DispatchQueue.main.async {
+            application.registerForRemoteNotifications()
+        }
+        
         return await withCheckedContinuation { continuation in
             // If the token has already been received before this method was called
             if let token = self.fcmToken {
