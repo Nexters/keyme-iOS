@@ -167,6 +167,10 @@ public struct RootFeature: Reducer {
                 
                 return .send(.updateState(.canUseApp(userId: userId, nickname: nickname)))
                 
+            case .mainPage(.presented(.myPage(.settingViewAction(.logout)))):
+                print("logout from rootview")
+                return .none
+                
             default:
                 return .none
             }
