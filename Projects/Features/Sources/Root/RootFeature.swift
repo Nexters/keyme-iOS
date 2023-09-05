@@ -148,7 +148,7 @@ public struct RootFeature: Reducer {
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
-]                userStorage.accessToken = nil
+                userStorage.accessToken = nil
                 return .send(.updateState(.needSignIn(SignInFeature.State())))
                 
             default:

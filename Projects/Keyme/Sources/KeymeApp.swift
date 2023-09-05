@@ -1,6 +1,7 @@
 import SwiftUI
 import UserNotifications
 
+import Core
 import ComposableArchitecture
 import FirebaseCore
 import FirebaseMessaging
@@ -41,6 +42,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         FirebaseApp.configure()
 
         Task { await notificationManager.registerPushNotification() }
+        
+        // 웹 뷰 로딩속도 개선 툴
+        WKWebViewWarmUper.shared.prepare()
 
         return true
     }
