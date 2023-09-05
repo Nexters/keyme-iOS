@@ -26,7 +26,7 @@ struct SettingView: View {
             ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .ignoresSafeArea()
-                
+                    
                 ScrollView {
                     VStack(alignment: .leading, spacing: 30) {
                         section(title: "개인정보") {

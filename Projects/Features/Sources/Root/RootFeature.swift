@@ -49,7 +49,7 @@ public struct RootFeature: Reducer {
             case .view(.checkUserStatus):
                 let accessToken = userStorage.accessToken
                 if accessToken == nil { // 로그 아웃 상태
-                    return .send(.updateState(.needSignIn(.loggedOut)))
+                    return .send(.updateState(.needSignIn(SignInFeature.State())))
                 } else { // 로그인 상태
                     network.registerAuthorizationToken(accessToken)
                     return .send(.updateMemberInformation(withMemberData: nil))
@@ -148,8 +148,8 @@ public struct RootFeature: Reducer {
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
-                userStorage.accessToken = nil
-                return .send(.updateState(.needSignIn(.loggedOut)))
+]                userStorage.accessToken = nil
+                return .send(.updateState(.needSignIn(SignInFeature.State())))
                 
             default:
                 return .none

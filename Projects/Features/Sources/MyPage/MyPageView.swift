@@ -111,15 +111,3 @@ struct MyPageView: View {
         }
     }
 }
-
-//private extension MyPageView {
-//    func destinationView() -> some View {
-//        let store = store.scope(
-//            state: \.settingViewState,
-//            action: MyPageFeature.Action.setting)
-//
-//        return IfLetStore(store) { store in
-//            SettingView(store: store)
-//        }
-//    }
-//}

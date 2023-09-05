@@ -57,10 +57,7 @@ public final class PushNotificationManager: NSObject {
     }
 
     private func waitForToken(for application: UIApplication) async -> String? {
-        
-//        DispatchQueue.main.async {
-            await application.registerForRemoteNotifications()
-//        }
+        await application.registerForRemoteNotifications()
         
         return await withCheckedContinuation { continuation in
             // If the token has already been received before this method was called
