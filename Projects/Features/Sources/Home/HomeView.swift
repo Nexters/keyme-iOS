@@ -12,7 +12,7 @@ import SwiftUI
 
 public struct HomeView: View {
     public var store: StoreOf<HomeFeature>
-
+    
     public init(store: StoreOf<HomeFeature>) {
         self.store = store
     }
@@ -22,22 +22,9 @@ public struct HomeView: View {
             ZStack(alignment: .center) {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                 
-                VStack(alignment: .leading) {
-                    // Filler
-                    Spacer().frame(height: 75)
-                    
-                    welcomeText(nickname: viewStore.nickname)
-                        .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-                    
-                    Spacer()
-                }
-                .fullFrame()
-                .padding(.horizontal, 16)
-
-                // 테스트 뷰
-                testView
-
-                // 결과 화면 표시도 생각
+                #warning("testResultId로 분기처리 해야됨")
+                //startTestView
+                dailyTestListView
                 
             }
             .onAppear {
@@ -51,7 +38,7 @@ public struct HomeView: View {
 }
 
 extension HomeView {
-    var testView: some View {
+    var startTestView: some View {
         let startTestStore = store.scope(
             state: \.$startTestState,
             action: HomeFeature.Action.startTest
@@ -67,11 +54,14 @@ extension HomeView {
         }
     }
     
-    func welcomeText(nickname: String) -> some View {
-        Text.keyme(
-            "환영해요 \(nickname)님!",
-//            "환영해요 \(viewStore.nickname)님!\n이제 문제를 풀어볼까요?",
-            font: .heading1)
+    var dailyTestListView: some View {
+        let dailyTestListStore = store.scope(
+            state: \.$dailyTestListState,
+            action: HomeFeature.Action.dailyTestList
+        )
+        
+        return IfLetStore(dailyTestListStore) { store in
+            DailyTestListView(store: store)
+        }
     }
-    
 }

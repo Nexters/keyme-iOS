@@ -23,13 +23,24 @@ public struct StartTestView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
+            VStack(alignment: .leading) {
+                Spacer().frame(height: 75)
+                
+                welcomeText(nickname: viewStore.nickname)
+                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+                
+                Spacer()
+            }
+            .fullFrame()
+            .padding(.horizontal, 16)
+            
             startTestsButton(viewStore)
                 .onTapGesture {
                     viewStore.send(.startButtonDidTap)
                 }
                 .navigationDestination(
                     store: store.scope(
-                        state: \.$keymeTests,
+                        state: \.$keymeTestsState,
                         action: StartTestFeature.Action.keymeTests
                     ), destination: { store in
                         KeymeTestsView(store: store)
@@ -41,7 +52,9 @@ public struct StartTestView: View {
             store.send(.viewWillAppear)
         }
     }
-    
+}
+
+extension StartTestView {
     func startTestsButton(_ viewStore: ViewStore<StartTestFeature.State,
                           StartTestFeature.Action>) -> some View {
         ZStack {
@@ -65,5 +78,11 @@ public struct StartTestView: View {
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
                 .animation(.spring(response: 0.8), value: viewStore.isAnimating)
         }
+    }
+    
+    func welcomeText(nickname: String) -> some View {
+        Text.keyme(
+            "환영해요 \(nickname)님!\n이제 문제를 풀어볼까요?",
+            font: .heading1)
     }
 }

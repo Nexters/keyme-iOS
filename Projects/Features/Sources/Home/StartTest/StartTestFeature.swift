@@ -18,7 +18,7 @@ public struct StartTestFeature: Reducer {
         let authorizationToken: String
 
         public var icon: IconModel = .EMPTY
-        @PresentationState public var keymeTests: KeymeTestsFeature.State?
+        @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
         public init(nickname: String, testData: KeymeTestsModel, authorizationToken: String) {
@@ -46,7 +46,7 @@ public struct StartTestFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .viewWillAppear:
-                return .send(.startAnimation(state.testData.icons))
+                return .send(.startAnimation(state.testData.tests.map { $0.icon }))
                 
             case .startAnimation(let icons):
                 
@@ -64,10 +64,11 @@ public struct StartTestFeature: Reducer {
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
-                state.keymeTests = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
+                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
+                print(state.keymeTestsState)
                 
             case .keymeTests(.presented(.close)):
-                state.keymeTests = nil
+                state.keymeTestsState = nil
                 
             case let .toggleAnimation(icon):
                 state.isAnimating.toggle()
@@ -85,7 +86,7 @@ public struct StartTestFeature: Reducer {
             
             return .none
         }
-        .ifLet(\.$keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }

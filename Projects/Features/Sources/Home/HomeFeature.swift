@@ -18,6 +18,7 @@ public struct HomeFeature: Reducer {
     public struct State: Equatable {
         @PresentationState var alertState: AlertState<Action.Alert>?
         @PresentationState var startTestState: StartTestFeature.State?
+        @PresentationState var dailyTestListState: DailyTestListFeature.State?
         var authorizationToken: String? {
             @Dependency(\.keymeAPIManager.authorizationToken) var authorizationToken
             return authorizationToken
@@ -43,6 +44,7 @@ public struct HomeFeature: Reducer {
         
         case alert(PresentationAction<Alert>)
         case startTest(PresentationAction<StartTestFeature.Action>)
+        case dailyTestList(PresentationAction<DailyTestListFeature.Action>)
         
         enum View {}
         
@@ -69,9 +71,8 @@ public struct HomeFeature: Reducer {
             switch action {
             case .fetchDailyTests:
                 return .run { send in
-                    let fetchedTest = try await network.requestWithSampleData(.test(.daily), object: KeymeTestsDTO.self)
+                    let fetchedTest = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
                     let testData = fetchedTest.toKeymeTestsModel()
-                    
                     await send(.showTestStartView(testData: testData))
                 }
                 
@@ -85,6 +86,11 @@ public struct HomeFeature: Reducer {
                     nickname: state.view.nickname,
                     testData: testData,
                     authorizationToken: authorizationToken
+                )
+                
+                state.dailyTestListState =
+                DailyTestListFeature.State(
+                    testData: testData
                 )
             case .showErrorAlert(let error):
                 if case .cannotGetAuthorizationInformation = error {
@@ -112,6 +118,9 @@ public struct HomeFeature: Reducer {
         }
         .ifLet(\.$startTestState, action: /Action.startTest) {
             StartTestFeature()
+        }
+        .ifLet(\.$dailyTestListState, action: /Action.dailyTestList) {
+            DailyTestListFeature()
         }
     }
 }
