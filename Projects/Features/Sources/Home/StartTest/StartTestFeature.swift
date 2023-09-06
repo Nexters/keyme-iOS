@@ -1,5 +1,5 @@
 //
-//  KeymeTestsStartFeature.swift
+//  StartTestFeature.swift
 //  Features
 //
 //  Created by 김영인 on 2023/08/12.
@@ -11,7 +11,7 @@ import ComposableArchitecture
 
 import Domain
 
-public struct KeymeTestsStartFeature: Reducer {
+public struct StartTestFeature: Reducer {
     public struct State: Equatable {
         public let nickname: String
         public let testData: KeymeTestsModel

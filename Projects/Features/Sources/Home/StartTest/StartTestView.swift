@@ -1,5 +1,5 @@
 //
-//  KeymeTestsStartView.swift
+//  StartTestView.swift
 //  Features
 //
 //  Created by 김영인 on 2023/08/12.
@@ -14,10 +14,10 @@ import Core
 import Util
 import DSKit
 
-public struct KeymeTestsStartView: View {
-    public var store: StoreOf<KeymeTestsStartFeature>
+public struct StartTestView: View {
+    public var store: StoreOf<StartTestFeature>
     
-    public init(store: StoreOf<KeymeTestsStartFeature>) {
+    public init(store: StoreOf<StartTestFeature>) {
         self.store = store
     }
     
@@ -30,7 +30,7 @@ public struct KeymeTestsStartView: View {
                 .navigationDestination(
                     store: store.scope(
                         state: \.$keymeTests,
-                        action: KeymeTestsStartFeature.Action.keymeTests
+                        action: StartTestFeature.Action.keymeTests
                     ), destination: { store in
                         KeymeTestsView(store: store)
                             .ignoresSafeArea(.all)
@@ -42,8 +42,8 @@ public struct KeymeTestsStartView: View {
         }
     }
     
-    func startTestsButton(_ viewStore: ViewStore<KeymeTestsStartFeature.State,
-                          KeymeTestsStartFeature.Action>) -> some View {
+    func startTestsButton(_ viewStore: ViewStore<StartTestFeature.State,
+                          StartTestFeature.Action>) -> some View {
         ZStack {
             Circle()
                 .strokeBorder(.white.opacity(0.3), lineWidth: 1)

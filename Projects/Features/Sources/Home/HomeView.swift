@@ -1,5 +1,5 @@
 //
-//  KeymeTestHomeView.swift
+//  HomeView.swift
 //  Features
 //
 //  Created by 이영빈 on 2023/08/30.
@@ -10,14 +10,14 @@ import ComposableArchitecture
 import DSKit
 import SwiftUI
 
-struct KeymeTestsHomeView: View {
-    var store: StoreOf<KeymeTestsHomeFeature>
+public struct HomeView: View {
+    public var store: StoreOf<HomeFeature>
 
-    init(store: StoreOf<KeymeTestsHomeFeature>) {
+    public init(store: StoreOf<HomeFeature>) {
         self.store = store
     }
     
-    var body: some View {
+    public var body: some View {
         WithViewStore(store, observe: { $0.view }) { viewStore in
             ZStack(alignment: .center) {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
@@ -46,18 +46,18 @@ struct KeymeTestsHomeView: View {
                 }
             }
         }
-        .alert(store: store.scope(state: \.$alertState, action: KeymeTestsHomeFeature.Action.alert))
+        .alert(store: store.scope(state: \.$alertState, action: HomeFeature.Action.alert))
     }
 }
 
-extension KeymeTestsHomeView {
+extension HomeView {
     var testView: some View {
         let startTestStore = store.scope(
-            state: \.$testStartViewState,
-            action: KeymeTestsHomeFeature.Action.startTest)
+            state: \.$startTestState,
+            action: HomeFeature.Action.startTest)
         
         return IfLetStore(startTestStore) { store in
-            KeymeTestsStartView(store: store)
+            StartTestView(store: store)
         } else: {
             Circle()
                 .strokeBorder(.white.opacity(0.3), lineWidth: 1)
