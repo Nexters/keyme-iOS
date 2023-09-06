@@ -61,7 +61,7 @@ struct DailyTestListView: View {
 extension DailyTestListView {
     func welcomeText(nickname: String) -> some View {
         Text.keyme(
-            "\(nickname)님!\n친구들의 답변이 쌓이고 있어요!",
+            "\(nickname)님 친구들의\n답변이 쌓이고 있어요!",
             font: .heading1)
         .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
         .frame(maxWidth: .infinity, alignment: .leading)
