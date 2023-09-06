@@ -28,6 +28,8 @@ public struct HomeFeature: Reducer {
         struct View: Equatable {
             let nickname: String
             var dailyTestId: Int?
+            var isSolvedDailyTest: Bool = false
+            var testId: Int?
         }
         
         public init(nickname: String) {
@@ -39,9 +41,11 @@ public struct HomeFeature: Reducer {
         case requestLogout
         
         case fetchDailyTests
+        case saveIsSolved(Bool)
+        case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
         case showErrorAlert(HomeFeatureError)
-        
+
         case alert(PresentationAction<Alert>)
         case startTest(PresentationAction<StartTestFeature.Action>)
         case dailyTestList(PresentationAction<DailyTestListFeature.Action>)
@@ -71,10 +75,19 @@ public struct HomeFeature: Reducer {
             switch action {
             case .fetchDailyTests:
                 return .run { send in
-                    let fetchedTest = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
+                    let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
+//                    let fetchedTest = try await network.requestWithSampleData(.test(.onboarding), object: KeymeTestsDTO.self)
                     let testData = fetchedTest.toKeymeTestsModel()
+                    await send(.saveIsSolved(fetchedTest.data.testResultId != nil))
+                    await send(.saveTestId(testData.testId))
                     await send(.showTestStartView(testData: testData))
                 }
+                
+            case let .saveIsSolved(isSolved):
+                state.view.isSolvedDailyTest = isSolved
+                
+            case let .saveTestId(testId):
+                state.view.testId = testId
                 
             case .showTestStartView(let testData):
                 state.view.dailyTestId = testData.testId

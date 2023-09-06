@@ -96,9 +96,9 @@ extension KeymeTestsAPI: BaseAPI {
                         "title": "님은 길에서 도를 아십니까와 마주쳤을때 무시하고 지나간다",
                         "keyword": "마이웨이",
                         "category": {
-                            "iconUrl": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/icon/passion.png",
+                            "iconUrl": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/icon/intelligence.png",
                             "name": "PASSION",
-                            "color": "F37952"
+                            "color": "D6EC63"
                         }
                     }
                 ]
@@ -121,7 +121,7 @@ extension KeymeTestsAPI: BaseAPI {
                     "name": "MONEY",
                     "color": "568049"
                 },
-                "keyword": "참군인",
+                "keyword": "돈관리 마스터",
                 "myScore": 0,
                 "questionId": 0,
                 "title": "불의를 보면 참지 않는다"
@@ -145,7 +145,7 @@ extension KeymeTestsAPI: BaseAPI {
                     "name": "INTELLIGENCE",
                     "color": "D6EC63"
                 },
-                "keyword": "참군인",
+                "keyword": "무념무상",
                 "myScore": 0,
                 "questionId": 0,
                 "title": "불의를 보면 참지 않는다"

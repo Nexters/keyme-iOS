@@ -26,10 +26,10 @@ struct DailyTestListView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(alignment: .leading) {
-                Spacer().frame(height: 75)
+                Spacer()
+                    .frame(height: 75)
                 
                 welcomeText(nickname: viewStore.testData.nickname)
-                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
                 
                 Spacer()
                 
@@ -63,6 +63,8 @@ extension DailyTestListView {
         Text.keyme(
             "\(nickname)님!\n친구들의 답변이 쌓이고 있어요!",
             font: .heading1)
+        .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     func dailyTestList(_ viewStore: DailyTestStore) -> some View {
@@ -93,7 +95,7 @@ extension DailyTestListView {
                                        font: .body3Semibold)
                                 .foregroundColor(.white)
                             
-                            Text.keyme("평균점수 | \(testStatistics.avarageScores)점",
+                            Text.keyme("평균점수 | \(testStatistics.avarageScore)점",
                                        font: .body4)
                             .foregroundColor(.white.opacity(0.5))
                         }

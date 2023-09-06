@@ -17,14 +17,7 @@ public struct DailyStatisticsModel: Equatable {
 
 public struct TestsStatisticsModel: Hashable, Equatable {
     public let keymeTests: KeymeTestsInfoModel
-    public let avarageScores: Double
-}
-
-public extension DailyStatisticsModel {
-    static var EMPTY: Self = .init(
-        solvedCount: 0,
-        testsStatistics: []
-    )
+    public let avarageScore: Double
 }
 
 public extension StatisticsDTO {
@@ -38,7 +31,7 @@ public extension StatisticsDTO {
                         color: Color.hex($0.category.color)
                     )
                 ),
-                avarageScores: $0.avgScore
+                avarageScore: $0.avgScore
             )
         }
         

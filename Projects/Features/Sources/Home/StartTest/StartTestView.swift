@@ -23,30 +23,31 @@ public struct StartTestView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack(alignment: .leading) {
-                Spacer().frame(height: 75)
+            VStack {
+                Spacer()
+                    .frame(height: 75)
                 
                 welcomeText(nickname: viewStore.nickname)
-                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
                 
                 Spacer()
+                
+                startTestsButton(viewStore)
+                    .onTapGesture {
+                        viewStore.send(.startButtonDidTap)
+                    }
+                    .navigationDestination(
+                        store: store.scope(
+                            state: \.$keymeTestsState,
+                            action: StartTestFeature.Action.keymeTests
+                        ), destination: { store in
+                            KeymeTestsView(store: store)
+                                .ignoresSafeArea(.all)
+                                .transition(.scale.animation(.easeIn))
+                        })
+                
+                Spacer()
+                Spacer()
             }
-            .fullFrame()
-            .padding(.horizontal, 16)
-            
-            startTestsButton(viewStore)
-                .onTapGesture {
-                    viewStore.send(.startButtonDidTap)
-                }
-                .navigationDestination(
-                    store: store.scope(
-                        state: \.$keymeTestsState,
-                        action: StartTestFeature.Action.keymeTests
-                    ), destination: { store in
-                        KeymeTestsView(store: store)
-                            .ignoresSafeArea(.all)
-                            .transition(.scale.animation(.easeIn))
-                    })
         }
         .onAppear {
             store.send(.viewWillAppear)
@@ -84,5 +85,8 @@ extension StartTestView {
         Text.keyme(
             "환영해요 \(nickname)님!\n이제 문제를 풀어볼까요?",
             font: .heading1)
+        .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 16)
     }
 }

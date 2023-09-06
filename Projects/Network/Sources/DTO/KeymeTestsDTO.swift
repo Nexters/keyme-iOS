@@ -17,7 +17,7 @@ public struct KeymeTestsDTO: Codable {
         public let owner: Owner
         public let questions: [Question]
         public let testId: Int
-        let testResultId: Int?
+        public let testResultId: Int?
         public let title: String
     }
 

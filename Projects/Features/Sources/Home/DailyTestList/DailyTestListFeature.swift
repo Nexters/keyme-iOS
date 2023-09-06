@@ -35,10 +35,11 @@ public struct DailyTestListFeature: Reducer {
             switch action {
             case .viewWillAppear:
                 return .send(.fetchDailyStatistics)
+                
             case .fetchDailyStatistics:
                 return .run { [testId = state.testData.testId] send in
-//                    let dailyStatisticsData = try await network.request(.test(.statistics(testId)), object: StatisticsDTO.self)
-                    let dailyStatisticsData = try await network.requestWithSampleData(.test(.statistics(testId)), object: StatisticsDTO.self)
+                    let dailyStatisticsData = try await network.request(.test(.statistics(testId)), object: StatisticsDTO.self)
+//                    let dailyStatisticsData = try await network.requestWithSampleData(.test(.statistics(testId)), object: StatisticsDTO.self)
                     let dailyStatistics = dailyStatisticsData.toDailyStatisticsModel()
                     await send(.saveDailyStatistics(dailyStatistics))
                 }
