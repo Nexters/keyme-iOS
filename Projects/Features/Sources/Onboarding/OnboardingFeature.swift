@@ -140,6 +140,9 @@ public struct OnboardingFeature: Reducer {
             case .testResult(.closeButtonDidTap):
                 state.status = .completed
                 
+            case .keymeTests(.presented(.close)):
+                state.keymeTestsState = nil
+                
             default:
                 break
             }

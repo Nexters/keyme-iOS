@@ -23,23 +23,19 @@ public struct KeymeTestsStartView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            IfLetStore(
-                self.store.scope(
-                    state: \.keymeTests,
-                    action: KeymeTestsStartFeature.Action.keymeTests
-                ),
-                then: { store in
-                    KeymeTestsView(store: store)
-                        .ignoresSafeArea(.all)
-                        .transition(.scale.animation(.easeIn))
-                },
-                else: {
-                    startTestsButton(viewStore)
-                        .onTapGesture {
-                            viewStore.send(.startButtonDidTap)
-                        }
+            startTestsButton(viewStore)
+                .onTapGesture {
+                    viewStore.send(.startButtonDidTap)
                 }
-            )
+                .navigationDestination(
+                    store: store.scope(
+                        state: \.$keymeTests,
+                        action: KeymeTestsStartFeature.Action.keymeTests
+                    ), destination: { store in
+                        KeymeTestsView(store: store)
+                            .ignoresSafeArea(.all)
+                            .transition(.scale.animation(.easeIn))
+                    })
         }
         .onAppear {
             store.send(.viewWillAppear)

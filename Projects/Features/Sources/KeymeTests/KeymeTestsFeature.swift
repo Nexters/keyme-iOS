@@ -20,6 +20,8 @@ public struct KeymeTestsFeature: Reducer {
             return authorizationToken
         }
         
+        @PresentationState var alertState: AlertState<Action.Alert>?
+        
         public init(url: String) {
             self.url = url
         }
@@ -28,9 +30,13 @@ public struct KeymeTestsFeature: Reducer {
     public enum Action: Equatable {
         case transition
         case close
+        case closeButtonTapped
         case submit(resultCode: String, testResultId: Int)
         case showResult(data: KeymeWebViewModel)
         case postResult(TaskResult<String>)
+        case alert(PresentationAction<Alert>)
+        
+        public enum Alert: Equatable {}
     }
     
     @Dependency(\.keymeTestsClient) var keymeTestsClient
@@ -42,10 +48,13 @@ public struct KeymeTestsFeature: Reducer {
             switch action {
             case .transition:
                 return .none
+                
             case .close:
                 return .none
+                
             case .submit(let code, let id):
                 return .none
+                
             case .showResult(let data):
                 return .run { [resultCode = data.resultCode] send in
                     await send(.postResult(
@@ -54,6 +63,10 @@ public struct KeymeTestsFeature: Reducer {
                         }
                     ))
                 }
+                
+            case .alert:
+                return .none
+                
             default:
                 return .none
             }

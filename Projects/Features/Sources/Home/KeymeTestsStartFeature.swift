@@ -17,7 +17,7 @@ public struct KeymeTestsStartFeature: Reducer {
         public let testData: KeymeTestsModel
 
         public var icon: IconModel = .EMPTY
-        public var keymeTests: KeymeTestsFeature.State?
+        @PresentationState public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
         public init(nickname: String, testData: KeymeTestsModel) {
@@ -31,7 +31,7 @@ public struct KeymeTestsStartFeature: Reducer {
         case startAnimation([IconModel])
         case setIcon(IconModel)
         case startButtonDidTap
-        case keymeTests(KeymeTestsFeature.Action)
+        case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
     }
     
     @Dependency(\.continuousClock) var clock
@@ -67,13 +67,16 @@ public struct KeymeTestsStartFeature: Reducer {
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
                 state.keymeTests = KeymeTestsFeature.State(url: url)
                 
-            case .keymeTests:
-                return .none
+            case .keymeTests(.presented(.close)):
+                state.keymeTests = nil
+                
+            default:
+                break
             }
             
             return .none
         }
-        .ifLet(\.keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTests, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }
