@@ -46,6 +46,7 @@ struct KeymeTestsHomeView: View {
                 }
             }
         }
+        .alert(store: store.scope(state: \.$alertState, action: KeymeTestsHomeFeature.Action.alert))
     }
 }
 

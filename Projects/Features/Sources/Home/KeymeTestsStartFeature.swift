@@ -15,14 +15,16 @@ public struct KeymeTestsStartFeature: Reducer {
     public struct State: Equatable {
         public let nickname: String
         public let testData: KeymeTestsModel
+        let authorizationToken: String
 
         public var icon: IconModel = .EMPTY
         @PresentationState public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
-        public init(nickname: String, testData: KeymeTestsModel) {
+        public init(nickname: String, testData: KeymeTestsModel, authorizationToken: String) {
             self.nickname = nickname
             self.testData = testData
+            self.authorizationToken = authorizationToken
         }
     }
     
@@ -65,7 +67,7 @@ public struct KeymeTestsStartFeature: Reducer {
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
-                state.keymeTests = KeymeTestsFeature.State(url: url)
+                state.keymeTests = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
             case .keymeTests(.presented(.close)):
                 state.keymeTests = nil

@@ -9,13 +9,19 @@
 import ComposableArchitecture
 import Domain
 import Network
+import Foundation
 
 public struct KeymeTestsHomeFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     // 테스트를 아직 풀지 않았거나, 풀었거나 2가지 케이스만 존재
     public struct State: Equatable {
+        @PresentationState var alertState: AlertState<Action.Alert>?
         @PresentationState var testStartViewState: KeymeTestsStartFeature.State?
+        var authorizationToken: String? {
+            @Dependency(\.keymeAPIManager.authorizationToken) var authorizationToken
+            return authorizationToken
+        }
         var view: View
         
         struct View: Equatable {
@@ -29,11 +35,31 @@ public struct KeymeTestsHomeFeature: Reducer {
     }
     
     public enum Action {
+        case requestLogout
+        
         case fetchDailyTests
         case showTestStartView(testData: KeymeTestsModel)
+        case showErrorAlert(HomeFeatureError)
+        
+        case alert(PresentationAction<Alert>)
         case startTest(PresentationAction<KeymeTestsStartFeature.Action>)
         
         enum View {}
+        
+        public enum Alert: Equatable {
+            case error(HomeFeatureError)
+        }
+        
+        public enum HomeFeatureError: LocalizedError {
+            case cannotGetAuthorizationInformation
+            
+            public var errorDescription: String? {
+                switch self {
+                case .cannotGetAuthorizationInformation:
+                    return "로그인 정보를 불러올 수 없습니다. 다시 로그인을 진행해주세요."
+                }
+            }
+        }
     }
     
     public var body: some ReducerOf<Self> {
@@ -49,7 +75,32 @@ public struct KeymeTestsHomeFeature: Reducer {
                 
             case .showTestStartView(let testData):
                 state.view.dailyTestId = testData.testId
-                state.testStartViewState = .init(nickname: state.view.nickname, testData: testData)
+                guard let authorizationToken = state.authorizationToken else {
+                    return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
+                }
+                
+                state.testStartViewState = KeymeTestsStartFeature.State(
+                    nickname: state.view.nickname,
+                    testData: testData,
+                    authorizationToken: authorizationToken)
+                
+            case .showErrorAlert(let error):
+                if case .cannotGetAuthorizationInformation = error {
+                    state.alertState = AlertState(
+                        title: { TextState("에러 발생") },
+                        actions: { ButtonState(
+                            action: .error(.cannotGetAuthorizationInformation),
+                            label: { TextState("닫기") }
+                        ) },
+                        message: { TextState(error.localizedDescription) })
+                }
+                return .none
+                
+            case .alert(.presented(.error(let error))):
+                if case .cannotGetAuthorizationInformation = error {
+                    return .send(.requestLogout)
+                }
+                return .none
                 
             default:
                 break

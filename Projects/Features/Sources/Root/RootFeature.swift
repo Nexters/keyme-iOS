@@ -17,6 +17,12 @@ public struct RootFeature: Reducer {
     @Dependency(\.notificationManager) private var notificationManager
     @Dependency(\.keymeAPIManager) private var network
     
+    var authorizationToken: String? {
+        @Dependency(\.keymeAPIManager.authorizationToken) var token
+        return token
+    }
+    
+    
     public init() {}
     
     public enum State: Equatable {
@@ -39,7 +45,7 @@ public struct RootFeature: Reducer {
         case mainPage(MainPageFeature.Action)
         
         case updateState(State)
-        case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?)
+        case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?, authorizationToken: String)
         case registerPushNotification
     }
     
@@ -48,14 +54,16 @@ public struct RootFeature: Reducer {
             switch action {
             case .view(.checkUserStatus):
                 let accessToken = userStorage.accessToken
-                if accessToken == nil { // 로그 아웃 상태
-                    return .send(.updateState(.needSignIn(SignInFeature.State())))
-                } else { // 로그인 상태
+                if let accessToken { // 로그인 상태
                     network.registerAuthorizationToken(accessToken)
-                    return .send(.updateMemberInformation(withMemberData: nil))
+                    return .send(.updateMemberInformation(
+                        withMemberData: nil,
+                        authorizationToken: accessToken))
+                } else { // 로그 아웃 상태
+                    return .send(.updateState(.needSignIn(SignInFeature.State())))
                 }
                 
-            case .updateMemberInformation(let receviedMemberData):
+            case .updateMemberInformation(let receviedMemberData, let accessToken):
                 return .run(priority: .userInitiated) { send in
                     let memberInformation: MemberUpdateDTO.MemberData
                     if let receviedMemberData {
@@ -81,7 +89,9 @@ public struct RootFeature: Reducer {
                     
                     if let userId = memberInformation.id, let nickname = memberInformation.nickname {
                         if memberInformation.isOnboardingClear != true {
-                            await send(.updateState(.needOnboarding(OnboardingFeature.State())))
+                            await send(
+                                .updateState(
+                                    .needOnboarding(OnboardingFeature.State(authorizationToken: accessToken))))
                         } else {
                             await send(.updateState(
                                 .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
@@ -117,7 +127,7 @@ public struct RootFeature: Reducer {
                     userStorage.accessToken = token
                     network.registerAuthorizationToken(token)
                     
-                    return .send(.updateMemberInformation(withMemberData: nil))
+                    return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                     
                 case .failure:
                     return .none
@@ -130,26 +140,38 @@ public struct RootFeature: Reducer {
                     userStorage.accessToken = token
                     network.registerAuthorizationToken(token)
                     
-                    return .send(.updateMemberInformation(withMemberData: nil))
+                    return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                     
                 case .failure:
                     return .none
                 }
                 
             case .registration(.finishRegisterResponse(let response)):
-                return .send(.updateMemberInformation(withMemberData: response.data))
+                guard let token = authorizationToken else {
+                    // 로그인 재시도
+                    return gotoSignInState
+                }
+                return .send(.updateMemberInformation(withMemberData: response.data, authorizationToken: token))
                 
             case .onboarding(.testResult(.closeButtonDidTap)):
+                guard let token = authorizationToken else {
+                    // 로그인 재시도
+                    return gotoSignInState
+                }
                 guard let userId = userStorage.userId, let nickname = userStorage.nickname else {
                     // 멤버 정보 수신 재시도
-                    return .send(.updateMemberInformation(withMemberData: nil))
+                    return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                 }
-                
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
                 userStorage.accessToken = nil
-                return .send(.updateState(.needSignIn(SignInFeature.State())))
+                // Logout
+                return gotoSignInState
+                
+            case .mainPage(.home(.requestLogout)):
+                // Logout
+                return gotoSignInState
                 
             default:
                 return .none
@@ -167,5 +189,9 @@ public struct RootFeature: Reducer {
         .ifCaseLet(/State.canUseApp, action: /Action.mainPage) {
             MainPageFeature()
         }
+    }
+    
+    private var gotoSignInState: Effect<RootFeature.Action> {
+        .send(.updateState(.needSignIn(SignInFeature.State())))
     }
 }

@@ -35,13 +35,7 @@ public struct MainPageFeature: Reducer {
             MyPageFeature()
         }
         
-        Reduce { _, action in
-            switch action {
-            case .myPage(.setting(.presented(.view(.logout)))):
-                print("logout from mainpage")
-            default:
-                break
-            }
+        Reduce { _, _ in
             return .none
         }
     }
