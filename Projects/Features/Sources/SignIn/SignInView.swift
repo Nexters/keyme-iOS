@@ -23,6 +23,12 @@ public struct SignInView: View {
     }
     
     public var body: some View {
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            if viewStore.state.isLoading {
+                ProgressView()
+            }
+        }
+        
         ZStack(alignment: .center) {
             Text.keyme("KEYME", font: .checkResult)
                 .foregroundColor(.white)

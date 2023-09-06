@@ -15,14 +15,16 @@ public struct KeymeTestsStartFeature: Reducer {
     public struct State: Equatable {
         public let nickname: String
         public let testData: KeymeTestsModel
+        let authorizationToken: String
 
         public var icon: IconModel = .EMPTY
-        public var keymeTests: KeymeTestsFeature.State?
+        @PresentationState public var keymeTests: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
-        public init(nickname: String, testData: KeymeTestsModel) {
+        public init(nickname: String, testData: KeymeTestsModel, authorizationToken: String) {
             self.nickname = nickname
             self.testData = testData
+            self.authorizationToken = authorizationToken
         }
     }
     
@@ -31,7 +33,7 @@ public struct KeymeTestsStartFeature: Reducer {
         case startAnimation([IconModel])
         case setIcon(IconModel)
         case startButtonDidTap
-        case keymeTests(KeymeTestsFeature.Action)
+        case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
     }
     
     @Dependency(\.continuousClock) var clock
@@ -47,6 +49,10 @@ public struct KeymeTestsStartFeature: Reducer {
                 return .send(.startAnimation(state.testData.icons))
                 
             case .startAnimation(let icons):
+                guard state.isAnimating == false else {
+                    return .none
+                }
+                
                 return .run { send in
                     repeat {
                         for icon in icons {
@@ -58,19 +64,21 @@ public struct KeymeTestsStartFeature: Reducer {
                 
             case let .setIcon(icon):
                 state.icon = icon
-                state.isAnimating = true
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
-                state.keymeTests = KeymeTestsFeature.State(url: url)
+                state.keymeTests = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
-            case .keymeTests:
-                return .none
+            case .keymeTests(.presented(.close)):
+                state.keymeTests = nil
+                
+            default:
+                break
             }
             
             return .none
         }
-        .ifLet(\.keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTests, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }

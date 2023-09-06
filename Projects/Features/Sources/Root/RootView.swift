@@ -1,8 +1,8 @@
 //
 //  RootView.swift
-//  Keyme
+//  Features
 //
-//  Created by 이영빈 on 2023/08/09.
+//  Created by 이영빈 on 2023/09/04.
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
@@ -12,82 +12,76 @@ import ComposableArchitecture
 import DSKit
 
 public struct RootView: View {
+    @State private var showBlurringBackground = false
     private let store: StoreOf<RootFeature>
     
     public init() {
-        self.store = Store(initialState: RootFeature.State()) {
-            RootFeature()._printChanges()
+        self.store = Store(initialState: RootFeature.State.notDetermined) {
+            RootFeature()
         }
         
         store.send(.view(.checkUserStatus))
     }
     
     public var body: some View {
-        WithViewStore(store, observe: { $0.userStatus }, send: RootFeature.Action.view) { viewStore in
-            ZStack {
-                // 애니메이션 부웅.. 부웅..
-                KeymeLottieView(asset: .background, loopMode: .autoReverse)
-                    .ignoresSafeArea()
-                
-                if viewStore.state != .needSignIn {
+        ZStack {
+            // 애니메이션 부웅.. 부웅..
+            KeymeLottieView(asset: .background, loopMode: .autoReverse)
+                .ignoresSafeArea()
+            
+            SwitchStore(store) { state in
+                // 블러 깔 것인지 판단(로그인 아니면 깐다)
+                if case .needSignIn = state {
+                    EmptyView()
+                } else {
                     BackgroundBlurringView(style: .dark)
                         .ignoresSafeArea()
                         .transition(.opacity.animation(Animation.customInteractiveSpring()))
                 }
                 
-                switch viewStore.state {
+                switch state {
                 case .needSignIn:
-                    // 회원가입을 하지 않았거나 로그인을 하지 않은 유저
-                    let loginStore = store.scope(
-                        state: \.$logInStatus,
-                        action: RootFeature.Action.login)
-                    
-                    IfLetStore(loginStore) { store in
+                    CaseLet(
+                        /RootFeature.State.needSignIn,
+                         action: RootFeature.Action.login
+                    ) { store in
                         SignInView(store: store)
                     }
-                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
                     .zIndex(ViewZIndex.siginIn.rawValue)
-
-                case .needRegistration:
-                    // 개인정보 등록
-                    let registrationStore = store.scope(
-                        state: \.$registrationState,
-                        action: RootFeature.Action.registration)
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
                     
-                    IfLetStore(registrationStore) { store in
+                case .needRegistration:
+                    CaseLet(
+                        /RootFeature.State.needRegistration,
+                         action: RootFeature.Action.registration
+                    ) { store in
                         RegistrationView(store: store)
                     }
-                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
                     .zIndex(ViewZIndex.registration.rawValue)
-                    
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+
                 case .needOnboarding:
-                    // 가입했지만 온보딩을 하지 않고 종료했던 유저
-                    let onboardingStore = store.scope(
-                        state: \.$onboardingState,
-                        action: RootFeature.Action.onboarding)
-                    
-                    IfLetStore(onboardingStore) { store in
+                    CaseLet(
+                        /RootFeature.State.needOnboarding,
+                         action: RootFeature.Action.onboarding
+                    ) { store in
                         OnboardingView(store: store)
                     }
-                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
                     .zIndex(ViewZIndex.onboarding.rawValue)
-                    
-                case .canUseApp:
-                    // 가입했고 온보딩을 진행한 유저
-                    let mainPageStore = store.scope(
-                        state: \.$mainPageState,
-                        action: RootFeature.Action.mainPage)
-                    
-                    IfLetStore(mainPageStore) { store in
-                        KeymeMainView(store: store)
-                    } else: {
-                        Text("에러")
-                    }
                     .transition(.opacity.animation(Animation.customInteractiveSpring()))
+
+                case .canUseApp:
+                    CaseLet(
+                        /RootFeature.State.canUseApp,
+                         action: RootFeature.Action.mainPage
+                    ) { store in
+                        KeymeMainView(store: store)
+                    }
                     .zIndex(ViewZIndex.main.rawValue)
-                    
-                case .notDetermined:
-                    EmptyView()
+                    .transition(.opacity.animation(Animation.customInteractiveSpring()))
+
+                default:
+                    Text("")
                 }
             }
         }
@@ -100,11 +94,5 @@ private extension RootView {
         case registration = 3
         case onboarding = 2
         case main = 1
-    }
-}
-
-struct RootView_Previews: PreviewProvider {
-    static var previews: some View {
-        RootView()
     }
 }

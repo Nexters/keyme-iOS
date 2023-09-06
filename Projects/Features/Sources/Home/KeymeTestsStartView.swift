@@ -19,28 +19,26 @@ public struct KeymeTestsStartView: View {
     
     public init(store: StoreOf<KeymeTestsStartFeature>) {
         self.store = store
-        store.send(.viewWillAppear)
     }
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            IfLetStore(
-                self.store.scope(
-                    state: \.keymeTests,
-                    action: KeymeTestsStartFeature.Action.keymeTests
-                ),
-                then: { store in
-                    KeymeTestsView(store: store)
-                        .ignoresSafeArea(.all)
-                        .transition(.scale.animation(.easeIn))
-                },
-                else: {
-                    startTestsButton(viewStore)
-                        .onTapGesture {
-                            viewStore.send(.startButtonDidTap)
-                        }
+            startTestsButton(viewStore)
+                .onTapGesture {
+                    viewStore.send(.startButtonDidTap)
                 }
-            )
+                .navigationDestination(
+                    store: store.scope(
+                        state: \.$keymeTests,
+                        action: KeymeTestsStartFeature.Action.keymeTests
+                    ), destination: { store in
+                        KeymeTestsView(store: store)
+                            .ignoresSafeArea(.all)
+                            .transition(.scale.animation(.easeIn))
+                    })
+        }
+        .onAppear {
+            store.send(.viewWillAppear)
         }
     }
     
@@ -53,7 +51,7 @@ public struct KeymeTestsStartView: View {
                 .frame(width: 280, height: 280)
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
-                .animation(.spring(response: 0.85).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
             
             Circle()
                 .foregroundColor(viewStore.icon.color)

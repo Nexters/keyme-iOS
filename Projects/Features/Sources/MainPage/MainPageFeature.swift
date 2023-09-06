@@ -8,15 +8,16 @@
 
 import Foundation
 import ComposableArchitecture
+import Core
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
-        var home: KeymeTestsHomeFeature.State
-        var myPage: MyPageFeature.State
+        @Box var home: KeymeTestsHomeFeature.State
+        @Box var myPage: MyPageFeature.State
         
         public init(userId: Int, nickname: String) {
-            self.home = .init(nickname: nickname)
-            self.myPage = .init(userId: userId, nickname: nickname)
+            self._home = .init(.init(nickname: nickname))
+            self._myPage = .init(.init(userId: userId, nickname: nickname))
         }
     }
     
@@ -26,10 +27,6 @@ public struct MainPageFeature: Reducer {
     }
     
     public var body: some Reducer<State, Action> {
-        Reduce { _, _ in
-            return .none
-        }
-        
         Scope(state: \.home, action: /Action.home) {
             KeymeTestsHomeFeature()
         }
@@ -38,5 +35,8 @@ public struct MainPageFeature: Reducer {
             MyPageFeature()
         }
         
+        Reduce { _, _ in
+            return .none
+        }
     }
 }

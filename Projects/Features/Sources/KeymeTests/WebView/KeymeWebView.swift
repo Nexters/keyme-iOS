@@ -9,6 +9,7 @@
 import SwiftUI
 import WebKit
 
+import Core
 import Domain
 import DSKit
 
@@ -30,17 +31,18 @@ public struct KeymeWebView: UIViewRepresentable {
     private let webView: WKWebView
     public let url: String
     
-    init(url: String) {
+    init(url: String, accessToken: String) {
         self.option = .init()
         self.url = url
-        self.webView = WKWebView(frame: CGRect.zero, configuration: WKWebViewConfiguration())
+        self.webView = WKWebViewWarmUper.shared.dequeue()
         
         if
             let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
             let url = URL(string: encodedUrl)
         {
-            webView.load(URLRequest(url: url))
-            
+            var request = URLRequest(url: url)
+            request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+            webView.load(request)
         }
     }
     

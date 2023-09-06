@@ -63,8 +63,11 @@ public struct OnboardingFeature: Reducer {
         public var isLoop: Bool = false
         public var isBlackBackground: Bool = false
         public var isShared: Bool = false
-
-        public init() { }
+        
+        let authorizationToken: String
+        public init(authorizationToken: String) {
+            self.authorizationToken = authorizationToken
+        }
     }
     
     public enum Action: Equatable {
@@ -117,12 +120,10 @@ public struct OnboardingFeature: Reducer {
                 return .none
                 
             case .startButtonDidTap:
-                // TODO: url 주석단거로 바꾸기
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
-//                let url = "https://keyme-frontend.vercel.app/test/5"
-                state.keymeTestsState = KeymeTestsFeature.State(url: url)
+                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
-            case .keymeTests(.presented(.showResult(let data))):
+            case .keymeTests(.presented(.view(.showResult(let data)))):
                 return .send(.showResult(data: data))
                 
             case .showResult(data: let data):
@@ -139,6 +140,9 @@ public struct OnboardingFeature: Reducer {
                 
             case .testResult(.closeButtonDidTap):
                 state.status = .completed
+                
+            case .keymeTests(.presented(.close)):
+                state.keymeTestsState = nil
                 
             default:
                 break
