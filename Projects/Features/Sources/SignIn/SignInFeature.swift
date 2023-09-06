@@ -24,10 +24,15 @@ public enum SignInError: Error {
 public struct SignInFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
-    public enum State: Equatable {
-        case notDetermined
-        case loggedIn
-        case loggedOut
+    public struct State: Equatable {
+        var isLoading: Bool = false
+        var status: Status = .notDetermined
+        
+        enum Status {
+            case notDetermined
+            case loggedIn
+            case loggedOut
+        }
     }
     
     public enum Action: Equatable {
@@ -43,20 +48,26 @@ public struct SignInFeature: Reducer {
             switch action {
             // MARK: - Kakao
             case .signInWithKakao:
+                state.isLoading = true
+                
                 return .run { send in
                     await send(.signInWithKakaoResponse(TaskResult { try await signInWithKakao() }))
                 }
                 
             case .signInWithKakaoResponse(.success): // 카카오 로그인 성공
-                state = .loggedIn
+                state.isLoading = false
+                state.status = .loggedIn
                 return .none
                 
             case .signInWithKakaoResponse(.failure): // 카카오 로그인 실패
-                state = .loggedOut
+                state.isLoading = false
+                state.status = .loggedOut
                 return .none
                 
             // MARK: - Apple
             case .signInWithApple(let authorization):
+                state.isLoading = true
+                
                 guard
                     let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
                     let identityTokenData = appleIDCredential.identityToken,
@@ -72,11 +83,11 @@ public struct SignInFeature: Reducer {
                 }
                 
             case .signInWithAppleResponse(.success): // 애플 로그인 성공
-                state = .loggedIn
+                state.status = .loggedIn
                 return .none
                 
             case .signInWithAppleResponse(.failure): // 애플 로그인 실패
-                state = .loggedOut
+                state.status = .loggedOut
                 return .none
             }
         }

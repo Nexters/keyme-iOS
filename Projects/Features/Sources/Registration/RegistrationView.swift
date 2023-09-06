@@ -7,6 +7,7 @@
 //
 
 import Core
+import DSKit
 import SwiftUI
 import PhotosUI
 
@@ -22,6 +23,7 @@ public struct RegistrationView: View {
     }
     
     // 닉네임 관련 프로퍼티
+    @FocusState private var isTextFieldFocused: Bool
     @State private var nickname = "" // 사용자가 새롭게 입력한 닉네임
     @State private var beforeNickname = "" // 기존에 입력했던 닉네임
     @State private var isShake = false // 최대 글자 수를 넘긴 경우 좌, 우로 떨리는 애니메이션
@@ -32,7 +34,12 @@ public struct RegistrationView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack(spacing: 12) {
+            VStack(spacing: 0) {
+                Text.keyme("회원가입", font: .body3Semibold)
+                    .foregroundColor(.white)
+                    .padding(.top, 16)
+                    .padding(.bottom, 24)
+                
                 // 프로필 이미지를 등록하는 Circle
                 PhotosPicker(selection: $selectedImage, matching: .images, photoLibrary: .shared()) {
                     profileImage(imageData: selectedImageData)
@@ -49,57 +56,72 @@ public struct RegistrationView: View {
                     }
                 }
                 
-                // 닉네임 관련 안내메세지
+                Spacer().frame(height: 59)
+                
                 HStack(alignment: .center, spacing: 4) {
-                    Text("닉네임")
-                        .font(.system(size: 14))
+                    Text.keyme("닉네임", font: .body3Regular)
+                        .foregroundColor(.white)
                     
-                    Text("(\(nickname.count)/6)")
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                    Text.keyme("(\(nickname.count)/6)", font: .caption1)
+                        .foregroundColor(DSKitAsset.Color.keymeMediumgray.swiftUIColor)
                     
                     Spacer()
                     
-                    Text("2~6자리 한글, 영어, 숫자")
-                        .font(.system(size: 12))
+                    Text.keyme("2~6자리 한글, 영어, 숫자", font: .caption1)
+                        .foregroundColor(.white)
                 }
-                .padding(.horizontal, 2)
+                
+                Spacer().frame(height: 12)
                 
                 // 닉네임을 입력하는 TextField
-                TextField("닉네임을 입력해주세요.", text: $nickname)
-                    .font(.system(size: 16))
+                TextField("Nickname", text: $nickname)
+                    .focused($isTextFieldFocused)
+                    .placeholder(when: nickname.isEmpty, placeholder: {
+                        Text.keyme("닉네임을 입력해주세요.", font: .body3Regular)
+                            .foregroundColor(.white.opacity(0.4))
+                    })
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
                     .frame(height: 50)
-                    .padding(.horizontal)
                     .overlay(
                         RoundedRectangle(cornerRadius: 4)
-                            .stroke(.gray, lineWidth: 1)
+                            .stroke(.white.opacity(0.3), lineWidth: 1)
+                    )
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(.black.opacity(0.4))
                     )
                     .modifier(Shake(isShake: $isShake))
                 
-                if !nickname.isEmpty, let isValid = viewStore.isNicknameAvailable {
+                if
+                    !nickname.isEmpty,
+                    let isValid = viewStore.state.isNicknameAvailable
+                {
                     ValidateNicknameView(isValid: isValid)
+                        .padding(.top, 12)
                 }
+                
+                Spacer(minLength: 50)
                 
                 // 닉네임 관련 안내메세지
                 Rectangle()
                     .frame(height: 80)
-                    .foregroundColor(.gray)
+                    .foregroundColor(
+                        DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
                     .cornerRadius(8)
                     .overlay(
-                        Text("친구들이 원할하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요. \(viewStore.canRegister.description)")
-                            .font(.system(size: 14))
-                            .fontWeight(.semibold)
+                        Text.keyme("친구들이 원활하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요.", font: .body4)
+                            .lineSpacing(10)
                             .foregroundColor(.white)
-                            .padding(.horizontal, 8)
                     )
-                
-                Spacer()
+                    .padding(.bottom, 64)
                 
                 // 다음 페이지로 넘어가기 위한 Button
                 Button(action: {
+                    HapticManager.shared.boong()
                     viewStore.send(
                         .finishRegister(
-                            nickname: viewStore.state.nicknameTextFieldString,
+                            nickname: viewStore.nicknameTextFieldString,
                             thumbnailURL: viewStore.thumbnailURL,
                             originalImageURL: viewStore.originalImageURL))
                 }) {
@@ -115,11 +137,11 @@ public struct RegistrationView: View {
                     }
                 }
                 .foregroundColor(.white)
-                .background(viewStore.canRegister ? .black : .gray)
+                .background(viewStore.state.canRegister ? .black : .white.opacity(0.3))
                 .cornerRadius(16)
-                .disabled(viewStore.canRegister ? false : true)
+                .padding(.bottom, 20)
+                .disabled(viewStore.state.canRegister ? false : true)
             }
-            .modifier(DismissKeyboardOnTap())
             .padding(.horizontal, 16)
             .onChange(of: nickname) { newValue in
                 guard 1 <= newValue.count, newValue.count <= 6 else {
@@ -136,6 +158,12 @@ public struct RegistrationView: View {
                 
                 viewStore.send(.debouncedNicknameUpdate(text: newValue))
             }
+            .fullFrame()
+            .ignoresSafeArea(.keyboard, edges: .bottom)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isTextFieldFocused = false
         }
     }
 }
@@ -143,7 +171,15 @@ public struct RegistrationView: View {
 // 닉네임에 대한 검증 여부를 보여주는 뷰
 extension RegistrationView {
     func profileImage(imageData: Data?) -> some View {
-        ZStack(alignment: .bottomTrailing) {
+        let outercircleSize = 160.0
+        let iconSize = 33.3
+        
+        return ZStack(alignment: .center) {
+            Circle()
+                .foregroundColor(.white.opacity(0.15))
+                .overlay(Circle().stroke(.white.opacity(0.30), lineWidth: 1))
+                .frame(width: outercircleSize, height: outercircleSize)
+            
             Group {
                 if
                     let selectedImageData = imageData,
@@ -152,25 +188,22 @@ extension RegistrationView {
                     Image(uiImage: profileImage)
                         .resizable()
                         .scaledToFill()
+                        .frame(width: outercircleSize - 20, height: outercircleSize - 20)
                 } else {
-                    Circle()
-                        .foregroundColor(.gray)
-                        .overlay(Circle().stroke(.white, lineWidth: 1))
+                    ZStack {
+                        Circle()
+                            .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
+                            .frame(width: outercircleSize - 20, height: outercircleSize - 20)
+                        
+                        Image(systemName: "photo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: iconSize, height: iconSize)
+                            .foregroundColor(.white)
+                    }
                 }
             }
-            .frame(width: 160, height: 160)
             .clipShape(Circle())
-            
-            ZStack {
-                Circle()
-                    .foregroundColor(.black)
-                    .frame(width: 50, height: 50)
-                Image(systemName: "photo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 33.3, height: 33.3)
-                    .foregroundColor(.white)
-            }
         }
     }
     
@@ -190,5 +223,13 @@ extension RegistrationView {
             }
             .padding(8)
         }
+    }
+}
+
+struct RegistrationView_preview: PreviewProvider {
+    static var previews: some View {
+        RegistrationView(store: Store(initialState: RegistrationFeature.State(), reducer: {
+            RegistrationFeature()
+        }))
     }
 }

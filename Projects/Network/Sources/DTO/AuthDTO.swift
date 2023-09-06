@@ -42,4 +42,3 @@ public struct UserData: Decodable {
 public struct Token: Decodable {
     public let accessToken: String
 }
-

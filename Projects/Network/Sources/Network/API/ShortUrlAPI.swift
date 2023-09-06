@@ -44,7 +44,12 @@ extension ShortUrlAPI: TargetType {
     }
     
     public var headers: [String : String]? {
-        let accessToken = "e9a1ab0011a56327138c36652c2242cdff37ee1b" // TODO: 밖으로
-        return ["Authorization": "Bearer \(accessToken)", "Content-Type": "application/json"]
+        var header = ["Content-Type": "application/json"]
+        
+        if let accessToken = Bundle.main.object(forInfoDictionaryKey: "BITLY_API_KEY") as? String {
+            header["Authorization"] = "Bearer \(accessToken)"
+        }
+        
+        return header
     }
 }

@@ -9,7 +9,9 @@
 //
 
 import AuthenticationServices
+import Core
 import ComposableArchitecture
+import DSKit
 import SwiftUI
 import Network
 
@@ -21,16 +23,33 @@ public struct SignInView: View {
     }
     
     public var body: some View {
-        VStack(alignment: .center, spacing: 0) {
-            Spacer()
-            
-            KakaoLoginButton(store: store)
-            
-            AppleLoginButton(store: store)
-            
-            GuideMessageView()
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            if viewStore.state.isLoading {
+                ProgressView()
+            }
         }
-        .padding()
+        
+        ZStack(alignment: .center) {
+            Text.keyme("KEYME", font: .checkResult)
+                .foregroundColor(.white)
+                .offset(y: -39)
+            
+            VStack(alignment: .center, spacing: 30) {
+                Spacer()
+                
+                VStack(spacing: 16) {
+                    KakaoLoginButton(store: store)
+                        .frame(height: 48)
+                    
+                    AppleLoginButton(store: store)
+                        .frame(height: 48)
+                }
+                
+                GuideMessageView()
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 56)
+        }
     }
     
     // 카카오 로그인 버튼
@@ -40,12 +59,12 @@ public struct SignInView: View {
         var body: some View {
             Button(action: {
                 store.send(.signInWithKakao)
+                HapticManager.shared.boong()
             }) {
                 Image("kakao_login")
                     .resizable()
                     .scaledToFill()
             }
-            .frame(width: 312, height: 48)
             .cornerRadius(6)
         }
     }
@@ -57,6 +76,7 @@ public struct SignInView: View {
         var body: some View {
             SignInWithAppleButton(
                 onRequest: { request in
+                    HapticManager.shared.boong()
                     request.requestedScopes = [.fullName, .email]
                 },
                 onCompletion: { completion in
@@ -68,20 +88,26 @@ public struct SignInView: View {
                     }
                 })
             .signInWithAppleButtonStyle(.white)
-            .frame(width: 312, height: 48)
             .cornerRadius(6)
-            .padding(.vertical)
         }
     }
     
     struct GuideMessageView: View {
+        let serviceTermURLString = "https://keyme.notion.site/Keyme-b1f3902d8fe04b97be6d8835119887cd?pvs=4"
+        let privacyTermURLString = "https://keyme.notion.site/Keyme-46bef61be1204fc594a49e85e5913a39?pvs=4"
+        
         var body: some View {
             VStack(spacing: 8) {
                 Text("가입 시, 키미의 다음 사항에 동의하는 것으로 간주합니다.")
                     .foregroundColor(.gray)
                 
                 HStack(spacing: 4) {
-                    Button(action: {}) {
+                    Button(action: {
+                        guard let serviceTermURL = URL(string: serviceTermURLString) else {
+                            return
+                        }
+                        UIApplication.shared.open(serviceTermURL)
+                    }) {
                         Text("서비스 이용약관")
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -90,7 +116,12 @@ public struct SignInView: View {
                     Text("및")
                         .foregroundColor(.gray)
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        guard let privacyTermURL = URL(string: privacyTermURLString) else {
+                            return
+                        }
+                        UIApplication.shared.open(privacyTermURL)
+                    }) {
                         Text("개인정보 정책")
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -99,7 +130,6 @@ public struct SignInView: View {
                 }
             }
             .font(.system(size: 11))
-            .frame(width: 265, height: 36)
         }
     }
 }

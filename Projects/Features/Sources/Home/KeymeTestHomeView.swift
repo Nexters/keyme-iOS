@@ -15,7 +15,6 @@ struct KeymeTestsHomeView: View {
 
     init(store: StoreOf<KeymeTestsHomeFeature>) {
         self.store = store
-        store.send(.fetchDailyTests)
     }
     
     var body: some View {
@@ -41,7 +40,13 @@ struct KeymeTestsHomeView: View {
                 // 결과 화면 표시도 생각
                 
             }
+            .onAppear {
+                if viewStore.dailyTestId == nil {
+                    viewStore.send(.fetchDailyTests)
+                }
+            }
         }
+        .alert(store: store.scope(state: \.$alertState, action: KeymeTestsHomeFeature.Action.alert))
     }
 }
 

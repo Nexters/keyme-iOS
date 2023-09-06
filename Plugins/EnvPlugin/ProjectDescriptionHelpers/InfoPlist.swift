@@ -16,11 +16,24 @@ public extension Project {
         "CFBundleURLTypes": [
             [
                 "CFBundleTypeRole": "Editor",
-                "CFBundleURLSchemes": ["keyme"]
+                "CFBundleURLSchemes": [
+                    "keyme",
+                    "kakao$(KAKAO_API_KEY)"
+                ]
             ]
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
-        "UIUserInterfaceStyle": "Light"
+        "KAKAO_API_KEY": "$(KAKAO_API_KEY)",
+        "UIUserInterfaceStyle": "Light",
+        "NSAppTransportSecurity": [
+            "NSExceptionDomains": [
+                "api.keyme.space": [
+                    "NSIncludesSubdomains": true,
+                    "NSExceptionMinimumTLSVersion": "TLSv1.2",
+                ],
+            ]
+        ],
+        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink"]
     ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [

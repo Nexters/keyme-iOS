@@ -8,24 +8,33 @@
 
 import Foundation
 import ComposableArchitecture
+import Core
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
-        let userId: Int
-        let nickname: String
+        @Box var home: KeymeTestsHomeFeature.State
+        @Box var myPage: MyPageFeature.State
         
         public init(userId: Int, nickname: String) {
-            self.userId = userId
-            self.nickname = nickname
+            self._home = .init(.init(nickname: nickname))
+            self._myPage = .init(.init(userId: userId, nickname: nickname))
         }
     }
     
     public enum Action {
-        case logout
-        case changeNickname(String)
+        case home(KeymeTestsHomeFeature.Action)
+        case myPage(MyPageFeature.Action)
     }
     
     public var body: some Reducer<State, Action> {
+        Scope(state: \.home, action: /Action.home) {
+            KeymeTestsHomeFeature()
+        }
+        
+        Scope(state: \.myPage, action: /Action.myPage) {
+            MyPageFeature()
+        }
+        
         Reduce { _, _ in
             return .none
         }

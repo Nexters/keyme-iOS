@@ -99,7 +99,7 @@ public struct OnboardingView: View {
                 Color.clear
                     .contentShape(Circle())
                     .onTapGesture {
-                        HapticManager.shared.tongtong()
+                        HapticManager.shared.boong()
                         viewStore.send(.startButtonDidTap)
                     }
             }
@@ -116,7 +116,7 @@ public struct OnboardingView: View {
                     .foregroundColor(.black)
             }
             .onTapGesture {
-                HapticManager.shared.tok()
+                HapticManager.shared.boong()
                 viewStore.send(.nextButtonDidTap)
             }
             .padding(Padding.insets(leading: 16, trailing: 16))

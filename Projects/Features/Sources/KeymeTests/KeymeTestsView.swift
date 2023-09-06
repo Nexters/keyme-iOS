@@ -20,15 +20,16 @@ public struct KeymeTestsView: View {
     }
     
     public var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: { $0 }, send: KeymeTestsFeature.Action.view) { viewStore in
             ZStack {
-                KeymeWebView(url: viewStore.url)
+                KeymeWebView(url: viewStore.url, accessToken: viewStore.authorizationToken)
                     .onCloseWebView {
-                        print("close")
+                        viewStore.send(.closeButtonTapped)
                     }
                     .onTestSubmitted { testResult in
                         viewStore.send(.showResult(data: testResult))
                     }
+                    .toolbar(.hidden, for: .navigationBar)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }

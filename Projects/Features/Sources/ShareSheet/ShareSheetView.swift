@@ -15,13 +15,13 @@ struct ActivityViewController: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
     var activityItems: [Any]
     
-    var applicationActivities: [UIActivity]? = nil
+    var applicationActivities: [UIActivity]?
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
         
         // Set the completion handler
-        controller.completionWithItemsHandler = { (activityType, completed, returnedItems, error) in
+        controller.completionWithItemsHandler = { (_, _, _, _) in
             // Dismiss the share sheet when the share action completes (whether successful or not)
             self.isPresented = false
         }
@@ -33,7 +33,6 @@ struct ActivityViewController: UIViewControllerRepresentable {
         // Update code here if needed
     }
 }
-
 
 extension ActivityViewController {
     struct SharedURL: Identifiable {

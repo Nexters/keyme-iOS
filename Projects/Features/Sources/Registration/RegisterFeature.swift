@@ -47,20 +47,26 @@ public struct RegistrationFeature: Reducer {
         case registerProfileImageResponse(thumbnailURL: URL, originalImageURL: URL)
         
         case finishRegister(nickname: String, thumbnailURL: URL?, originalImageURL: URL?)
-        case finishRegisterResponse(id: Int, friendCode: String)
+        case finishRegisterResponse(MemberUpdateDTO)
     }
     
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
             case .debouncedNicknameUpdate(let nicknameString):
+                guard !nicknameString.isEmpty else {
+                    return .none
+                }
+
                 state.nicknameTextFieldString = nicknameString
+                state.isNicknameAvailable = nil
+                
                 return .run { send in
                     try await withTaskCancellation(
                         id: CancelID.debouncedNicknameUpdate,
                         cancelInFlight: true
                     ) {
-                        try await self.clock.sleep(for: .seconds(0.7))
+                        try await self.clock.sleep(for: .seconds(0.3))
                         
                         await send(.checkDuplicatedNickname(nicknameString))
                     }
@@ -112,10 +118,7 @@ public struct RegistrationFeature: Reducer {
                             profileThumbnail: originalImageURL?.absoluteString)),
                         object: MemberUpdateDTO.self)
                     
-                    await send(
-                        .finishRegisterResponse(
-                            id: result.data.id,
-                            friendCode: result.data.friendCode ?? "")) // TODO: 나중에 non-null 값 필요
+                    await send(.finishRegisterResponse(result))
                 }
                 
             case .finishRegisterResponse:

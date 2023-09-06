@@ -54,6 +54,13 @@ public class HapticManager {
         generator.impactOccurred()
     }
     
+    /// 붕
+    public func boong() {
+        let generator = UIImpactFeedbackGenerator(style: .soft)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+    
     /// 패턴 재생(패턴은 추후 협의 후 개발해서 추가)
     public func playHapticPattern() {
         do {

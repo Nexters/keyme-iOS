@@ -18,11 +18,6 @@ struct MyPageView: View {
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
-         
-        store.send(.requestCircle(.top5))
-        store.send(.requestCircle(.low5))
-        
-        store.send(.view(.selectSegement(.similar)))
     }
     
     public var body: some View {
@@ -54,19 +49,34 @@ struct MyPageView: View {
                         viewStore.send(.circleDismissed)
                     }
                 }
-
+                
                 if !viewStore.state.circleShown {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
+                            Button(action: { viewStore.send(.prepareSettingView) }) {
+                                DSKitAsset.Image.photoExport.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 35, height: 35)
+                            }
+                            
                             Spacer()
+                            
                             Text.keyme("마이", font: .body3Semibold)
                             Image(systemName: "info.circle")
                                 .resizable()
                                 .frame(width: 16, height: 16)
                                 .scaledToFit()
+                            
                             Spacer()
+                            
+                            Button(action: { viewStore.send(.prepareSettingView) }) {
+                                DSKitAsset.Image.setting.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 24, height: 24)
+                            }
                         }
                         .padding(.top, 10)
+                        .padding(.horizontal, 24)
                         
                         SegmentControlView(
                             segments: MyPageSegment.allCases,
@@ -89,6 +99,15 @@ struct MyPageView: View {
                     .foregroundColor(.white)
                 }
             }
+            .navigationDestination(
+                store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
+                destination: { SettingView(store: $0) })
+        }
+        .onAppear {
+            store.send(.requestCircle(.top5))
+            store.send(.requestCircle(.low5))
+            
+            store.send(.view(.selectSegement(.similar)))
         }
     }
 }

@@ -22,4 +22,6 @@ protocol CoreNetworking<APIType> {
     
     /// 인증토큰 헤더에 넣어주는 메서드
     func registerAuthorizationToken(_ authorizationToken: String?)
+    
+    var authorizationToken: String? { get }
 }
