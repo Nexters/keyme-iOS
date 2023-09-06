@@ -34,6 +34,7 @@ public struct StartTestFeature: Reducer {
         case setIcon(IconModel)
         case startButtonDidTap
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
+        case toggleAnimation(IconModel)
     }
     
     @Dependency(\.continuousClock) var clock
@@ -45,19 +46,15 @@ public struct StartTestFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .viewWillAppear:
-                state.isAnimating = true
                 return .send(.startAnimation(state.testData.icons))
                 
             case .startAnimation(let icons):
-                guard state.isAnimating == false else {
-                    return .none
-                }
                 
                 return .run { send in
                     repeat {
                         for icon in icons {
-                            await send(.setIcon(icon))
-                            try await self.clock.sleep(for: .seconds(1.595))
+                            await send(.toggleAnimation(icon))
+                            try await self.clock.sleep(for: .seconds(0.85))
                         }
                     } while true
                 }
@@ -71,6 +68,16 @@ public struct StartTestFeature: Reducer {
                 
             case .keymeTests(.presented(.close)):
                 state.keymeTests = nil
+                
+            case let .toggleAnimation(icon):
+                state.isAnimating.toggle()
+                
+                return .run {[isAnimating = state.isAnimating] send in
+                    while !isAnimating {
+                        try await self.clock.sleep(for: .seconds(1))
+                    }
+                    await send(.setIcon(icon))
+                }
                 
             default:
                 break

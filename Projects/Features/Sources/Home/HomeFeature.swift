@@ -69,7 +69,7 @@ public struct HomeFeature: Reducer {
             switch action {
             case .fetchDailyTests:
                 return .run { send in
-                    let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
+                    let fetchedTest = try await network.requestWithSampleData(.test(.daily), object: KeymeTestsDTO.self)
                     let testData = fetchedTest.toKeymeTestsModel()
                     
                     await send(.showTestStartView(testData: testData))
@@ -84,8 +84,8 @@ public struct HomeFeature: Reducer {
                 state.startTestState = StartTestFeature.State(
                     nickname: state.view.nickname,
                     testData: testData,
-                    authorizationToken: authorizationToken)
-                
+                    authorizationToken: authorizationToken
+                )
             case .showErrorAlert(let error):
                 if case .cannotGetAuthorizationInformation = error {
                     state.alertState = AlertState(

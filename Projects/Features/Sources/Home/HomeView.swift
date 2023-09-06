@@ -54,7 +54,8 @@ extension HomeView {
     var testView: some View {
         let startTestStore = store.scope(
             state: \.$startTestState,
-            action: HomeFeature.Action.startTest)
+            action: HomeFeature.Action.startTest
+        )
         
         return IfLetStore(startTestStore) { store in
             StartTestView(store: store)
@@ -62,7 +63,7 @@ extension HomeView {
             Circle()
                 .strokeBorder(.white.opacity(0.3), lineWidth: 1)
                 .background(Circle().foregroundColor(.white.opacity(0.3)))
-                .frame(width: 280, height: 280)
+                .frame(width: 280 * 0.8, height: 280 * 0.8)
         }
     }
     

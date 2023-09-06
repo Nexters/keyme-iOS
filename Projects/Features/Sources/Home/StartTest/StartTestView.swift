@@ -51,19 +51,19 @@ public struct StartTestView: View {
                 .frame(width: 280, height: 280)
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.8)
                 .shadow(color: .white.opacity(0.3), radius: 30, x: 0, y: 10)
-                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.85), value: viewStore.isAnimating)
             
             Circle()
                 .foregroundColor(viewStore.icon.color)
                 .frame(width: 110, height: 110)
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
-                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.8), value: viewStore.isAnimating)
             
             KFImageManager.shared.toImage(url: viewStore.icon.imageURL)
                 .frame(width: 30, height: 30)
                 .scaledToFit()
                 .scaleEffect(viewStore.isAnimating ? 1.0 : 0.001)
-                .animation(.spring(response: 0.8).repeatForever(), value: viewStore.isAnimating)
+                .animation(.spring(response: 0.8), value: viewStore.isAnimating)
         }
     }
 }
