@@ -58,9 +58,9 @@ extension KeymeAPIManager: APIRequestable {
     }
     
     public func requestWithSampleData<T: Decodable>(_ api: KeymeAPI, object: T.Type) async throws -> T {
-        let response = try await api.sampleData
+        let response = api.sampleData
         let decoded = try decoder.decode(T.self, from: response)
-
+        
         return decoded
     }
 

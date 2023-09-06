@@ -13,6 +13,7 @@ import Moya
 public enum KeymeTestsAPI {
     case onboarding
     case daily
+    case statistics(Int)
     case result(Int)
     case register(String)
 }
@@ -24,6 +25,8 @@ extension KeymeTestsAPI: BaseAPI {
             return "tests/onboarding"
         case .daily:
             return "tests/daily"
+        case let .statistics(testId):
+            return "tests/\(testId)/statistics"
         case let .result(testResultId):
             return "tests/result/\(testResultId)"
         case .register:
@@ -100,6 +103,57 @@ extension KeymeTestsAPI: BaseAPI {
                     }
                 ]
             }
+        }
+        """
+                .data(using: .utf8)!
+        case .statistics:
+            return
+        """
+        {
+          "code": 200,
+          "data": {
+            "averageRate": 0,
+            "questionsStatistics": [
+              {
+                "avgScore": 3.5,
+                "category": {
+                    "iconUrl": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/icon/money.png",
+                    "name": "MONEY",
+                    "color": "568049"
+                },
+                "keyword": "참군인",
+                "myScore": 0,
+                "questionId": 0,
+                "title": "불의를 보면 참지 않는다"
+              },
+               {
+                 "avgScore": 4.5,
+                 "category": {
+                     "iconUrl": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/icon/passion.png",
+                     "name": "PASSION",
+                     "color": "F37952"
+                 },
+                 "keyword": "참군인",
+                 "myScore": 0,
+                 "questionId": 0,
+                 "title": "불의를 보면 참지 않는다"
+               },
+              {
+                "avgScore": 5.5,
+                "category": {
+                    "iconUrl": "https://keyme-ec2-access-s3.s3.ap-northeast-2.amazonaws.com/icon/intelligence.png",
+                    "name": "INTELLIGENCE",
+                    "color": "D6EC63"
+                },
+                "keyword": "참군인",
+                "myScore": 0,
+                "questionId": 0,
+                "title": "불의를 보면 참지 않는다"
+              }
+            ],
+            "solvedCount": 0
+          },
+          "message": "SUCCESS"
         }
         """
                 .data(using: .utf8)!
