@@ -22,7 +22,6 @@ public struct RootFeature: Reducer {
         return token
     }
     
-    
     public init() {}
     
     public enum State: Equatable {

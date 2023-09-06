@@ -121,7 +121,7 @@ public struct OnboardingFeature: Reducer {
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
-                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken) // TODO: FIx
+                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
             case .keymeTests(.presented(.view(.showResult(let data)))):
                 return .send(.showResult(data: data))
