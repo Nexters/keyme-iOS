@@ -21,7 +21,6 @@ public class CirclePackViewOption<DetailView: View> {
     var outboundLength: CGFloat
     /// Circle pack 그래프의 크기에 줄 패딩값. 즉, 뷰 전체 프레임과 그래프 사이에 둘 거리.
     var framePadding: CGFloat
-    var rotationAngle: Angle
     /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
     var magnifiedCircleRatio: CGFloat
     
@@ -36,7 +35,6 @@ public class CirclePackViewOption<DetailView: View> {
         background = .white
         outboundLength = 700
         framePadding = 350
-        rotationAngle = .degrees(0)
         magnifiedCircleRatio =  0.9
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
@@ -47,7 +45,6 @@ public class CirclePackViewOption<DetailView: View> {
         background: Color,
         outboundLength: CGFloat,
         framePadding: CGFloat,
-        rotationAngle: Angle,
         magnifiedCircleRatio: CGFloat,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
         onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
@@ -56,7 +53,6 @@ public class CirclePackViewOption<DetailView: View> {
         self.background = background
         self.outboundLength = outboundLength
         self.framePadding = framePadding
-        self.rotationAngle = rotationAngle
         self.magnifiedCircleRatio = magnifiedCircleRatio
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
@@ -81,7 +77,7 @@ public struct CirclePackView<DetailView: View>: View {
     @State private var focusedCircleData: CircleData?
     @State private var isPersonalityCirclePressed = false
     
-    private let circleData: [CircleData]
+    private var circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
     
@@ -92,12 +88,13 @@ public struct CirclePackView<DetailView: View>: View {
     public init(
         namespace: Namespace.ID,
         data: [CircleData],
+        rotationAngle: Angle = .degrees(45),
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
-        print("init")
-        self.namespace = namespace
-        self.circleData = data
+        print("init CirclePackView")
         self.option = .init()
+        self.namespace = namespace
+        self.circleData = data.rotate(degree: rotationAngle)
         
         self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
@@ -132,7 +129,6 @@ public struct CirclePackView<DetailView: View>: View {
                 }
                 .frame(width: option.outboundLength, height: option.outboundLength)
                 .padding(option.framePadding)
-                .rotationEffect(option.rotationAngle)
                 .pinchZooming()
             }
             .zIndex(1)
@@ -177,7 +173,6 @@ public struct CirclePackView<DetailView: View>: View {
                     }
                     .transition(.offset(x: 1, y: 1).combined(with: .opacity))
                     .padding(.vertical, 12)
-//                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
                     
                     VStack {
                         BottomSheetWrapperView {
@@ -365,14 +360,6 @@ extension CirclePackView {
         return self
     }
     
-    /// 그래프를 돌려봅니다.
-    ///
-    /// 기본값은 0도(`Angle(degree: 0))`입니다.
-    func graphRotation(angle: Angle) -> CirclePackView {
-        self.option.rotationAngle = angle
-        return self
-    }
-    
     func onCircleTapped(_ handler: @escaping (CircleData) -> Void) -> CirclePackView {
         self.option.onCircleTappedHandler = handler
         return self
@@ -381,5 +368,29 @@ extension CirclePackView {
     func onCircleDismissed(_ handler: @escaping (CircleData) -> Void) -> CirclePackView {
         self.option.onCircleDismissedHandler = handler
         return self
+    }
+}
+
+private extension Array where Element == CircleData {
+    func rotate(degree: Angle) -> [CircleData] {
+        func formula(xPoint: CGFloat, yPoint: CGFloat) -> (x: CGFloat, y: CGFloat) {
+            let degree = CGFloat(degree.degrees)
+            let newXPoint = xPoint * cos(degree) - yPoint * sin(degree)
+            let newYPoint = yPoint * cos(degree) + xPoint * sin(degree)
+            
+            return (newXPoint, newYPoint)
+        }
+        
+        return self.map { data in
+            let newCoordinate = formula(xPoint: data.xPoint, yPoint: data.yPoint)
+            let newCircle = CircleData(
+                color: data.color,
+                xPoint: newCoordinate.x,
+                yPoint: newCoordinate.y,
+                radius: data.radius,
+                metadata: data.metadata)
+            
+            return newCircle
+        }
     }
 }
