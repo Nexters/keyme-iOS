@@ -28,6 +28,8 @@ public struct MyPageFeature: Reducer {
             let userId: Int
             let nickname: String
             
+            var imageExportMode = false
+            
             var circleShown = false
             var selectedSegment: MyPageSegment = .similar
             var shownFirstTime = true
@@ -54,6 +56,7 @@ public struct MyPageFeature: Reducer {
             case circleDismissed
             case prepareSettingView
             case selectSegement(MyPageSegment)
+            case setExportPhotoMode(enabled: Bool)
         }
     }
     
@@ -130,6 +133,10 @@ public struct MyPageFeature: Reducer {
             case .view(.prepareSettingView):
                 print("@@ init from mypage")
                 state.settingViewState = SettingFeature.State()
+                return .none
+                
+            case .view(.setExportPhotoMode(let isEnabled)):
+                state.view.imageExportMode = isEnabled
                 return .none
                 
             case .scoreListAction:
