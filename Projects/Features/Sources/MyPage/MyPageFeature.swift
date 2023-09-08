@@ -36,6 +36,7 @@ public struct MyPageFeature: Reducer {
             let nickname: String
             
             var imageExportMode = false
+            var rotationAngle: Double = 45
             
             var circleShown = false
             var selectedSegment: MyPageSegment = .similar

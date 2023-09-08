@@ -30,11 +30,14 @@ public struct ImageExportOverlayFeature: Reducer {
 
 extension MyPageView {
     struct ImageExportOverlayView: View {
+        @Binding var rotationAngle: Angle
+        
         private typealias Action = () -> Void
         private let store: StoreOf<ImageExportOverlayFeature>
         
-        init(store: StoreOf<ImageExportOverlayFeature>) {
+        init(store: StoreOf<ImageExportOverlayFeature>, angle: Binding<Angle>) {
             self.store = store
+            self._rotationAngle = angle
         }
         
         var body: some View {
@@ -52,7 +55,7 @@ extension MyPageView {
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
                     
                     DSKitAsset.Color.keymeBlack.swiftUIColor
-                        .reverseMask { maskingShape(isFilled: true) }
+                        .reverseMask { maskingShape(isFilled: true).padding(32) }
                         .overlay {
                             maskingShape(isFilled: false).overlay {
                                 VStack(alignment: .leading, spacing: 8) {
@@ -65,11 +68,20 @@ extension MyPageView {
                                     Spacer()
                                     horizontalSpacer
                                 }
-                                .padding(28)
+                                .padding(20)
                             }
                             .padding(32)
                         }
                         .allowsHitTesting(false)
+                    
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.white)
+                        Slider(value: $rotationAngle.degrees, in: -180...180, step: 0.1)
+                            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                    }
+                    .padding(20)
+                    .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 }
             }
         }
@@ -84,7 +96,6 @@ extension MyPageView {
                     shape.stroke(.white.opacity(0.3))
                 }
             }
-            .padding(.bottom, 40)
         }
         
         private var horizontalSpacer: some View {
