@@ -15,8 +15,6 @@ struct MyPageView: View {
     @Namespace private var namespace
     
     @State var graphRotationAngle: Angle = .degrees(45)
-    @State var lastRotationAngle: Angle = .degrees(45)
-    @State var isGestureStarted = false
 
     private let store: StoreOf<MyPageFeature>
     
@@ -61,7 +59,7 @@ struct MyPageView: View {
                     state: \.imageExportModeState,
                     action: MyPageFeature.Action.imageExportModeAction)
                 ) {
-                    ImageExportOverlayView(store: $0)
+                    ImageExportOverlayView(store: $0, angle: $graphRotationAngle)
                 }
                 
                 // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
