@@ -26,7 +26,8 @@ struct PinchToZoomViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .scaleEffect(scale, anchor: anchor)
+//            .scaleEffect(scale, anchor: anchor)
+            .scaleEffect(scale)
             .offset(offset)
             .overlay(
                 PinchZoomViewRepresentable(

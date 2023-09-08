@@ -18,11 +18,18 @@ public struct MyPageFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     public struct State: Equatable {
+        var view: View
+        
         var similarCircleDataList: [CircleData] = []
         var differentCircleDataList: [CircleData] = []
-        var view: View
+        
         @Box var scoreListState: ScoreListFeature.State
         @PresentationState var settingViewState: SettingFeature.State?
+        var imageExportModeState: ImageExportOverlayFeature.State? {
+            didSet {
+                view.imageExportMode = imageExportModeState == nil ? false : true
+            }
+        }
         
         struct View: Equatable {            
             let userId: Int
@@ -47,8 +54,10 @@ public struct MyPageFeature: Reducer {
         case showCircle(MyPageSegment)
         case requestCircle(MatchRate)
         case view(View)
+        
         case scoreListAction(ScoreListFeature.Action)
         case setting(PresentationAction<SettingFeature.Action>)
+        case imageExportModeAction(ImageExportOverlayFeature.Action)
  
         public enum View: Equatable {
             case markViewAsShown
@@ -56,7 +65,7 @@ public struct MyPageFeature: Reducer {
             case circleDismissed
             case prepareSettingView
             case selectSegement(MyPageSegment)
-            case setExportPhotoMode(enabled: Bool)
+            case enableImageExportMode
         }
     }
     
@@ -70,10 +79,7 @@ public struct MyPageFeature: Reducer {
         
         Reduce { state, action in    
             switch action {
-            case .view(.selectSegement(let segment)):
-                state.view.selectedSegment = segment
-                return .send(.showCircle(state.view.selectedSegment))
-
+            // MARK: - Internal actions
             // 서버 부하가 있으므로 웬만하면 한 번만 콜 할 것
             case .requestCircle(let rate):
                 let userId = state.view.userId
@@ -117,6 +123,11 @@ public struct MyPageFeature: Reducer {
                 }
                 return .none
                 
+            // MARK: - View actions
+            case .view(.selectSegement(let segment)):
+                state.view.selectedSegment = segment
+                return .send(.showCircle(state.view.selectedSegment))
+
             case .view(.markViewAsShown):
                 state.view.shownFirstTime = false
                 return .none
@@ -135,12 +146,20 @@ public struct MyPageFeature: Reducer {
                 state.settingViewState = SettingFeature.State()
                 return .none
                 
-            case .view(.setExportPhotoMode(let isEnabled)):
-                state.view.imageExportMode = isEnabled
+            case .view(.enableImageExportMode):
+                state.imageExportModeState = ImageExportOverlayFeature.State(
+                    title: state.view.selectedSegment.title,
+                    nickname: state.view.nickname)
+                
                 return .none
                 
+            // MARK: - Child actions
             case .scoreListAction:
                 print("score")
+                return .none
+                
+            case .imageExportModeAction(.dismissImageExportMode):
+                state.imageExportModeState = nil
                 return .none
                 
             default:
@@ -149,6 +168,9 @@ public struct MyPageFeature: Reducer {
         }
         .ifLet(\.$settingViewState, action: /Action.setting) {
             SettingFeature()
+        }
+        .ifLet(\.imageExportModeState, action: /Action.imageExportModeAction) {
+            ImageExportOverlayFeature()
         }
     }
 }
