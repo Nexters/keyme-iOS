@@ -61,7 +61,7 @@ struct MyPageView: View {
                             lastRotationAngle = graphRotationAngle
                         }
                 )
-                .ignoresSafeArea(.container)
+                .ignoresSafeArea(.container, edges: .bottom)
                 
                 if viewStore.imageExportMode {
                     VStack(spacing: 0) {
@@ -94,10 +94,12 @@ struct MyPageView: View {
                                 RoundedRectangle(cornerRadius: 24)
                                     .fill(Color.black)
                                     .padding(32)
+                                    .padding(.bottom, 40)
                             }
                             .overlay {
                                 RoundedRectangle(cornerRadius: 24)
                                     .stroke(.white.opacity(0.3))
+                                    .padding(.bottom, 40)
                                     .overlay {
                                         VStack(alignment: .leading, spacing: 8) {
                                             Text.keyme(
@@ -118,6 +120,7 @@ struct MyPageView: View {
                                     .padding(32)
                             }
                     }
+                    .ignoresSafeArea(edges: .bottom)
                 }
                 
                 // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
