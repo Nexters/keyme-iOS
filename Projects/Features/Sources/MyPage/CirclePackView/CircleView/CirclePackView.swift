@@ -60,7 +60,6 @@ public class CirclePackViewOption<DetailView: View> {
 }
 
 public struct CirclePackView<DetailView: View>: View {
-//    @Namespace private var namespace
     private let namespace: Namespace.ID
     
     // 애니메이션 관련

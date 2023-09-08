@@ -26,7 +26,7 @@ struct KeymeMainView: View {
     
     var body: some View {
         NavigationStack {
-            WithViewStore(store, observe: { $0 }) { _ in
+            WithViewStore(store, observe: { $0.view }) { _ in
                 TabView(selection: $selectedTab) {
                     HomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
                         .tabItem {

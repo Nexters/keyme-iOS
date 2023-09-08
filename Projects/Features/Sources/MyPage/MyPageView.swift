@@ -14,6 +14,9 @@ import SwiftUI
 struct MyPageView: View {
     @Namespace private var namespace
     
+    @State var graphRotationAngle: Angle = .degrees(45)
+    @State var lastRotationAngle: Angle = .degrees(45)
+
     private let store: StoreOf<MyPageFeature>
     
     init(store: StoreOf<MyPageFeature>) {
@@ -26,6 +29,7 @@ struct MyPageView: View {
                 CirclePackView(
                     namespace: namespace,
                     data: viewStore.shownCircleDatalist,
+                    rotationAngle: graphRotationAngle,
                     detailViewBuilder: { data in
                         let scoreListStore = store.scope(
                             state: \.scoreListState,
@@ -50,6 +54,13 @@ struct MyPageView: View {
                     }
                 }
                 .graphFrame(length: viewStore.imageExportMode ? 560 : 700)
+                .simultaneousGesture(
+                    RotationGesture()
+                        .onChanged { angle in
+                            graphRotationAngle = lastRotationAngle + angle * 0.01
+                            lastRotationAngle = graphRotationAngle
+                        }
+                )
                 .ignoresSafeArea(.container)
                 
                 if viewStore.imageExportMode {
