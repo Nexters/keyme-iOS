@@ -16,6 +16,7 @@ struct MyPageView: View {
     
     @State var graphRotationAngle: Angle = .degrees(45)
     @State var lastRotationAngle: Angle = .degrees(45)
+    @State var isGestureStarted = false
 
     private let store: StoreOf<MyPageFeature>
     
@@ -53,74 +54,14 @@ struct MyPageView: View {
                         viewStore.send(.circleDismissed)
                     }
                 }
-                .graphFrame(length: viewStore.imageExportMode ? 560 : 700)
-                .simultaneousGesture(
-                    RotationGesture()
-                        .onChanged { angle in
-                            graphRotationAngle = lastRotationAngle + angle * 0.01
-                            lastRotationAngle = graphRotationAngle
-                        }
-                )
                 .ignoresSafeArea(.container, edges: .bottom)
                 
-                if viewStore.imageExportMode {
-                    VStack(spacing: 0) {
-                        HStack {
-                            Button(action: { viewStore.send(.setExportPhotoMode(enabled: false)) }) {
-                                Image(systemName: "xmark")
-                                    .foregroundColor(.white)
-                            }
-                            Spacer()
-                            Button(action: {}) {
-                                HStack {
-                                    DSKitAsset.Image.photoExport.swiftUIImage
-                                    Text("이미지 저장")
-                                }
-                            }
-                            .foregroundColor(.white)
-                            .padding(3)
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.white.opacity(0.3))
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 28)
-                        .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
-                        
-                        DSKitAsset.Color.keymeBlack.swiftUIColor
-                            .allowsHitTesting(false)
-                            .reverseMask {
-                                RoundedRectangle(cornerRadius: 24)
-                                    .fill(Color.black)
-                                    .padding(32)
-                                    .padding(.bottom, 40)
-                            }
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 24)
-                                    .stroke(.white.opacity(0.3))
-                                    .padding(.bottom, 40)
-                                    .overlay {
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text.keyme(
-                                                viewStore.selectedSegment.title,
-                                                font: .body5)
-                                            .foregroundColor(.white.opacity(0.3))
-                                            Text.keyme(
-                                                "친구들이 생각하는\n\(viewStore.nickname)님의 성격은?",
-                                                font: .heading1)
-                                            .foregroundColor(.white)
-                                            
-                                            Spacer()
-                                            
-                                            HStack { Spacer() }
-                                        }
-                                        .padding(28)
-                                    }
-                                    .padding(32)
-                            }
-                    }
-                    .ignoresSafeArea(edges: .bottom)
+                // Export 모드에 진입합니다
+                IfLetStore(store.scope(
+                    state: \.imageExportModeState,
+                    action: MyPageFeature.Action.imageExportModeAction)
+                ) {
+                    ImageExportOverlayView(store: $0)
                 }
                 
                 // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
@@ -128,7 +69,7 @@ struct MyPageView: View {
                 if !viewStore.circleShown && !viewStore.imageExportMode {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
-                            Button(action: { viewStore.send(.setExportPhotoMode(enabled: true)) }) {
+                            Button(action: { viewStore.send(.enableImageExportMode) }) {
                                 DSKitAsset.Image.photoExport.swiftUIImage
                                     .resizable()
                                     .frame(width: 35, height: 35)

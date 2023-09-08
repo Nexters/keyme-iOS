@@ -85,8 +85,8 @@ class PinchZoomView: UIView {
             isPinching = false
             scale = scale.between(min: 0.5, max: 2.0)
             lastScale = scale
-            anchor = .center
-            offset = .zero
+//            anchor = .center
+//            offset = .zero
         default:
             break
         }
