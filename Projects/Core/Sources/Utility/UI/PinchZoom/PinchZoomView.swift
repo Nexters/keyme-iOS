@@ -13,6 +13,8 @@ import UIKit
 class PinchZoomView: UIView {
     weak var delegate: PinchZoomViewDelgate?
 
+    private var lastScale: CGFloat = 1
+    
     private(set) var scale: CGFloat = 0 {
         didSet {
             delegate?.pinchZoomView(self, didChangeScale: scale)
@@ -74,14 +76,15 @@ class PinchZoomView: UIView {
                 numberOfTouches = gesture.numberOfTouches
             }
 
-            scale = gesture.scale
+            scale = lastScale * gesture.scale
 
             location = gesture.location(in: self)
             offset = CGSize(width: location.x - startLocation.x, height: location.y - startLocation.y)
-
+            
         case .ended, .cancelled, .failed:
             isPinching = false
-            scale = 1.0
+            scale = scale.between(min: 0.5, max: 2.0)
+            lastScale = scale
             anchor = .center
             offset = .zero
         default:
