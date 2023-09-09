@@ -38,6 +38,7 @@ extension MyPageView {
         init(store: StoreOf<ImageExportOverlayFeature>, angle: Binding<Angle>) {
             self.store = store
             self._rotationAngle = angle
+            print(angle.wrappedValue)
         }
         
         var body: some View {
@@ -105,6 +106,9 @@ extension MyPageView {
         private func closeButton(action: @escaping Action) -> some View {
             Button(action: action) {
                 Image(systemName: "xmark")
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .scaledToFit()
                     .foregroundColor(.white)
             }
         }
@@ -112,13 +116,17 @@ extension MyPageView {
         private func photoCaptureButton(action: @escaping Action) -> some View {
             Button(action: action) {
                 HStack {
-                    DSKitAsset.Image.photoExport.swiftUIImage
-                    Text("이미지 저장")
+                    Image(systemName: "photo")
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .scaledToFit()
+                    Text.keyme("이미지 저장", font: .body4)
                 }
             }
             .foregroundColor(.white)
-            .padding(3)
-            .overlay { Capsule().stroke(Color.white.opacity(0.3)) }
+            .padding(.vertical, 7)
+            .padding(.horizontal, 12)
+            .overlay { Capsule().stroke(DSKitAsset.Color.keymeMediumgray.swiftUIColor) }
         }
     }
 }
