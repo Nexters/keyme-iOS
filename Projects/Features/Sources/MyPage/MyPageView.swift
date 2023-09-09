@@ -14,7 +14,7 @@ import SwiftUI
 struct MyPageView: View {
     @Namespace private var namespace
     
-    @State var graphRotationAngle: Angle = .degrees(45)
+    @State var graphRotationAngle: Angle = .radians(0.018)
 
     private let store: StoreOf<MyPageFeature>
     
@@ -120,8 +120,7 @@ struct MyPageView: View {
                     ImageExportOverlayView(store: $0, angle: $graphRotationAngle)
                 }
                 .transition(
-                    .opacity
-                        .combined(with: .scale(scale: 2))
+                    .opacity.combined(with: .scale(scale: 1.5))
                         .animation(Animation.customInteractiveSpring()))
                 .zIndex(ViewZIndex.high.rawValue)
             }
