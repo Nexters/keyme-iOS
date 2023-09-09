@@ -161,11 +161,12 @@ public struct MyPageFeature: Reducer {
                 
             case .imageExportModeAction(.dismissImageExportMode):
                 state.imageExportModeState = nil
-                return .none
                 
             default:
                 return .none
             }
+            
+            return .none
         }
         .ifLet(\.$settingViewState, action: /Action.setting) {
             SettingFeature()

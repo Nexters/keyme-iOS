@@ -25,6 +25,10 @@ struct MyPageView: View {
     public var body: some View {
         WithViewStore(store, observe: \.view, send: MyPageFeature.Action.view) { viewStore in
             ZStack(alignment: .topLeading) {
+                // Default bg color
+                DSKitAsset.Color.keymeBlack.swiftUIColor
+                    .ignoresSafeArea()
+                
                 CirclePackView(
                     namespace: namespace,
                     data: viewStore.shownCircleDatalist,
@@ -52,16 +56,9 @@ struct MyPageView: View {
                         viewStore.send(.circleDismissed)
                     }
                 }
+                .graphScale(viewStore.imageExportMode ? 0.7 : 1)
                 .ignoresSafeArea(.container, edges: .bottom)
-                
-                // Export 모드에 진입합니다
-                IfLetStore(store.scope(
-                    state: \.imageExportModeState,
-                    action: MyPageFeature.Action.imageExportModeAction)
-                ) {
-                    ImageExportOverlayView(store: $0, angle: $graphRotationAngle)
-                }
-                
+            
                 // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
                 // 탑 바, 탭 바, top5, bottom5 등
                 if !viewStore.circleShown && !viewStore.imageExportMode {
@@ -111,12 +108,30 @@ struct MyPageView: View {
                             .transition(.opacity)
                     }
                     .foregroundColor(.white)
+                    .transition(.opacity)
                 }
+                
+                // Export 모드에 진입합니다
+                
+                IfLetStore(store.scope(
+                    state: \.imageExportModeState,
+                    action: MyPageFeature.Action.imageExportModeAction)
+                ) {
+                    ImageExportOverlayView(store: $0, angle: $graphRotationAngle)
+                }
+                .transition(
+                    .opacity
+                        .combined(with: .scale(scale: 2))
+                        .animation(Animation.customInteractiveSpring()))
+                .zIndex(ViewZIndex.high.rawValue)
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)
             .navigationDestination(
                 store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
                 destination: { SettingView(store: $0) })
+            .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
+            .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
+            .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
         }
         .onAppear {
             store.send(.requestCircle(.top5))
@@ -124,6 +139,11 @@ struct MyPageView: View {
             
             store.send(.view(.selectSegement(.similar)))
         }
+    }
+    
+    private enum ViewZIndex: CGFloat {
+        case low = 0
+        case high = 1
     }
 }
 
