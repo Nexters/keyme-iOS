@@ -77,7 +77,7 @@ extension MyPageView {
                     HStack {
                         Image(systemName: "arrow.clockwise")
                             .foregroundColor(.white)
-                        Slider(value: $rotationAngle.degrees, in: -180...180, step: 0.1)
+                        Slider(value: $rotationAngle.degrees, in: -Double.pi...Double.pi, step: 0.01)
                             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
                     }
                     .padding(20)

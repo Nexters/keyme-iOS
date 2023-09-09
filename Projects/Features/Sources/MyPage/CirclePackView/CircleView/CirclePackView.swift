@@ -23,6 +23,8 @@ public class CirclePackViewOption<DetailView: View> {
     var framePadding: CGFloat
     /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
     var magnifiedCircleRatio: CGFloat
+    /// 그런거 모르겠고 Scale로 사이즈 조정하고 싶으면 여기
+    var scale: CGFloat
     
     var onCircleTappedHandler: (CircleData) -> Void
     var onCircleDismissedHandler: (CircleData) -> Void
@@ -36,6 +38,7 @@ public class CirclePackViewOption<DetailView: View> {
         outboundLength = 700
         framePadding = 350
         magnifiedCircleRatio =  0.9
+        scale = 1
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }
@@ -46,6 +49,7 @@ public class CirclePackViewOption<DetailView: View> {
         outboundLength: CGFloat,
         framePadding: CGFloat,
         magnifiedCircleRatio: CGFloat,
+        scale: CGFloat,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
         onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
@@ -54,6 +58,7 @@ public class CirclePackViewOption<DetailView: View> {
         self.outboundLength = outboundLength
         self.framePadding = framePadding
         self.magnifiedCircleRatio = magnifiedCircleRatio
+        self.scale = scale
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }
@@ -127,6 +132,7 @@ public struct CirclePackView<DetailView: View>: View {
                     }
                 }
                 .frame(width: option.outboundLength, height: option.outboundLength)
+                .scaleEffect(option.scale)
                 .padding(option.framePadding)
                 .pinchZooming()
             }
@@ -356,6 +362,14 @@ extension CirclePackView {
     /// 기본값은 350입니다.
     func graphFramePadding(_ factor: CGFloat) -> CirclePackView {
         self.option.framePadding = factor
+        return self
+    }
+    
+    /// 버블차트의 원 크기 스케일을 잡습니다.
+    ///
+    /// 기본값은 당연히 1입니다.
+    func graphScale(_ factor: CGFloat) -> CirclePackView {
+        self.option.scale = factor
         return self
     }
     
