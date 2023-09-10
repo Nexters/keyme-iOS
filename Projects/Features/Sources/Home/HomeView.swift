@@ -100,17 +100,16 @@ extension HomeView {
         .frame(height: 60)
         .onTapGesture {
             Task {
-                // TODO: 현재 url 이슈로 shorURL 생성 안됨 -> 추후에 바꿔놓기
                 if viewStore.isSolvedDailyTest {
-                    let url = "https://keyme-frontend.vercel.app/test/17"
-                    //                let url = "https://keyme-frontend.vercel.app/test/\(viewStore.view.testId)"
-//                    let shortURL = try await ShortUrlAPIManager.shared.request(
-//                        .shortenURL(longURL: url),
-//                        object: BitlyResponse.self).link
+//                    let url = "https://keyme-frontend.vercel.app/test/17"
+                    let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                    let shortURL = try await ShortUrlAPIManager.shared.request(
+                        .shortenURL(longURL: url),
+                        object: BitlyResponse.self).link
 
                     sharedURL = ActivityViewController.SharedURL("www.example.com")
                 } else {
-                    // TODO: 시작하기 누르면 웹뷰로 가도록 구현
+                    viewStore.send(.startTest(.presented(.startButtonDidTap)))
                 }
             }
         }

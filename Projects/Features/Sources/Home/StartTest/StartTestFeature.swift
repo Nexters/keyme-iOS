@@ -72,7 +72,6 @@ public struct StartTestFeature: Reducer {
             case let .setIcon(icon):
                 state.icon = icon
                 
-            // TODO: 현재 문제 풀이 웹뷰로 안넘어감
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
                 state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)

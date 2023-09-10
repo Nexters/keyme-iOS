@@ -39,6 +39,7 @@ public struct KeymeTestsFeature: Reducer {
         public enum View: Equatable {
             case showResult(data: KeymeWebViewModel)
             case closeButtonTapped
+            case closeWebView
         }
         
         public enum Alert: Equatable {
@@ -83,6 +84,9 @@ public struct KeymeTestsFeature: Reducer {
                         }
                     ))
                 }
+                
+            case .view(.closeWebView):
+                return .send(.close)
 
             case .submit:
                 return .none
