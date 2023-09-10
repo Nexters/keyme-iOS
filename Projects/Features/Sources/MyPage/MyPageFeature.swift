@@ -16,6 +16,7 @@ import Network
 
 public struct MyPageFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
+    @Dependency(\.shortUrlAPIManager) private var shortURLManager
     
     public struct State: Equatable {
         var view: View
@@ -30,22 +31,30 @@ public struct MyPageFeature: Reducer {
                 view.imageExportMode = imageExportModeState == nil ? false : true
             }
         }
+        @PresentationState var shareSheetState: ShareSheetFeature.State?
+        @PresentationState var alertState: AlertState<Action.Alert>?
         
         struct View: Equatable {            
             let userId: Int
             let nickname: String
+            let testId: Int
+            var testURL: String { "https://keyme-frontend.vercel.app/test/\(testId)" }
             
             var imageExportMode = false
-            var rotationAngle: Double = 45
             
             var circleShown = false
             var selectedSegment: MyPageSegment = .similar
             var shownFirstTime = true
             var shownCircleDatalist: [CircleData] = []
+            
+            var nowFetching: TargetData?
+            enum TargetData {
+                case circleData
+            }
         }
         
-        init(userId: Int, nickname: String) {
-            self.view = View(userId: userId, nickname: nickname)
+        init(userId: Int, nickname: String, testId: Int) {
+            self.view = View(userId: userId, nickname: nickname, testId: testId)
             self._scoreListState = .init(.init())
         }
     }
@@ -55,9 +64,13 @@ public struct MyPageFeature: Reducer {
         case showCircle(MyPageSegment)
         case requestCircle(MatchRate)
         case view(View)
+        case showAlert(message: String)
+        case showShareSheet(URL)
         
         case scoreListAction(ScoreListFeature.Action)
         case setting(PresentationAction<SettingFeature.Action>)
+        case shareSheet(PresentationAction<ShareSheetFeature.Action>)
+        case alert(PresentationAction<Action.Alert>)
         case imageExportModeAction(ImageExportOverlayFeature.Action)
  
         public enum View: Equatable {
@@ -67,7 +80,11 @@ public struct MyPageFeature: Reducer {
             case prepareSettingView
             case selectSegement(MyPageSegment)
             case enableImageExportMode
+            case captureImage
+            case requestTestURL
         }
+        
+        public enum Alert: Equatable {}
     }
     
     // 마이페이지를 사용할 수 없는 케이스
@@ -124,6 +141,12 @@ public struct MyPageFeature: Reducer {
                 }
                 return .none
                 
+            case .showShareSheet(let url):
+                state.shareSheetState = ShareSheetFeature.State(url: url)
+                
+            case .showAlert(let message):
+                state.alertState = AlertState(title: TextState("오류가 발생했어요"), message: TextState(message))
+                
             // MARK: - View actions
             case .view(.selectSegement(let segment)):
                 state.view.selectedSegment = segment
@@ -154,6 +177,26 @@ public struct MyPageFeature: Reducer {
                 
                 return .none
                 
+            case .view(.requestTestURL):
+                return .run { [testURL = state.view.testURL] send in
+                    do {
+                        
+                        let shortURL = try await shortURLManager.request(
+                            .shortenURL(longURL: testURL),
+                            object: BitlyResponse.self).link
+                        
+                        guard let url = URL(string: shortURL) else {
+                            await send(.showAlert(message: "링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                            return
+                        }
+                        
+                        await send(.showShareSheet(url))
+                    } catch {
+                        await send(.showAlert(
+                            message: "링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.\n\(error.localizedDescription)"))
+                    }
+                }
+                
             // MARK: - Child actions
             case .scoreListAction:
                 print("score")
@@ -161,6 +204,12 @@ public struct MyPageFeature: Reducer {
                 
             case .imageExportModeAction(.dismissImageExportMode):
                 state.imageExportModeState = nil
+                
+            case .imageExportModeAction(.captureImage):
+                break
+                
+            case .shareSheet(.dismiss):
+                state.shareSheetState = nil
                 
             default:
                 return .none

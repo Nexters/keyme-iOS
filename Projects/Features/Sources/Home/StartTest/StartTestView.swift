@@ -54,6 +54,9 @@ public struct StartTestView: View {
         .onDisappear {
             store.send(.onDisappear)
         }
+        .onDisappear {
+            store.send(.stopAnimation)
+        }
     }
 }
 

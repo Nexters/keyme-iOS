@@ -36,6 +36,8 @@ public struct KeymeTestsFeature: Reducer {
         case view(View)
         case alert(PresentationAction<Alert>)
         
+        case showErrorAlert(message: String)
+        
         public enum View: Equatable {
             case showResult(data: KeymeWebViewModel)
             case closeButtonTapped
@@ -78,6 +80,11 @@ public struct KeymeTestsFeature: Reducer {
                 
             case .view(.showResult(let data)):
                 return .run { [resultCode = data.resultCode] send in
+                    guard let resultCode else {
+                        await send(.showErrorAlert(message: "데이터 조회 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."))
+                        return
+                    }
+                    
                     await send(.postResult(
                         TaskResult { try await
                             self.keymeTestsClient.postTestResult(resultCode)
@@ -90,6 +97,9 @@ public struct KeymeTestsFeature: Reducer {
 
             case .submit:
                 return .none
+                
+            case .showErrorAlert(let message):
+                state.alertState = AlertState(title: TextState("오류가 발생했어요"), message: TextState(message))
                 
             case .alert(.presented(.closeTest)):
                 return .send(.close)

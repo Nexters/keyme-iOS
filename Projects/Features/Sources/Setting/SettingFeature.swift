@@ -13,8 +13,10 @@ import Network
 
 public struct SettingFeature: Reducer {
     @Dependency(\.notificationManager) var notificationManager
+    @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
+        @PresentationState var alerState: AlertState<Action.Alert>?
         var isPushNotificationEnabled: Bool
         
         init() {
@@ -31,7 +33,11 @@ public struct SettingFeature: Reducer {
             case togglePushNotification
         }
         
+        public enum Alert: Equatable {}
+        
         case view(View)
+        case alert(Alert)
+        case showAlert(message: String)
         case setPushNotificationStatus(Bool)
     }
     
@@ -45,8 +51,14 @@ public struct SettingFeature: Reducer {
                 return .none
                 
             case .view(.withdrawal):
-                // TODO: Call api
-                return .none
+                return .run { send in
+                    do {
+                        try await network.request(.setting(.withdrawal))
+                        await send(.view(.logout))
+                    } catch {
+                        await send(.showAlert(message: "작업을 실행할 수 없습니다. 잠시 후 다시 시도해주세요."))
+                    }
+                }
                 
             case .view(.togglePushNotification):
                 if state.isPushNotificationEnabled == false {
@@ -62,6 +74,13 @@ public struct SettingFeature: Reducer {
                     notificationManager.unregisterPushNotification()
                     return .send(.setPushNotificationStatus(false))
                 }
+                
+            case .showAlert(let message):
+                state.alerState = AlertState(
+                    title: TextState("에러가 발생했습니다"),
+                    message: TextState(message))
+                
+                return .none
                 
             case .setPushNotificationStatus(let value):
                 state.isPushNotificationEnabled = value
