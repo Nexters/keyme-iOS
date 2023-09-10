@@ -11,7 +11,7 @@ import Foundation
 public struct VerifyNicknameDTO: Decodable {
     let code: Int
     let message: String
-    public let data: NicknameData
+    public let data: NicknameData?
     
     public struct NicknameData: Decodable {
         let description: String

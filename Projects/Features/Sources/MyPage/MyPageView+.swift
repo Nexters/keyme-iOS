@@ -6,6 +6,7 @@
 //  Copyright © 2023 team.humanwave. All rights reserved.
 //
 
+import Core
 import ComposableArchitecture
 import DSKit
 import SwiftUI
@@ -30,15 +31,17 @@ public struct ImageExportOverlayFeature: Reducer {
 
 extension MyPageView {
     struct ImageExportOverlayView: View {
+        private let captureAction: () -> Void
         @Binding var rotationAngle: Angle
-        
+
         private typealias Action = () -> Void
         private let store: StoreOf<ImageExportOverlayFeature>
+        private let imageSaver = ImageSaver()
         
-        init(store: StoreOf<ImageExportOverlayFeature>, angle: Binding<Angle>) {
+        init(store: StoreOf<ImageExportOverlayFeature>, angle: Binding<Angle>, captureAction: @escaping () -> Void) {
             self.store = store
             self._rotationAngle = angle
-            print(angle.wrappedValue)
+            self.captureAction = captureAction
         }
         
         var body: some View {
@@ -49,31 +52,20 @@ extension MyPageView {
                         
                         Spacer()
                         
-                        photoCaptureButton(action: { viewStore.send(.captureImage) })
+                        photoCaptureButton(action: {
+                            viewStore.send(.captureImage)
+                            captureAction()
+                        })
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 28)
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
                     
-                    DSKitAsset.Color.keymeBlack.swiftUIColor
-                        .reverseMask { maskingShape(isFilled: true).padding(32) }
-                        .overlay {
-                            maskingShape(isFilled: false).overlay {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text.keyme(viewStore.title, font: .body5)
-                                        .foregroundColor(.white.opacity(0.3))
-                                    
-                                    Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
-                                        .foregroundColor(.white)
-                                    
-                                    Spacer()
-                                    horizontalSpacer
-                                }
-                                .padding(20)
-                            }
-                            .padding(32)
-                        }
-                        .allowsHitTesting(false)
+                    imageExportTargetView(
+                        title: viewStore.title,
+                        nickname: viewStore.nickname)
+                    .allowsHitTesting(false)
+                    
                     
                     HStack {
                         Image(systemName: "arrow.clockwise")
@@ -128,5 +120,53 @@ extension MyPageView {
             .padding(.horizontal, 12)
             .overlay { Capsule().stroke(DSKitAsset.Color.keymeMediumgray.swiftUIColor) }
         }
+        
+        private func imageExportTargetView(title: String, nickname: String) -> some View {
+            ZStack {
+                DSKitAsset.Color.keymeBlack.swiftUIColor
+                    .reverseMask { maskingShape(isFilled: true).padding(32) }
+                
+                ZStack {
+                    maskingShape(isFilled: false)
+                    
+                    MyPageImageExportView(title: title, nickname: nickname, content: { EmptyView() })
+                        .padding(20)
+                }
+                .padding(32)
+            }
+        }
+    }
+}
+
+public struct MyPageImageExportView<Content: View>: View {
+    let title: String
+    let nickname: String
+    let content: Content
+    
+    init(title: String, nickname: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.nickname = nickname
+        self.content = content()
+    }
+    
+    public var body: some View {
+        ZStack {
+            content
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text.keyme(title, font: .body5)
+                    .foregroundColor(.white.opacity(0.3))
+                
+                Text.keyme("친구들이 생각하는\n\(nickname)님의 성격은?", font: .heading1)
+                    .foregroundColor(.white)
+                
+                Spacer()
+                horizontalSpacer
+            }
+        }
+    }
+    
+    private var horizontalSpacer: some View {
+        HStack { Spacer() }
     }
 }

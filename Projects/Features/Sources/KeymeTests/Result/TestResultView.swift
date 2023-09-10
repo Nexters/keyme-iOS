@@ -16,7 +16,8 @@ import Network
 
 public struct TestResultView: View {
     @State var sharedURL: ActivityViewController.SharedURL?
-    
+    @Dependency(\.shortUrlAPIManager) private var shortURLManager
+
     private let store: StoreOf<TestResultFeature>
     
     public init(store: StoreOf<TestResultFeature>) {
@@ -120,7 +121,7 @@ public struct TestResultView: View {
                 // TODO: url 주석단거로 바꾸기
                 let url = "https://keyme-frontend.vercel.app/test/\(17)"
 //                let url = "https://keyme-frontend.vercel.app/test/5"
-                let shortURL = try await ShortUrlAPIManager.shared.request(
+                let shortURL = try await shortURLManager.request(
                     .shortenURL(longURL: url),
                     object: BitlyResponse.self).link
                 

@@ -90,7 +90,8 @@ public struct RootFeature: Reducer {
                         if memberInformation.isOnboardingClear != true {
                             await send(
                                 .updateState(
-                                    .needOnboarding(OnboardingFeature.State(authorizationToken: accessToken))))
+                                    .needOnboarding(OnboardingFeature.State(
+                                        authorizationToken: accessToken, nickname: nickname))))
                         } else {
                             await send(.updateState(
                                 .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
