@@ -50,7 +50,10 @@ struct DailyTestListView: View {
                 Spacer()
             }
             .onAppear {
-                viewStore.send(.viewWillAppear)
+                viewStore.send(.onAppear)
+            }
+            .onDisappear {
+                viewStore.send(.onDisappear)
             }
             .fullFrame()
             .padding([.leading, .trailing], 16)

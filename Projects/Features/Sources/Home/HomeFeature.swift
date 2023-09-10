@@ -38,6 +38,7 @@ public struct HomeFeature: Reducer {
     }
     
     public enum Action {
+        case onDisappear
         case requestLogout
         
         case fetchDailyTests

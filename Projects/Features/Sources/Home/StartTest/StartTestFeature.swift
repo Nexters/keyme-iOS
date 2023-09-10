@@ -29,12 +29,17 @@ public struct StartTestFeature: Reducer {
     }
     
     public enum Action {
-        case viewWillAppear
+        case onAppear
+        case onDisappear
         case startAnimation([IconModel])
         case setIcon(IconModel)
         case startButtonDidTap
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
         case toggleAnimation(IconModel)
+    }
+    
+    enum CancelID {
+        case startTest
     }
     
     @Dependency(\.continuousClock) var clock
@@ -45,8 +50,12 @@ public struct StartTestFeature: Reducer {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .viewWillAppear:
+            case .onAppear:
                 return .send(.startAnimation(state.testData.tests.map { $0.icon }))
+                
+            case .onDisappear:
+                state.isAnimating = true
+                return .cancel(id: CancelID.startTest)
                 
             case .startAnimation(let icons):
                 
@@ -58,6 +67,7 @@ public struct StartTestFeature: Reducer {
                         }
                     } while true
                 }
+                .cancellable(id: CancelID.startTest)
                 
             case let .setIcon(icon):
                 state.icon = icon
@@ -79,6 +89,7 @@ public struct StartTestFeature: Reducer {
                     }
                     await send(.setIcon(icon))
                 }
+                .cancellable(id: CancelID.startTest)
                 
             default:
                 break

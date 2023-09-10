@@ -50,7 +50,10 @@ public struct StartTestView: View {
             }
         }
         .onAppear {
-            store.send(.viewWillAppear)
+            store.send(.onAppear)
+        }
+        .onDisappear {
+            store.send(.onDisappear)
         }
     }
 }

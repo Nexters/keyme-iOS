@@ -24,17 +24,25 @@ public struct DailyTestListFeature: Reducer {
     }
     
     public enum Action {
-        case viewWillAppear
+        case onAppear
+        case onDisappear
         case fetchDailyStatistics
         case saveDailyStatistics(DailyStatisticsModel)
         case shareButtonDidTap
     }
     
+    enum CancelID {
+        case dailyTestList
+    }
+    
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .viewWillAppear:
+            case .onAppear:
                 return .send(.fetchDailyStatistics)
+                
+            case .onDisappear:
+                return .cancel(id: CancelID.dailyTestList)
                 
             case .fetchDailyStatistics:
                 return .run { [testId = state.testData.testId] send in
@@ -43,7 +51,8 @@ public struct DailyTestListFeature: Reducer {
                     let dailyStatistics = dailyStatisticsData.toDailyStatisticsModel()
                     await send(.saveDailyStatistics(dailyStatistics))
                 }
-                
+                .cancellable(id: CancelID.dailyTestList)
+        
             case let .saveDailyStatistics(dailyStatistics):
                 state.dailyStatistics = dailyStatistics
                 
