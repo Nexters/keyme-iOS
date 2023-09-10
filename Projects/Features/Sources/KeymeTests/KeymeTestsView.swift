@@ -33,5 +33,6 @@ public struct KeymeTestsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .alert(store: store.scope(state: \.$alertState, action: KeymeTestsFeature.Action.alert))
     }
 }

@@ -24,6 +24,7 @@ public extension Project {
         ],
         "API_BASE_URL": "$(API_BASE_URL)",
         "KAKAO_API_KEY": "$(KAKAO_API_KEY)",
+        "BITLY_API_KEY": "$(BITLY_API_KEY)",
         "UIUserInterfaceStyle": "Light",
         "NSAppTransportSecurity": [
             "NSExceptionDomains": [
@@ -33,7 +34,8 @@ public extension Project {
                 ],
             ]
         ],
-        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink"]
+        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink"],
+        "NSPhotoLibraryAddUsageDescription": "스크린샷을 저장하기 위해서 앨범 접근 권한이 필요합니다"
     ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [

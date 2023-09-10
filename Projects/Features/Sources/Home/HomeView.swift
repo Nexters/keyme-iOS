@@ -29,11 +29,11 @@ public struct HomeView: View {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                 
                 VStack {
-                    if(viewStore.isSolvedDailyTest) {
-                        dailyTestListView
-                    } else {
+//                    if(viewStore.isSolvedDailyTest) {
+//                        dailyTestListView
+//                    } else {
                         startTestView
-                    }
+//                    }
                     
                     Spacer()
                     

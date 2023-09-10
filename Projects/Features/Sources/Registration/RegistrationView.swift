@@ -216,7 +216,7 @@ extension RegistrationView {
                     .foregroundColor(isValid ? .green : .red)
                     .frame(width: 10, height: 10)
                 
-                Text.keyme(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.", font: .caption1)
+                Text.keyme(isValid ? "사용 가능한 닉네임입니다" : "이미 사용 중인 닉네임입니다", font: .caption1)
                     .foregroundColor(.gray)
                 
                 Spacer()

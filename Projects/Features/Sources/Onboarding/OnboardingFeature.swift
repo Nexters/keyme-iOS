@@ -65,8 +65,10 @@ public struct OnboardingFeature: Reducer {
         public var isShared: Bool = false
         
         let authorizationToken: String
-        public init(authorizationToken: String) {
+        let nickname: String
+        public init(authorizationToken: String, nickname: String) {
             self.authorizationToken = authorizationToken
+            self.nickname = nickname
         }
     }
     

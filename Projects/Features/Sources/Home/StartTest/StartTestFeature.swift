@@ -12,6 +12,8 @@ import ComposableArchitecture
 import Domain
 
 public struct StartTestFeature: Reducer {
+    enum CancelID { case startAnimation }
+    
     public struct State: Equatable {
         public let nickname: String
         public let testData: KeymeTestsModel
@@ -31,6 +33,7 @@ public struct StartTestFeature: Reducer {
     public enum Action {
         case viewWillAppear
         case startAnimation([IconModel])
+        case stopAnimation
         case setIcon(IconModel)
         case startButtonDidTap
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
@@ -49,15 +52,22 @@ public struct StartTestFeature: Reducer {
                 return .send(.startAnimation(state.testData.tests.map { $0.icon }))
                 
             case .startAnimation(let icons):
-                
                 return .run { send in
-                    repeat {
-                        for icon in icons {
-                            await send(.toggleAnimation(icon))
-                            try await self.clock.sleep(for: .seconds(0.85))
-                        }
-                    } while true
+                    try await withTaskCancellation(
+                        id: CancelID.startAnimation,
+                        cancelInFlight: true
+                    ) {
+                        repeat {
+                            for icon in icons {
+                                await send(.toggleAnimation(icon))
+                                try await self.clock.sleep(for: .seconds(0.85))
+                            }
+                        } while true
+                    }
                 }
+                
+            case .stopAnimation:
+                return .cancel(id: CancelID.startAnimation)
                 
             case let .setIcon(icon):
                 state.icon = icon

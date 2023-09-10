@@ -87,11 +87,17 @@ public struct OnboardingView: View {
             Spacer()
                 .frame(height: 119)
             
-            Text.keyme(viewStore.lottieType.title, font: .heading1)
-                .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-                .padding(Padding.insets(leading: 16))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .animation(Animation.customInteractiveSpring(), value: viewStore.lottieType)
+            Group {
+                if case .question = viewStore.lottieType {
+                    Text.keyme("환영해요 \(viewStore.nickname)님!\n이제 문제를 풀어볼까요?", font: .heading1)
+                } else {
+                    Text.keyme(viewStore.lottieType.title, font: .heading1)
+                }
+            }
+            .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+            .padding(Padding.insets(leading: 16))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .animation(Animation.customInteractiveSpring(), value: viewStore.lottieType)
             
             Spacer()
             
