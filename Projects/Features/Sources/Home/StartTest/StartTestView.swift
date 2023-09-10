@@ -46,7 +46,6 @@ public struct StartTestView: View {
                         })
                 
                 Spacer()
-                Spacer()
             }
         }
         .onAppear {

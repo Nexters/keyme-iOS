@@ -42,14 +42,15 @@ public struct KeymeWebView: UIViewRepresentable {
         {
             var request = URLRequest(url: url)
             request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+            webView.customUserAgent = "KEYME_\(accessToken)"
             webView.load(request)
         }
     }
     
     public func makeUIView(context: Context) -> WKWebView {
         // This is the important part
+        webView.navigationDelegate = context.coordinator
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
-        webView.customUserAgent = "KEYME"
         webView.backgroundColor = UIColor(Color.hex("171717"))
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
@@ -65,7 +66,7 @@ public struct KeymeWebView: UIViewRepresentable {
         Coordinator(parent: self, option: option)
     }
     
-    public final class Coordinator: NSObject, WKScriptMessageHandler {
+    public final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         private let decoder = JSONDecoder()
         let parent: KeymeWebView
         let option: KeymeWebViewOption
