@@ -120,8 +120,7 @@ struct MyPageView: View {
                     ImageExportOverlayView(store: $0, angle: $graphRotationAngle)
                 }
                 .transition(
-                    .opacity
-                        .combined(with: .scale(scale: 2))
+                    .opacity.combined(with: .scale(scale: 1.5))
                         .animation(Animation.customInteractiveSpring()))
                 .zIndex(ViewZIndex.high.rawValue)
             }
