@@ -31,24 +31,17 @@ final class KeymeWebViewOption {
 }
 
 public struct KeymeWebView: UIViewRepresentable {
+    private var url: String?
+    private let accessToken: String
     private let option: KeymeWebViewOption
     private let webView: WKWebView
-    public let url: String
     
-    init(url: String, accessToken: String) {
-        self.option = .init()
+    init(url: String?, accessToken: String) {
         self.url = url
+//        self._url = url
+        self.option = .init()
+        self.accessToken = accessToken
         self.webView = SharedWebView.instance
-        
-        if
-            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-            let url = URL(string: encodedUrl)
-        {
-            var request = URLRequest(url: url)
-            request.setValue(accessToken, forHTTPHeaderField: "Authorization")
-            webView.customUserAgent = "KEYME_\(accessToken)"
-            webView.load(request)
-        }
     }
     
     public func makeUIView(context: Context) -> WKWebView {
@@ -62,12 +55,21 @@ public struct KeymeWebView: UIViewRepresentable {
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
         
+        let url = self.url ?? "about:blank"
+        if
+            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+            let url = URL(string: encodedUrl)
+        {
+            var request = URLRequest(url: url)
+            request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+            webView.customUserAgent = "KEYME_\(accessToken)"
+            webView.load(request)
+        }
+        
         return webView
     }
     
-    public func updateUIView(_ uiView: WKWebView, context: Context) {
-        
-    }
+    public func updateUIView(_ uiView: WKWebView, context: Context) {}
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(parent: self, option: option)
@@ -96,6 +98,7 @@ public struct KeymeWebView: UIViewRepresentable {
                 switch command {
                 case "CLOSE_WEBVIEW":
                     option.onCloseWebView()
+                    self.parent.load(url: "about:blank")
                     
                 case "SEND_TEST_RESULT":
                     if let data = messageBody["data"] as? [String: Any] {
@@ -120,8 +123,9 @@ public struct KeymeWebView: UIViewRepresentable {
 }
 
 public extension KeymeWebView {
-    func load(url: String) -> Self {
-        guard let url = URL(string: url) else  { return self }
+    @discardableResult
+    func load(url: String?) -> Self {
+        guard let url = URL(string: url ?? "about:blank") else { return self }
         
         let request = URLRequest(url: url)
         self.webView.load(request)

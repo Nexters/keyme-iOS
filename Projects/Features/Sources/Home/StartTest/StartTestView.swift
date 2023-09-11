@@ -36,21 +36,14 @@ public struct StartTestView: View {
                     .onTapGesture {
                         viewStore.send(.startButtonDidTap)
                     }
-                    .navigationDestination(
-                        store: store.scope(
-                            state: \.$keymeTestsState,
-                            action: StartTestFeature.Action.keymeTests
-                        ), destination: { store in
-                            KeymeTestsView(store: store)
-                                .ignoresSafeArea(.all)
-                                .transition(.scale.animation(.easeIn))
-                        })
                 
                 Spacer()
             }
             .background {
                 // 웹뷰 로딩속도 개선 때문에 거의 안 보일 정도로 미리 띄워놓는 것임
-                warmUpWebView()
+                if viewStore.keymeTestsState != nil {
+                    warmUpWebView().allowsHitTesting(false)
+                }
             }
         }
         .onAppear {
@@ -59,13 +52,23 @@ public struct StartTestView: View {
         .onDisappear {
             store.send(.stopAnimation)
         }
+        .navigationDestination(
+            store: store.scope(
+                state: \.$keymeTestsState,
+                action: StartTestFeature.Action.keymeTests),
+            destination: { store in
+                KeymeTestsView(store: store)
+                    .ignoresSafeArea(.all)
+                    .transition(.scale.animation(.easeIn))
+            }
+        )
     }
 }
 
 extension StartTestView {
     func warmUpWebView() -> some View {
         let store: StoreOf<KeymeTestsFeature> = Store(
-            initialState: KeymeTestsFeature.State(url: "", authorizationToken: "")
+            initialState: KeymeTestsFeature.State(url: nil, authorizationToken: "")
         ) {
             KeymeTestsFeature()
         }

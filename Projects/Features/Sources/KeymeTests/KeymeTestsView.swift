@@ -23,17 +23,23 @@ public struct KeymeTestsView: View {
         WithViewStore(store, observe: { $0 }, send: KeymeTestsFeature.Action.view) { viewStore in
             ZStack {
                 KeymeWebView(url: viewStore.url, accessToken: viewStore.authorizationToken)
-                    .load(url: viewStore.url)
                     .onCloseWebView {
                         viewStore.send(.closeButtonTapped)
                     }
                     .onTestSubmitted { testResult in
                         viewStore.send(.showResult(data: testResult))
                     }
-                    .toolbar(.hidden, for: .navigationBar)
+                    .onAppear {
+                        print("WEBVIEW APPEAR")
+                    }
+                    .onDisappear {
+                        print("WEBVIEW diss")
+                    }
+                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .toolbar(.hidden, for: .navigationBar)
         .alert(store: store.scope(state: \.$alertState, action: KeymeTestsFeature.Action.alert))
     }
 }

@@ -15,11 +15,11 @@ import Network
 public struct KeymeTestsFeature: Reducer {
     
     public struct State: Equatable {
-        let url: String
+        let url: String?
         let authorizationToken: String
         @PresentationState var alertState: AlertState<Action.Alert>?
         
-        public init(url: String, authorizationToken: String) {
+        public init(url: String?, authorizationToken: String) {
             self.url = url
             self.authorizationToken = authorizationToken
             self.alertState = alertState
