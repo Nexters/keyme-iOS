@@ -115,25 +115,27 @@ public struct CirclePackView<DetailView: View>: View {
             // 전체 스크롤, 원상복구되는 줌 들어가 있음
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
                 ZStack {
-                    ForEach(circleData) { data in
-                        if data == focusedCircleData {
-                            Circle().fill(.clear)
-                        } else {
-                            SubCircleView(
-                                namespace: namespace,
-                                outboundLength: option.outboundLength,
-                                circleData: data,
-                                onTapGesture: {
-                                    guard animationEnded else { return }
-                                    option.onCircleTappedHandler(data)
-                                    focusedCircleData = data
-                                })
+                    ZStack {
+                        ForEach(circleData) { data in
+                            if data == focusedCircleData {
+                                Circle().fill(.clear)
+                            } else {
+                                SubCircleView(
+                                    namespace: namespace,
+                                    outboundLength: option.outboundLength,
+                                    circleData: data,
+                                    onTapGesture: {
+                                        guard animationEnded else { return }
+                                        option.onCircleTappedHandler(data)
+                                        focusedCircleData = data
+                                    })
+                            }
                         }
                     }
+                    .frame(width: option.outboundLength, height: option.outboundLength)
+                    .padding(option.framePadding)
+                    .scaleEffect(scale)
                 }
-                .frame(width: option.outboundLength, height: option.outboundLength)
-                .scaleEffect(option.scale)
-                .padding(option.framePadding)
                 .pinchZooming()
             }
             .zIndex(1)

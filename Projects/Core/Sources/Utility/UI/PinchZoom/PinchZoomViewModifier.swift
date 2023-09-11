@@ -20,14 +20,14 @@ public extension View {
 
 struct PinchToZoomViewModifier: ViewModifier {
     @State var scale: CGFloat = 1.0
-    @State var anchor: UnitPoint = .center
+    @State var anchor: UnitPoint = .zero
     @State var offset: CGSize = .zero
     @State var isPinching: Bool = false
 
     func body(content: Content) -> some View {
         content
 //            .scaleEffect(scale, anchor: anchor)
-            .scaleEffect(scale)
+            .scaleEffect(scale) // Prevent glitching
             .offset(offset)
             .overlay(
                 PinchZoomViewRepresentable(
