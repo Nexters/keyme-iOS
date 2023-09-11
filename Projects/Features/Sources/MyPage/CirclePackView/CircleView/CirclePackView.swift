@@ -134,7 +134,7 @@ public struct CirclePackView<DetailView: View>: View {
                     }
                     .frame(width: option.outboundLength, height: option.outboundLength)
                     .padding(option.framePadding)
-                    .scaleEffect(scale)
+                    .scaleEffect(option.scale)
                 }
                 .pinchZooming()
             }
