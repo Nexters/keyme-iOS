@@ -102,6 +102,79 @@ public struct MyPageFeature: Reducer {
 
                 switch rate {
                 case .top5:
+                    state.similarCircleDataList = [
+                        CircleData(
+                            color: DSKitAsset.Color.relationship.swiftUIColor,
+                            xPoint: CGFloat(-7.850462293418875e-17),
+                            yPoint: CGFloat(-0.45609943575566647),
+                            radius: CGFloat(0.17677669529663687),
+                            metadata: .init(
+                                questionId: 1,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.relationship.swiftUIImage,
+                                keyword: "돌직구",
+                                averageScore: 2.0,
+                                myScore: 3.2
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.emotional.swiftUIColor,
+                            xPoint: CGFloat(0.4118209091937473),
+                            yPoint: CGFloat(0.6710075582593835),
+                            radius: CGFloat(0.17677669529663687),
+                            metadata: .init(
+                                questionId: 2,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.emotional.swiftUIImage,
+                                keyword: "새벽감성",
+                                averageScore: 2.0,
+                                myScore: 3.7
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.relationshipNe.swiftUIColor,
+                            xPoint: CGFloat(-7.850462293418875e-17),
+                            yPoint: CGFloat(0.559016994374948),
+                            radius: CGFloat(0.25),
+                            metadata: .init(
+                                questionId: 3,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.relationship.swiftUIImage,
+                                keyword: "표현력",
+                                averageScore: 3,
+                                myScore: 3.9
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.humor.swiftUIColor,
+                            xPoint: CGFloat(0.5),
+                            yPoint: CGFloat(0.0),
+                            radius: CGFloat(0.5),
+                            metadata: .init(
+                                questionId: 4,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.humor.swiftUIImage,
+                                keyword: "개그맨",
+                                averageScore: 5.0,
+                                myScore: 4.1
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.affection.swiftUIColor,
+                            xPoint: CGFloat(-0.5),
+                            yPoint: CGFloat(0.0),
+                            radius: CGFloat(0.5),
+                            metadata: .init(
+                                questionId: 5,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.affection.swiftUIImage,
+                                keyword: "플러팅 장인",
+                                averageScore: 4.6,
+                                myScore: 3.5
+                            )
+                        )
+                    ]
+                    
                     return .run(priority: .userInitiated) { send in
                         let response = await TaskResult {
                             try await network.request(
@@ -113,6 +186,78 @@ public struct MyPageFeature: Reducer {
                     }
                     
                 case .low5:
+                    state.differentCircleDataList = [
+                        CircleData(
+                            color: DSKitAsset.Color.passion.swiftUIColor,
+                            xPoint: CGFloat(0.45308183932197243),
+                            yPoint: CGFloat(0.6268618634400174),
+                            radius: CGFloat(0.22654091966098625),
+                            metadata: .init(
+                                questionId: 1,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.passion.swiftUIImage,
+                                keyword: "술고래",
+                                averageScore: 2.0,
+                                myScore: 3.2
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.money.swiftUIColor,
+                            xPoint: CGFloat(-0.0918538376173901),
+                            yPoint: CGFloat(0.5803367897906911),
+                            radius: CGFloat(0.3203772410170405),
+                            metadata: .init(
+                                questionId: 2,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.money.swiftUIImage,
+                                keyword: "절약왕",
+                                averageScore: 2.0,
+                                myScore: 3.7
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.intelligence.swiftUIColor,
+                            xPoint: CGFloat(-0.0918538376173901),
+                            yPoint: CGFloat(-0.6733869370893438),
+                            radius: CGFloat(0.3203772410170405),
+                            metadata: .init(
+                                questionId: 3,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.inteligence.swiftUIImage,
+                                keyword: "나무위키",
+                                averageScore: 3,
+                                myScore: 3.9
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.body.swiftUIColor,
+                            xPoint: CGFloat(0.36122800170458236),
+                            yPoint: CGFloat(-0.04652507364932634),
+                            radius: CGFloat(0.4530818393219725),
+                            metadata: .init(
+                                questionId: 4,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.body.swiftUIImage,
+                                keyword: "개복치",
+                                averageScore: 5.0,
+                                myScore: 4.1
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.sense.swiftUIColor,
+                            xPoint: CGFloat(-0.5449356769393626),
+                            yPoint: CGFloat(-0.04652507364932634),
+                            radius: CGFloat(0.4530818393219725),
+                            metadata: .init(
+                                questionId: 5,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.sense.swiftUIImage,
+                                keyword: "눈썰미",
+                                averageScore: 4.6,
+                                myScore: 3.5
+                            )
+                        )
+                    ]
                     return .run(priority: .userInitiated) { send in
                         let response = await TaskResult {
                             try await network.request(
@@ -136,9 +281,155 @@ public struct MyPageFeature: Reducer {
                 
                 switch rate {
                 case .top5:
-                    state.similarCircleDataList = data
+                    state.similarCircleDataList = [
+                        CircleData(
+                            color: DSKitAsset.Color.relationship.swiftUIColor,
+                            xPoint: CGFloat(-7.850462293418875e-17),
+                            yPoint: CGFloat(-0.45609943575566647),
+                            radius: CGFloat(0.17677669529663687),
+                            metadata: .init(
+                                questionId: 1,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.relationship.swiftUIImage,
+                                keyword: "돌직구",
+                                averageScore: 2.0,
+                                myScore: 3.2
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.emotional.swiftUIColor,
+                            xPoint: CGFloat(0.4118209091937473),
+                            yPoint: CGFloat(0.6710075582593835),
+                            radius: CGFloat(0.17677669529663687),
+                            metadata: .init(
+                                questionId: 2,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.emotional.swiftUIImage,
+                                keyword: "새벽감성",
+                                averageScore: 2.0,
+                                myScore: 3.7
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.relationshipNe.swiftUIColor,
+                            xPoint: CGFloat(-7.850462293418875e-17),
+                            yPoint: CGFloat(0.559016994374948),
+                            radius: CGFloat(0.25),
+                            metadata: .init(
+                                questionId: 3,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.relationship.swiftUIImage,
+                                keyword: "표현력",
+                                averageScore: 3,
+                                myScore: 3.9
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.humor.swiftUIColor,
+                            xPoint: CGFloat(0.5),
+                            yPoint: CGFloat(0.0),
+                            radius: CGFloat(0.5),
+                            metadata: .init(
+                                questionId: 4,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.humor.swiftUIImage,
+                                keyword: "개그맨",
+                                averageScore: 5.0,
+                                myScore: 4.1
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.affection.swiftUIColor,
+                            xPoint: CGFloat(-0.5),
+                            yPoint: CGFloat(0.0),
+                            radius: CGFloat(0.5),
+                            metadata: .init(
+                                questionId: 5,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.affection.swiftUIImage,
+                                keyword: "플러팅 장인",
+                                averageScore: 4.6,
+                                myScore: 3.5
+                            )
+                        )
+                    ]
+
+//                    state.similarCircleDataList = data
                 case .low5:
-                    state.differentCircleDataList = data
+                    state.differentCircleDataList = [
+                        CircleData(
+                            color: DSKitAsset.Color.passion.swiftUIColor,
+                            xPoint: CGFloat(0.45308183932197243),
+                            yPoint: CGFloat(0.6268618634400174),
+                            radius: CGFloat(0.22654091966098625),
+                            metadata: .init(
+                                questionId: 1,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.passion.swiftUIImage,
+                                keyword: "술고래",
+                                averageScore: 2.0,
+                                myScore: 3.2
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.money.swiftUIColor,
+                            xPoint: CGFloat(-0.0918538376173901),
+                            yPoint: CGFloat(0.5803367897906911),
+                            radius: CGFloat(0.3203772410170405),
+                            metadata: .init(
+                                questionId: 2,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.money.swiftUIImage,
+                                keyword: "절약왕",
+                                averageScore: 2.0,
+                                myScore: 3.7
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.intelligence.swiftUIColor,
+                            xPoint: CGFloat(-0.0918538376173901),
+                            yPoint: CGFloat(-0.6733869370893438),
+                            radius: CGFloat(0.3203772410170405),
+                            metadata: .init(
+                                questionId: 3,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.inteligence.swiftUIImage,
+                                keyword: "나무위키",
+                                averageScore: 3,
+                                myScore: 3.9
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.body.swiftUIColor,
+                            xPoint: CGFloat(0.36122800170458236),
+                            yPoint: CGFloat(-0.04652507364932634),
+                            radius: CGFloat(0.4530818393219725),
+                            metadata: .init(
+                                questionId: 4,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.body.swiftUIImage,
+                                keyword: "개복치",
+                                averageScore: 5.0,
+                                myScore: 4.1
+                            )
+                        ),
+                        CircleData(
+                            color: DSKitAsset.Color.sense.swiftUIColor,
+                            xPoint: CGFloat(-0.5449356769393626),
+                            yPoint: CGFloat(-0.04652507364932634),
+                            radius: CGFloat(0.4530818393219725),
+                            metadata: .init(
+                                questionId: 5,
+                                iconURL: nil,
+                                icon: DSKitAsset.Image.sense.swiftUIImage,
+                                keyword: "눈썰미",
+                                averageScore: 4.6,
+                                myScore: 3.5
+                            )
+                        )
+                    ]
+
+//                    state.differentCircleDataList = data
                 }
                 
                 state.view.nowFetching = false

@@ -29,12 +29,15 @@ public struct CircleContentView: View {
     
     public var body: some View {
         VStack(spacing: imageSize / 4) {
-            KFImage(metadata.iconURL)
-                .resizable()
-                .scaledToFit()
-                .frame(width: imageSize)
-                .opacity(showSubText ? 0.6 : 1)
-                .matchedGeometryEffect(id: contentIconEffectID, in: namespace)
+            if let image = metadata.icon {
+                image
+                //            KFImage(metadata.iconURL)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: imageSize)
+                    .opacity(showSubText ? 0.6 : 1)
+                    .matchedGeometryEffect(id: contentIconEffectID, in: namespace)
+            }
             
             if showSubText {
                 VStack(alignment: .center, spacing: 0) {

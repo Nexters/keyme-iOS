@@ -13,6 +13,7 @@ public struct CircleMetadata {
     public let questionId: Int
     public let animationId: Int
     public let iconURL: URL?
+    public let icon: Image?
     public let keyword: String
     public let averageScore: Float
     public let myScore: Float
@@ -21,6 +22,7 @@ public struct CircleMetadata {
         questionId: Int,
         animationId: Int = Int.random(in: 0...99999),
         iconURL: URL?,
+        icon: Image? = nil,
         keyword: String,
         averageScore: Float,
         myScore: Float
@@ -28,6 +30,7 @@ public struct CircleMetadata {
         self.questionId = questionId
         self.animationId = animationId
         self.iconURL = iconURL
+        self.icon = icon
         self.keyword = keyword
         self.averageScore = averageScore
         self.myScore = myScore

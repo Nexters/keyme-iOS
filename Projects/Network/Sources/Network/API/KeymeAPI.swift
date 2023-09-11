@@ -90,6 +90,71 @@ extension KeymeAPI: BaseAPI {
     
     public var sampleData: Data {
         switch self {
+        case let .myPage(.statistics(_, type)):
+            switch type {
+            case .different:
+                return """
+                {
+                  "code": 200,
+                  "data": {
+                    "memberId": 0,
+                    "results": [
+                      {
+                        "coordinate": {
+                          "r": 0.1213131,
+                          "x": 0.1213131,
+                          "y": -0.24213131
+                        },
+                        "questionStatistic": {
+                          "avgScore": 0,
+                          "category": {
+                            "color": "string",
+                            "iconUrl": "string",
+                            "name": "string"
+                          },
+                          "keyword": "참군인",
+                          "ownerScore": 0,
+                          "questionId": 0,
+                          "title": "불의를 보면 참지 않는다"
+                        }
+                      }
+                    ]
+                  },
+                  "message": "SUCCESS"
+                }
+                """.data(using: .utf8)!
+            case .similar:
+                return """
+                {
+                  "code": 200,
+                  "data": {
+                    "memberId": 0,
+                    "results": [
+                      {
+                        "coordinate": {
+                          "r": 0.1213131,
+                          "x": 0.1213131,
+                          "y": -0.24213131
+                        },
+                        "questionStatistic": {
+                          "avgScore": 0,
+                          "category": {
+                            "color": "string",
+                            "iconUrl": "string",
+                            "name": "string"
+                          },
+                          "keyword": "참군인",
+                          "ownerScore": 0,
+                          "questionId": 0,
+                          "title": "불의를 보면 참지 않는다"
+                        }
+                      }
+                    ]
+                  },
+                  "message": "SUCCESS"
+                }
+                """.data(using: .utf8)!
+            }
         case let .test(testAPI):
             return testAPI.sampleData
         default:
