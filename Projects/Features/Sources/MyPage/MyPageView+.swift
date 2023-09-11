@@ -66,7 +66,6 @@ extension MyPageView {
                         nickname: viewStore.nickname)
                     .allowsHitTesting(false)
                     
-                    
                     HStack {
                         Image(systemName: "arrow.clockwise")
                             .foregroundColor(.white)
