@@ -24,12 +24,6 @@ struct KeymeApp: App {
                         AuthController.handleOpenUrl(url: url)
                     }
                 })
-            
-//            // 홈 뷰 테스트용
-//            let keymeStore = Store(initialState: HomeFeature.State(nickname: "영인")) {
-//                HomeFeature()
-//            }
-//            HomeView(store: keymeStore)
         }
     }
 }

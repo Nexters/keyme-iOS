@@ -13,59 +13,9 @@ import Domain
 import DSKit
 import Foundation
 
-public class CirclePackViewOption<DetailView: View> {
-    var activateCircleBlink: Bool
-    /// Circle pack 그래프 배경색
-    var background: Color
-    /// Circle pack 그래프의 크기
-    var outboundLength: CGFloat
-    /// Circle pack 그래프의 크기에 줄 패딩값. 즉, 뷰 전체 프레임과 그래프 사이에 둘 거리.
-    var framePadding: CGFloat
-    /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
-    var magnifiedCircleRatio: CGFloat
-    /// 그런거 모르겠고 Scale로 사이즈 조정하고 싶으면 여기
-    var scale: CGFloat
-    
-    var onCircleTappedHandler: (CircleData) -> Void
-    var onCircleDismissedHandler: (CircleData) -> Void
-    
-    public init(
-        onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
-    ) {
-        activateCircleBlink = true
-        background = .white
-        outboundLength = 700
-        framePadding = 350
-        magnifiedCircleRatio =  0.9
-        scale = 1
-        self.onCircleTappedHandler = onCircleTappedHandler
-        self.onCircleDismissedHandler = onCircleDismissedHandler
-    }
-    
-    public init(
-        activateCircleBlink: Bool,
-        background: Color,
-        outboundLength: CGFloat,
-        framePadding: CGFloat,
-        magnifiedCircleRatio: CGFloat,
-        scale: CGFloat,
-        onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
-    ) {
-        self.activateCircleBlink = activateCircleBlink
-        self.background = background
-        self.outboundLength = outboundLength
-        self.framePadding = framePadding
-        self.magnifiedCircleRatio = magnifiedCircleRatio
-        self.scale = scale
-        self.onCircleTappedHandler = onCircleTappedHandler
-        self.onCircleDismissedHandler = onCircleDismissedHandler
-    }
-}
-
 public struct CirclePackView<DetailView: View>: View {
     private let namespace: Namespace.ID
+    @Binding private var graphScale: CGFloat
     
     // 애니메이션 관련
     @State private var doneDragging = true
@@ -92,6 +42,7 @@ public struct CirclePackView<DetailView: View>: View {
     public init(
         namespace: Namespace.ID,
         data: [CircleData],
+        scale: Binding<CGFloat>,
         rotationAngle: Angle = .degrees(45),
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
@@ -102,6 +53,8 @@ public struct CirclePackView<DetailView: View>: View {
         
         self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
+        
+        self._graphScale = scale
     }
         
     public var body: some View {
@@ -112,33 +65,35 @@ public struct CirclePackView<DetailView: View>: View {
                 .zIndex(0)
             
             // Circle pack 메인 뷰
-            // 전체 스크롤, 원상복구되는 줌 들어가 있음
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                ZStack {
-                    ZStack {
-                        ForEach(circleData) { data in
-                            if data == focusedCircleData {
-                                Circle().fill(.clear)
-                            } else {
-                                SubCircleView(
-                                    namespace: namespace,
-                                    outboundLength: option.outboundLength,
-                                    circleData: data,
-                                    onTapGesture: {
-                                        guard animationEnded else { return }
-                                        option.onCircleTappedHandler(data)
-                                        focusedCircleData = data
-                                    })
-                            }
+                ZStack(alignment: .center) {
+                    Color.clear.id(0) // Center position
+                    
+                    ForEach(circleData) { data in
+                        if data == focusedCircleData {
+                            Circle().fill(.clear)
+                        } else {
+                            SubCircleView(
+                                namespace: namespace,
+                                outboundLength: option.outboundLength,
+                                circleData: data,
+                                onTapGesture: {
+                                    guard animationEnded else { return }
+                                    option.onCircleTappedHandler(data)
+                                    focusedCircleData = data
+                                })
                         }
                     }
                     .frame(width: option.outboundLength, height: option.outboundLength)
                     .padding(option.framePadding)
                     .scaleEffect(option.scale)
                 }
-                .pinchZooming()
+                .frame(width: option.outboundLength, height: option.outboundLength)
+                .scaleEffect(graphScale)
+                .padding(option.framePadding)
+                .pinchZooming(with: $graphScale)
+                .zIndex(1)
             }
-            .zIndex(1)
             
             // 아래에 깔린 뷰 블러시키는 특수 뷰
             // `opacity`를 이용해서 visibility 조절함
@@ -162,7 +117,7 @@ public struct CirclePackView<DetailView: View>: View {
                         }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
-                            
+                    
                     FocusedCircleView(
                         namespace: namespace,
                         shrinkageDistance: currentSheetOffset,
@@ -209,6 +164,9 @@ public struct CirclePackView<DetailView: View>: View {
         .animation(
             Animation.customInteractiveSpring(),
             value: isPersonalityCirclePressed)
+        .animation(
+            Animation.customInteractiveSpring(),
+            value: graphScale)
         .animation(
             Animation.customInteractiveSpring(),
             value: focusedCircleData)
@@ -383,29 +341,5 @@ extension CirclePackView {
     func onCircleDismissed(_ handler: @escaping (CircleData) -> Void) -> CirclePackView {
         self.option.onCircleDismissedHandler = handler
         return self
-    }
-}
-
-private extension Array where Element == CircleData {
-    func rotate(degree: Angle) -> [CircleData] {
-        func formula(xPoint: CGFloat, yPoint: CGFloat) -> (x: CGFloat, y: CGFloat) {
-            let degree = CGFloat(degree.degrees)
-            let newXPoint = xPoint * cos(degree) - yPoint * sin(degree)
-            let newYPoint = yPoint * cos(degree) + xPoint * sin(degree)
-            
-            return (newXPoint, newYPoint)
-        }
-        
-        return self.map { data in
-            let newCoordinate = formula(xPoint: data.xPoint, yPoint: data.yPoint)
-            let newCircle = CircleData(
-                color: data.color,
-                xPoint: newCoordinate.x,
-                yPoint: newCoordinate.y,
-                radius: data.radius,
-                metadata: data.metadata)
-            
-            return newCircle
-        }
     }
 }

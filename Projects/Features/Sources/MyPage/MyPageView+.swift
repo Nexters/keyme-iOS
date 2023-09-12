@@ -32,23 +32,33 @@ public struct ImageExportOverlayFeature: Reducer {
 extension MyPageView {
     struct ImageExportOverlayView: View {
         private let captureAction: () -> Void
+        private let dismissAction: () -> Void
         @Binding var rotationAngle: Angle
 
         private typealias Action = () -> Void
         private let store: StoreOf<ImageExportOverlayFeature>
         private let imageSaver = ImageSaver()
         
-        init(store: StoreOf<ImageExportOverlayFeature>, angle: Binding<Angle>, captureAction: @escaping () -> Void) {
+        init(
+            store: StoreOf<ImageExportOverlayFeature>,
+            angle: Binding<Angle>,
+            captureAction: @escaping () -> Void,
+            dismissAction: @escaping () -> Void
+        ) {
             self.store = store
             self._rotationAngle = angle
             self.captureAction = captureAction
+            self.dismissAction = dismissAction
         }
         
         var body: some View {
             WithViewStore(store, observe: { $0 }) { viewStore in
                 VStack(spacing: 0) {
                     HStack {
-                        closeButton(action: { viewStore.send(.dismissImageExportMode) })
+                        closeButton(action: {
+                            viewStore.send(.dismissImageExportMode)
+                            dismissAction()
+                        })
                         
                         Spacer()
                         
@@ -129,7 +139,6 @@ extension MyPageView {
                     maskingShape(isFilled: false)
                     
                     MyPageImageExportView(title: title, nickname: nickname, content: { EmptyView() })
-                        .padding(20)
                 }
                 .padding(32)
             }
@@ -162,6 +171,7 @@ public struct MyPageImageExportView<Content: View>: View {
                 Spacer()
                 horizontalSpacer
             }
+            .padding(20)
         }
     }
     
