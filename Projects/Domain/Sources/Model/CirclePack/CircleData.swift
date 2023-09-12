@@ -141,3 +141,28 @@ extension CircleData: Identifiable {
         metadata.animationId
     }
 }
+
+
+public extension Array where Element == CircleData {
+    func rotate(degree: Angle) -> [CircleData] {
+        func formula(xPoint: CGFloat, yPoint: CGFloat) -> (x: CGFloat, y: CGFloat) {
+            let degree = CGFloat(degree.degrees)
+            let newXPoint = xPoint * cos(degree) - yPoint * sin(degree)
+            let newYPoint = yPoint * cos(degree) + xPoint * sin(degree)
+            
+            return (newXPoint, newYPoint)
+        }
+        
+        return self.map { data in
+            let newCoordinate = formula(xPoint: data.xPoint, yPoint: data.yPoint)
+            let newCircle = CircleData(
+                color: data.color,
+                xPoint: newCoordinate.x,
+                yPoint: newCoordinate.y,
+                radius: data.radius,
+                metadata: data.metadata)
+            
+            return newCircle
+        }
+    }
+}

@@ -15,11 +15,16 @@ import SwiftUI
 struct MyPageView: View {
     @Namespace private var namespace
     @Environment(\.displayScale) var displayScale
-
-    @State var graphRotationAngle: Angle = .radians(0.018)
     
     private let store: StoreOf<MyPageFeature>
+    private let exportModeScale = 0.7
     private let imageSaver = ImageSaver()
+    
+    @State var tempImage: ScreenImage?
+    @State var screenshotFired: Bool = false
+
+    @State var graphScale: CGFloat = 1
+    @State var graphRotationAngle: Angle = .radians(0.018)
     
     init(store: StoreOf<MyPageFeature>) {
         self.store = store
@@ -47,7 +52,18 @@ struct MyPageView: View {
                         })
                         
                     } else {
-                        circlePackGraphView(viewStore).ignoresSafeArea(.container, edges: .bottom)
+                        // Content에 있는 뷰를 캡처하는 래퍼 뷰
+                        Screenshotter(
+                            isTakingScreenshot: $screenshotFired,
+                            content: {
+                                circlePackGraphView(viewStore).ignoresSafeArea(.container, edges: .bottom)
+                            },
+                            onScreenshotTaken: {
+                                saveScreenShotWith(
+                                    graphImage: $0,
+                                    title: viewStore.selectedSegment.title,
+                                    nickname: viewStore.nickname)
+                            })
                         
                         // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
                         // 탑 바, 탭 바, top5, bottom5 등
@@ -84,32 +100,17 @@ struct MyPageView: View {
                             state: \.imageExportModeState,
                             action: MyPageFeature.Action.imageExportModeAction)
                         ) {
-                            ImageExportOverlayView(store: $0, angle: $graphRotationAngle, captureAction: {
-                                let exportTargetView = MyPageImageExportView(
-                                    title: viewStore.selectedSegment.title,
-                                    nickname: viewStore.nickname
-                                ) {
-                                    circlePackGraphView(viewStore)
-                                    //                                .frame(width: 300, height: 600)
-                                    //                            Image(systemName: "person").foregroundColor(.white)
+                            ImageExportOverlayView(
+                                store: $0,
+                                angle: $graphRotationAngle,
+                                captureAction: {
+                                    screenshotFired = true
+                                    viewStore.send(.captureImage)
+                                },
+                                dismissAction: {
+                                    graphScale /= exportModeScale
                                 }
-                                    .frame(width: 720, height: 1280)
-                                
-                                let renderer = ImageRenderer(content: exportTargetView)
-                                renderer.scale = displayScale
-                                let image = exportTargetView.capture()
-                                
-                                //                        guard let image = renderer.uiImage else {
-                                guard let image else {
-                                    return
-                                }
-                                
-                                imageSaver.save(image) { error in
-                                    print(error)
-                                }
-                                
-                                viewStore.send(.captureImage)
-                            })
+                            )
                         }
                         .transition(
                             .opacity.combined(with: .scale(scale: 1.5))
@@ -127,6 +128,9 @@ struct MyPageView: View {
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
         }
+        .sheet(item: $tempImage, content: { image in
+            Image(uiImage: image.image)
+        })
         .sheet(
             store: store.scope(
                 state: \.$shareSheetState,
@@ -148,6 +152,7 @@ struct MyPageView: View {
     }
 }
 
+// MARK: - Subviews
 private extension MyPageView {
     func circlePackGraphView(
         _ viewStore: ViewStore<MyPageFeature.State.View, MyPageFeature.Action.View>
@@ -155,6 +160,7 @@ private extension MyPageView {
         CirclePackView(
             namespace: namespace,
             data: viewStore.shownCircleDatalist,
+            scale: $graphScale,
             rotationAngle: graphRotationAngle,
             detailViewBuilder: { data in
                 let scoreListStore = store.scope(
@@ -179,7 +185,6 @@ private extension MyPageView {
                 viewStore.send(.circleDismissed)
             }
         }
-        .graphScale(viewStore.imageExportMode ? 0.7 : 1)
     }
     
     func emptyCircleView(shareButtonAction: @escaping () -> Void) -> some View {
@@ -222,7 +227,10 @@ private extension MyPageView {
         showExportImageButton: Bool
     ) -> some View {
         HStack(spacing: 4) {
-            Button(action: { viewStore.send(.enableImageExportMode) }) {
+            Button(action: {
+                viewStore.send(.enableImageExportMode)
+                graphScale *= exportModeScale
+            }) {
                 DSKitAsset.Image.photoExport.swiftUIImage
                     .resizable()
                     .frame(width: 35, height: 35)
@@ -249,19 +257,44 @@ private extension MyPageView {
     }
 }
 
-extension View {
-    func capture() -> UIImage? {
-        let controller = UIHostingController(rootView: self)
-        let view = controller.view
-
-        let targetSize = UIScreen.main.bounds.size
-        view?.bounds = CGRect(origin: .zero, size: targetSize)
-        view?.backgroundColor = .clear
-        view?.layoutIfNeeded()  // Force layout
-
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        return renderer.image { ctx in
-            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+// MARK: - Tools
+private extension MyPageView {
+    @MainActor func saveScreenShotWith(graphImage image: UIImage?, title: String, nickname: String) {
+        guard let image else {
+            // TODO: Show alert
+            return
         }
+
+        let exportView = MyPageImageExportView(title: title, nickname: nickname) {
+            ZStack {
+                DSKitAsset.Color.keymeBlack.swiftUIColor
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(1.0 / 0.81)
+            }
+        }
+        .frame(width: 310, height: 570) // Image size
+
+        let renderer = ImageRenderer(content: exportView)
+        renderer.scale = displayScale
+        
+        guard let exportImage = renderer.uiImage else {
+            // TODO: Show alert
+            return
+        }
+        
+        imageSaver.save(exportImage) { error in
+            // TODO: Show alert
+            return
+        }
+        
+        // Show bottom sheets
+        tempImage = ScreenImage(image: exportImage)
     }
+}
+
+struct ScreenImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
 }
