@@ -34,7 +34,12 @@ public extension Project {
                 ],
             ]
         ],
-        "LSApplicationQueriesSchemes": ["kakaokompassauth", "kakaolink"],
+        "LSApplicationQueriesSchemes": [
+            "kakaokompassauth",
+            "kakaolink",
+            "instagram",
+            "instagram-stories"
+        ],
         "NSPhotoLibraryAddUsageDescription": "스크린샷을 저장하기 위해서 앨범 접근 권한이 필요합니다"
     ]
     

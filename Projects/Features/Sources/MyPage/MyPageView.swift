@@ -129,7 +129,55 @@ struct MyPageView: View {
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
         }
         .sheet(item: $tempImage, content: { image in
-            Image(uiImage: image.image)
+            ZStack {
+                DSKitAsset.Color.keymeBlack.swiftUIColor
+                Image(uiImage: image.image)
+                    .resizable()
+                    .scaledToFit()
+                    .fullFrame()
+                
+                VStack {
+                    Spacer()
+                    HStack {
+                        Button(action: {
+                            let image = image.image
+
+                            if let storiesUrl = URL(string: "instagram-stories://share?source_application=969563760790586") {
+                                if UIApplication.shared.canOpenURL(storiesUrl) {
+                                    guard let imageData = image.pngData() else { return }
+                                    let pasteboardItems: [String: Any] = [
+                                        "com.instagram.sharedSticker.stickerImage": imageData,
+                                        "com.instagram.sharedSticker.backgroundTopColor": "#171717",
+                                        "com.instagram.sharedSticker.backgroundBottomColor": "#171717"
+                                    ]
+                                    let pasteboardOptions = [
+                                        UIPasteboard.OptionsKey.expirationDate:
+                                            Date().addingTimeInterval(300)
+                                    ]
+                                    UIPasteboard.general.setItems([pasteboardItems], options:
+                                                                    pasteboardOptions)
+                                    UIApplication.shared.open(storiesUrl, options: [:],
+                                                              completionHandler: nil)
+                                } else {
+                                    print("Sorry the application is not installed")
+                                }
+                            }
+                            
+                            
+                        }) {
+                            Text("스토리")
+                        }
+                        
+                        Button(action: { imageSaver.save(image.image) { error in
+                            // TODO: Show alert
+                        } }) {
+                            Text("앨범에 저장하기")
+                        }
+                        
+                        ShareLink(item: Image(uiImage: image.image), preview: SharePreview("Keyme - 나의 성격", image: Image(uiImage: image.image)))
+                    }
+                }
+            }
         })
         .sheet(
             store: store.scope(
@@ -274,17 +322,13 @@ private extension MyPageView {
                     .scaleEffect(1.0 / 0.81)
             }
         }
+//        .frame(width: 1080 / 3, height: 1920 / 3) // Image size
         .frame(width: 310, height: 570) // Image size
 
         let renderer = ImageRenderer(content: exportView)
         renderer.scale = displayScale
         
         guard let exportImage = renderer.uiImage else {
-            // TODO: Show alert
-            return
-        }
-        
-        imageSaver.save(exportImage) { error in
             // TODO: Show alert
             return
         }
