@@ -47,10 +47,7 @@ public struct MyPageFeature: Reducer {
             var shownFirstTime = true
             var shownCircleDatalist: [CircleData] = []
             
-            var nowFetching: TargetData?
-            enum TargetData {
-                case circleData
-            }
+            var nowFetching: Bool = false
         }
         
         init(userId: Int, nickname: String, testId: Int) {
@@ -101,6 +98,7 @@ public struct MyPageFeature: Reducer {
             // 서버 부하가 있으므로 웬만하면 한 번만 콜 할 것
             case .requestCircle(let rate):
                 let userId = state.view.userId
+                state.view.nowFetching = true
 
                 switch rate {
                 case .top5:
@@ -130,6 +128,7 @@ public struct MyPageFeature: Reducer {
                     state.differentCircleDataList = data
                 }
                 
+                state.view.nowFetching = false
                 return .send(.showCircle(state.view.selectedSegment))
                 
             case .showCircle(let segment):
@@ -139,6 +138,7 @@ public struct MyPageFeature: Reducer {
                 case .different:
                     state.view.shownCircleDatalist = state.differentCircleDataList
                 }
+                
                 return .none
                 
             case .showShareSheet(let url):

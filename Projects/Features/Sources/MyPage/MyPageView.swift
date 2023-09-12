@@ -38,10 +38,10 @@ struct MyPageView: View {
                     .ignoresSafeArea()
                 
                 switch viewStore.nowFetching {
-                case .circleData:
+                case true:
                     ProgressView()
                     
-                case .none:
+                case false:
                     if viewStore.shownCircleDatalist.isEmpty {
                         topBar(viewStore, showExportImageButton: false)
                             .padding(.top, 10)
@@ -127,8 +127,10 @@ struct MyPageView: View {
             .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
+            .redacted(reason: viewStore.nowFetching ? .placeholder : [])
         }
         .sheet(item: $tempImage, content: { image in
+            // FIXME: 디자인 나오기 전 임시
             ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                 Image(uiImage: image.image)
