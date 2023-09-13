@@ -23,6 +23,7 @@ public struct KeymeTestsView: View {
         WithViewStore(store, observe: { $0 }, send: KeymeTestsFeature.Action.view) { viewStore in
             ZStack {
                 KeymeWebView(url: viewStore.url, accessToken: viewStore.authorizationToken)
+                    .load(url: viewStore.url)
                     .onCloseWebView {
                         viewStore.send(.closeButtonTapped)
                     }
