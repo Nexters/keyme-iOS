@@ -28,19 +28,21 @@ public struct HomeView: View {
             ZStack(alignment: .center) {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                 
-                VStack {
-                    if(viewStore.isSolvedDailyTest) {
-                        dailyTestListView
-                    } else {
-                        startTestView
+                if(viewStore.dailyTestId != nil) {
+                    VStack {
+                        if(viewStore.isSolvedDailyTest) {
+                            dailyTestListView
+                        } else {
+                            startTestView
+                        }
+                        
+                        Spacer()
+                        
+                        bottomButton(viewStore)
+                        
+                        Spacer()
+                            .frame(height: 26)
                     }
-                    
-                    Spacer()
-                    
-                    bottomButton(viewStore)
-                    
-                    Spacer()
-                        .frame(height: 26)
                 }
             }
             .onAppear {
