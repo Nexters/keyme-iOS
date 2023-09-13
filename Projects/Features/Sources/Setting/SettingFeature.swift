@@ -76,9 +76,7 @@ public struct SettingFeature: Reducer {
                 }
                 
             case .showAlert(let message):
-                state.alerState = AlertState(
-                    title: TextState("에러가 발생했습니다"),
-                    message: TextState(message))
+                state.alerState = AlertState.errorWithMessage(message)
                 
                 return .none
                 

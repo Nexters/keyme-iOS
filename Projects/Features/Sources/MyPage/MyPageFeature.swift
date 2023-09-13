@@ -57,7 +57,7 @@ public struct MyPageFeature: Reducer {
     }
 
     public enum Action: Equatable {
-        case saveCircle([CircleData], MatchRate)
+        case saveCircle(TaskResult<[CircleData]>, MatchRate)
         case showCircle(MyPageSegment)
         case requestCircle(MatchRate)
         case view(View)
@@ -103,24 +103,37 @@ public struct MyPageFeature: Reducer {
                 switch rate {
                 case .top5:
                     return .run(priority: .userInitiated) { send in
-                        let response = try await network.request(
-                            .myPage(.statistics(userId, .similar)),
-                            object: CircleData.NetworkResult.self)
+                        let response = await TaskResult {
+                            try await network.request(
+                                .myPage(.statistics(userId, .similar)),
+                                object: CircleData.NetworkResult.self).toCircleData()
+                        }
                         
-                        await send(.saveCircle(response.toCircleData(), rate))
+                        await send(.saveCircle(response, rate))
                     }
                     
                 case .low5:
                     return .run(priority: .userInitiated) { send in
-                        let response = try await network.request(
-                            .myPage(.statistics(userId, .different)),
-                            object: CircleData.NetworkResult.self)
+                        let response = await TaskResult {
+                            try await network.request(
+                                .myPage(.statistics(userId, .different)),
+                                object: CircleData.NetworkResult.self).toCircleData()
+                        }
                         
-                        await send(.saveCircle(response.toCircleData(), rate))
+                        await send(.saveCircle(response, rate))
                     }
                 }
                 
-            case .saveCircle(let data, let rate):
+            case .saveCircle(let taskResult, let rate):
+                let data: [CircleData]
+                switch taskResult {
+                case .success(let received):
+                    data = received
+                case .failure:
+                    state.alertState = AlertState.errorWhileNetworking
+                    data = [CircleData]()
+                }
+                
                 switch rate {
                 case .top5:
                     state.similarCircleDataList = data
@@ -145,7 +158,7 @@ public struct MyPageFeature: Reducer {
                 state.shareSheetState = ShareSheetFeature.State(url: url)
                 
             case .showAlert(let message):
-                state.alertState = AlertState(title: TextState("오류가 발생했어요"), message: TextState(message))
+                state.alertState = AlertState.errorWithMessage(message)
                 
             // MARK: - View actions
             case .view(.selectSegement(let segment)):

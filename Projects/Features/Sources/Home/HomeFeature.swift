@@ -108,13 +108,11 @@ public struct HomeFeature: Reducer {
                 )
             case .showErrorAlert(let error):
                 if case .cannotGetAuthorizationInformation = error {
-                    state.alertState = AlertState(
-                        title: { TextState("에러 발생") },
-                        actions: { ButtonState(
-                            action: .error(.cannotGetAuthorizationInformation),
-                            label: { TextState("닫기") }
-                        ) },
-                        message: { TextState(error.localizedDescription) })
+                    state.alertState = AlertState.errorWithMessage(
+                        error.localizedDescription,
+                        actions: {
+                            ButtonState(action: .error(.cannotGetAuthorizationInformation), label: { TextState("닫기") })
+                        })
                 }
                 return .none
                 

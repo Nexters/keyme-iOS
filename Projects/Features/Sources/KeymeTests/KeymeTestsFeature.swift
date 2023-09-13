@@ -64,19 +64,16 @@ public struct KeymeTestsFeature: Reducer {
                 
             // MARK: - View actions
             case .view(.closeButtonTapped):
-                state.alertState = AlertState(
-                    title: { TextState("") },
-                    actions: {
-                        ButtonState(
-                            role: .cancel,
-                            label: { TextState("취소") }
-                        )
-                        ButtonState(
-                            action: .closeTest,
-                            label: { TextState("종료") }
-                        )
-                    },
-                    message: { TextState("테스트를 종료하시겠어요?") })
+                state.alertState = AlertState.information(title: "", message: "테스트를 종료하시겠어요?", actions: {
+                    ButtonState(
+                        role: .cancel,
+                        label: { TextState("취소") }
+                    )
+                    ButtonState(
+                        action: .closeTest,
+                        label: { TextState("종료") }
+                    )
+                })
                 
             case .view(.showResult(let data)):
                 return .run { [resultCode = data.resultCode] send in
@@ -99,7 +96,7 @@ public struct KeymeTestsFeature: Reducer {
                 return .none
                 
             case .showErrorAlert(let message):
-                state.alertState = AlertState(title: TextState("오류가 발생했어요"), message: TextState(message))
+                state.alertState = AlertState.errorWithMessage(message)
                 
             case .alert(.presented(.closeTest)):
                 return .send(.close)
