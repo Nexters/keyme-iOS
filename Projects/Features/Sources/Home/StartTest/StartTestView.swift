@@ -13,6 +13,7 @@ import ComposableArchitecture
 import Core
 import Util
 import DSKit
+import Domain
 
 public struct StartTestView: View {
     public var store: StoreOf<StartTestFeature>
@@ -47,6 +48,10 @@ public struct StartTestView: View {
                 
                 Spacer()
             }
+            .background {
+                // 웹뷰 로딩속도 개선 때문에 거의 안 보일 정도로 미리 띄워놓는 것임
+                warmUpWebView()
+            }
         }
         .onAppear {
             store.send(.onAppear)
@@ -61,6 +66,16 @@ public struct StartTestView: View {
 }
 
 extension StartTestView {
+    func warmUpWebView() -> some View {
+        let store: StoreOf<KeymeTestsFeature> = Store(
+            initialState: KeymeTestsFeature.State(url: "", authorizationToken: "")
+        ) {
+            KeymeTestsFeature()
+        }
+        
+        return KeymeTestsView(store: store).opacity(0.001)
+    }
+    
     func startTestsButton(_ viewStore: ViewStore<StartTestFeature.State,
                           StartTestFeature.Action>) -> some View {
         ZStack {

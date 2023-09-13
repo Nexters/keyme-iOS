@@ -13,6 +13,10 @@ import Core
 import Domain
 import DSKit
 
+final class SharedWebView {
+    static let instance = WKWebView()
+}
+
 final class KeymeWebViewOption {
     var onCloseWebView: () -> Void
     var onTestSubmitted: (_ testResult: KeymeWebViewModel) -> Void
@@ -34,7 +38,7 @@ public struct KeymeWebView: UIViewRepresentable {
     init(url: String, accessToken: String) {
         self.option = .init()
         self.url = url
-        self.webView = WKWebViewWarmUper.shared.dequeue()
+        self.webView = SharedWebView.instance
         
         if
             let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
@@ -50,7 +54,10 @@ public struct KeymeWebView: UIViewRepresentable {
     public func makeUIView(context: Context) -> WKWebView {
         // This is the important part
         webView.navigationDelegate = context.coordinator
+        
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "appInterface")
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
+
         webView.backgroundColor = UIColor(Color.hex("171717"))
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
@@ -113,6 +120,14 @@ public struct KeymeWebView: UIViewRepresentable {
 }
 
 public extension KeymeWebView {
+    func load(url: String) -> Self {
+        guard let url = URL(string: url) else  { return self }
+        
+        let request = URLRequest(url: url)
+        self.webView.load(request)
+        return self
+    }
+    
     func onCloseWebView(_ handler: @escaping () -> Void) -> Self {
         self.option.onCloseWebView = handler
         return self
