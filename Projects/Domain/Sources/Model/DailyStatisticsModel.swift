@@ -17,7 +17,7 @@ public struct DailyStatisticsModel: Equatable {
 
 public struct TestsStatisticsModel: Hashable, Equatable {
     public let keymeTests: KeymeTestsInfoModel
-    public let avarageScore: Double
+    public let avarageScore: Double?
 }
 
 public extension StatisticsDTO {

@@ -98,13 +98,19 @@ extension DailyTestListView {
                                        font: .body3Semibold)
                                 .foregroundColor(.white)
                             
-                            Text.keyme("평균점수 | \(testStatistics.avarageScore)점",
-                                       font: .body4)
-                            .foregroundColor(.white.opacity(0.5))
+                            statisticsScoreText(score: testStatistics.avarageScore)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+extension DailyTestListView {
+    func statisticsScoreText(score: Double?) -> some View {
+        Text.keyme(score != nil ? "평균점수 | \(String(describing: score))점" : "아직 아무도 풀지 않았어요",
+                   font: .body4)
+        .foregroundColor(.white.opacity(0.5))
     }
 }

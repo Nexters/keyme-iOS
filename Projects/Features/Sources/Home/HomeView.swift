@@ -54,7 +54,6 @@ public struct HomeView: View {
 }
 
 extension HomeView {
-    //
     var startTestView: some View {
         let startTestStore = store.scope(
             state: \.$startTestState,
@@ -71,7 +70,6 @@ extension HomeView {
         }
     }
     
-    // 데일리
     var dailyTestListView: some View {
         let dailyTestListStore = store.scope(
             state: \.$dailyTestListState,
