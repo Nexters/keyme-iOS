@@ -13,8 +13,26 @@ import Core
 import Domain
 import DSKit
 
-final class SharedWebView {
-    static let instance = WKWebView()
+public class KeymeWebViewSetup: ObservableObject {
+    let webView = WKWebView()
+    
+    init() {
+        load(url: "about:blank", accessToken: "")
+    }
+    
+    func load(url: String, accessToken: String) {
+        guard
+            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+            let url = URL(string: encodedUrl)
+        else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+        webView.customUserAgent = "KEYME_\(accessToken)"
+        webView.load(request)
+    }
 }
 
 final class KeymeWebViewOption {
@@ -31,24 +49,20 @@ final class KeymeWebViewOption {
 }
 
 public struct KeymeWebView: UIViewRepresentable {
+    @EnvironmentObject var webViewSetup: KeymeWebViewSetup
+    
+    private var url: String
+    private let accessToken: String
     private let option: KeymeWebViewOption
-    private let webView: WKWebView
-    public let url: String
+    
+    private var webView: WKWebView {
+        webViewSetup.webView
+    }
     
     init(url: String, accessToken: String) {
-        self.option = .init()
         self.url = url
-        self.webView = SharedWebView.instance
-        
-        if
-            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-            let url = URL(string: encodedUrl)
-        {
-            var request = URLRequest(url: url)
-            request.setValue(accessToken, forHTTPHeaderField: "Authorization")
-            webView.customUserAgent = "KEYME_\(accessToken)"
-            webView.load(request)
-        }
+        self.option = .init()
+        self.accessToken = accessToken
     }
     
     public func makeUIView(context: Context) -> WKWebView {
@@ -65,9 +79,7 @@ public struct KeymeWebView: UIViewRepresentable {
         return webView
     }
     
-    public func updateUIView(_ uiView: WKWebView, context: Context) {
-        
-    }
+    public func updateUIView(_ uiView: WKWebView, context: Context) {}
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(parent: self, option: option)
@@ -120,14 +132,6 @@ public struct KeymeWebView: UIViewRepresentable {
 }
 
 public extension KeymeWebView {
-    func load(url: String) -> Self {
-        guard let url = URL(string: url) else  { return self }
-        
-        let request = URLRequest(url: url)
-        self.webView.load(request)
-        return self
-    }
-    
     func onCloseWebView(_ handler: @escaping () -> Void) -> Self {
         self.option.onCloseWebView = handler
         return self

@@ -16,9 +16,11 @@ import DSKit
 import Domain
 
 public struct StartTestView: View {
+    @StateObject private var webViewSetUp: KeymeWebViewSetup
     public var store: StoreOf<StartTestFeature>
     
     public init(store: StoreOf<StartTestFeature>) {
+        self._webViewSetUp = .init(wrappedValue: KeymeWebViewSetup())
         self.store = store
     }
     
@@ -36,21 +38,8 @@ public struct StartTestView: View {
                     .onTapGesture {
                         viewStore.send(.startButtonDidTap)
                     }
-                    .navigationDestination(
-                        store: store.scope(
-                            state: \.$keymeTestsState,
-                            action: StartTestFeature.Action.keymeTests
-                        ), destination: { store in
-                            KeymeTestsView(store: store)
-                                .ignoresSafeArea(.all)
-                                .transition(.scale.animation(.easeIn))
-                        })
                 
                 Spacer()
-            }
-            .background {
-                // 웹뷰 로딩속도 개선 때문에 거의 안 보일 정도로 미리 띄워놓는 것임
-                warmUpWebView()
             }
         }
         .onAppear {
@@ -62,20 +51,21 @@ public struct StartTestView: View {
         .onDisappear {
             store.send(.stopAnimation)
         }
+        .navigationDestination(
+            store: store.scope(
+                state: \.$keymeTestsState,
+                action: StartTestFeature.Action.keymeTests),
+            destination: { store in
+                KeymeTestsView(store: store)
+                    .ignoresSafeArea(.all)
+                    .transition(.scale.animation(.easeIn))
+                    .environmentObject(webViewSetUp)
+            }
+        )
     }
 }
 
 extension StartTestView {
-    func warmUpWebView() -> some View {
-        let store: StoreOf<KeymeTestsFeature> = Store(
-            initialState: KeymeTestsFeature.State(url: "", authorizationToken: "")
-        ) {
-            KeymeTestsFeature()
-        }
-        
-        return KeymeTestsView(store: store).opacity(0.001)
-    }
-    
     func startTestsButton(_ viewStore: ViewStore<StartTestFeature.State,
                           StartTestFeature.Action>) -> some View {
         ZStack {

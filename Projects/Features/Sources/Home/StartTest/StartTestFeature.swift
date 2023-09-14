@@ -27,6 +27,10 @@ public struct StartTestFeature: Reducer {
             self.nickname = nickname
             self.testData = testData
             self.authorizationToken = authorizationToken
+            
+//            keymeTestsState = KeymeTestsFeature.State(
+//                url: "https://keyme-frontend.vercel.app/test/\(testID)",
+//                authorizationToken: authorizationToken)
         }
     }
     

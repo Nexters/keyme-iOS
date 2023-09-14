@@ -13,6 +13,8 @@ import Core
 import DSKit
 
 public struct OnboardingView: View {
+    @EnvironmentObject var webViewSetup: KeymeWebViewSetup
+
     private let store: StoreOf<OnboardingFeature>
     
     public init(store: StoreOf<OnboardingFeature>) {
@@ -38,6 +40,7 @@ public struct OnboardingView: View {
                             then: { store in
                                 KeymeTestsView(store: store)
                                     .ignoresSafeArea(.all)
+                                    .environmentObject(webViewSetup)
                                     .transition(
                                         .scale.combined(with: .opacity)
                                         .animation(Animation.customInteractiveSpring(duration: 1)))

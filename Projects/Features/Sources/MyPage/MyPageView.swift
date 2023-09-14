@@ -20,8 +20,8 @@ struct MyPageView: View {
     private let exportModeScale = 0.7
     private let imageSaver = ImageSaver()
     
-    @State var tempImage: ScreenImage?
-    @State var screenshotFired: Bool = false
+    @State private var tempImage: ScreenImage?
+    @State private var screenshotFired: Bool = false
 
     @State var graphScale: CGFloat = 1
     @State var graphRotationAngle: Angle = .radians(0.018)
@@ -309,6 +309,11 @@ private extension MyPageView {
 
 // MARK: - Tools
 private extension MyPageView {
+    struct ScreenImage: Identifiable {
+        let id = UUID()
+        let image: UIImage
+    }
+
     @MainActor func saveScreenShotWith(graphImage image: UIImage?, title: String, nickname: String) {
         guard let image else {
             // TODO: Show alert
@@ -324,7 +329,6 @@ private extension MyPageView {
                     .scaleEffect(1.0 / 0.81)
             }
         }
-//        .frame(width: 1080 / 3, height: 1920 / 3) // Image size
         .frame(width: 310, height: 570) // Image size
 
         let renderer = ImageRenderer(content: exportView)
@@ -338,9 +342,4 @@ private extension MyPageView {
         // Show bottom sheets
         tempImage = ScreenImage(image: exportImage)
     }
-}
-
-struct ScreenImage: Identifiable {
-    let id = UUID()
-    let image: UIImage
 }
