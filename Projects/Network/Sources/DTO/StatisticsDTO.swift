@@ -14,7 +14,7 @@ public struct StatisticsDTO: Codable {
     public let data: StatisticsData
     
     public struct StatisticsData: Codable {
-        public let averageRate: Int?
+        public let averageRate: Double?
         public let questionsStatistics: [QuestionsStatisticsData]
         public let solvedCount: Int
     }

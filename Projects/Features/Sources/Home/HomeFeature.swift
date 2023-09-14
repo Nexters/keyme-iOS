@@ -45,6 +45,7 @@ public struct HomeFeature: Reducer {
         case saveIsSolved(Bool)
         case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
+        case showTestResultView(testData: KeymeTestsModel)
         case showErrorAlert(HomeFeatureError)
 
         case alert(PresentationAction<Alert>)
@@ -59,11 +60,19 @@ public struct HomeFeature: Reducer {
         
         public enum HomeFeatureError: LocalizedError {
             case cannotGetAuthorizationInformation
+            case cannotGenerateTestLink
+            case network
             
             public var errorDescription: String? {
                 switch self {
                 case .cannotGetAuthorizationInformation:
                     return "로그인 정보를 불러올 수 없습니다. 다시 로그인을 진행해주세요."
+                    
+                case .cannotGenerateTestLink:
+                    return "링크를 생성할 수 없습니다. 잠시 후 다시 시도해주세요."
+                
+                case .network:
+                    return ""
                 }
             }
         }
@@ -77,11 +86,19 @@ public struct HomeFeature: Reducer {
             case .fetchDailyTests:
                 return .run { send in
                     let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
-//                    let fetchedTest = try await network.requestWithSampleData(.test(.onboarding), object: KeymeTestsDTO.self)
+                    
                     let testData = fetchedTest.toKeymeTestsModel()
-                    await send(.saveIsSolved(fetchedTest.data.testResultId != nil))
+                    
+                    await send(.saveIsSolved(fetchedTest.isSolved))
                     await send(.saveTestId(testData.testId))
-                    await send(.showTestStartView(testData: testData))
+                    
+                    if !fetchedTest.isSolved {
+                        await send(.showTestStartView(testData: testData))
+                    } else {
+                        await send(.showTestResultView(testData: testData))
+                    }
+                } catch: { _, send in
+                    await send(.showErrorAlert(.network))
                 }
                 
             case let .saveIsSolved(isSolved):
@@ -101,19 +118,28 @@ public struct HomeFeature: Reducer {
                     testData: testData,
                     authorizationToken: authorizationToken
                 )
+
+            case .showTestResultView(let testData):
+                state.view.dailyTestId = testData.testId
+                guard let authorizationToken = state.authorizationToken else {
+                    return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
+                }
                 
-                state.dailyTestListState =
-                DailyTestListFeature.State(
+                state.dailyTestListState = DailyTestListFeature.State(
                     testData: testData
                 )
+                
             case .showErrorAlert(let error):
-                if case .cannotGetAuthorizationInformation = error {
-                    state.alertState = AlertState.errorWithMessage(
-                        error.localizedDescription,
-                        actions: {
-                            ButtonState(action: .error(.cannotGetAuthorizationInformation), label: { TextState("닫기") })
-                        })
+                if case .network = error {
+                    state.alertState = .errorWhileNetworking
+                    return .none
                 }
+                
+                state.alertState = AlertState.errorWithMessage(
+                    error.localizedDescription,
+                    actions: {
+                        ButtonState(action: .error(.cannotGetAuthorizationInformation), label: { TextState("닫기") })
+                    })
                 return .none
                 
             case .alert(.presented(.error(let error))):
@@ -128,6 +154,7 @@ public struct HomeFeature: Reducer {
             
             return .none
         }
+        .ifLet(\.$alertState, action: /Action.alert)
         .ifLet(\.$startTestState, action: /Action.startTest) {
             StartTestFeature()
         }

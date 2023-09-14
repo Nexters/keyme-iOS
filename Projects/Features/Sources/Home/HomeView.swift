@@ -102,8 +102,13 @@ extension HomeView {
         .frame(height: 60)
         .onTapGesture {
             Task {
+                guard let testId = viewStore.testId else {
+                    viewStore.send(.showErrorAlert(.cannotGenerateTestLink))
+                    return
+                }
+                
                 if viewStore.isSolvedDailyTest {
-                    let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                    let url = "https://keyme-frontend.vercel.app/test/\(testId)"
                     let shortURL = try await shortURLAPIManager.request(
                         .shortenURL(longURL: url),
                         object: BitlyResponse.self).link
