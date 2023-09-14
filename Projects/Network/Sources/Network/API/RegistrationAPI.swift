@@ -42,11 +42,13 @@ extension RegistrationAPI: BaseAPI {
             return .requestJSONEncodable(nickname)
             
         case .uploadImage(let imageData):
-            let multipartFormData = MultipartFormData(
+            let multipartData = MultipartFormData(
                 provider: .data(imageData),
-                name: "profile_image")
-            
-            return .uploadMultipart([multipartFormData])
+                name: "image",
+                fileName: "image.jpeg",
+                mimeType: "image/jpeg")
+
+            return .uploadMultipart([multipartData])
         
         case .updateMemberDetails(let nickname, let profileImage, let profileThumbnail):
             return .requestParameters(

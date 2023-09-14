@@ -48,6 +48,7 @@ public struct RegistrationView: View {
                     Task(priority: .utility) {
                         guard let imageData = try await newImage?.loadTransferable(type: Data.self) else {
                             // TODO: Throw error and show alert
+                            print("IMAGE ERROR")
                             return
                         }
                         

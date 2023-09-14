@@ -230,6 +230,7 @@ public struct MyPageFeature: Reducer {
             
             return .none
         }
+        .ifLet(\.$alertState, action: /Action.alert)
         .ifLet(\.$settingViewState, action: /Action.setting) {
             SettingFeature()
         }
