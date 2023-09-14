@@ -27,10 +27,6 @@ public struct StartTestFeature: Reducer {
             self.nickname = nickname
             self.testData = testData
             self.authorizationToken = authorizationToken
-            
-//            keymeTestsState = KeymeTestsFeature.State(
-//                url: "https://keyme-frontend.vercel.app/test/\(testID)",
-//                authorizationToken: authorizationToken)
         }
     }
     
@@ -43,10 +39,6 @@ public struct StartTestFeature: Reducer {
         case startButtonDidTap
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
         case toggleAnimation(IconModel)
-    }
-    
-    enum CancelID {
-        case startTest
     }
     
     @Dependency(\.continuousClock) var clock
@@ -62,7 +54,6 @@ public struct StartTestFeature: Reducer {
                 
             case .onDisappear:
                 state.isAnimating = true
-                return .cancel(id: CancelID.startTest)
                 
             case .startAnimation(let icons):
                 return .run { send in
@@ -78,7 +69,6 @@ public struct StartTestFeature: Reducer {
                         } while true
                     }
                 }
-                .cancellable(id: CancelID.startTest)
                 
             case .stopAnimation:
                 return .cancel(id: CancelID.startAnimation)
@@ -102,7 +92,6 @@ public struct StartTestFeature: Reducer {
                     }
                     await send(.setIcon(icon))
                 }
-                .cancellable(id: CancelID.startTest)
                 
             default:
                 break

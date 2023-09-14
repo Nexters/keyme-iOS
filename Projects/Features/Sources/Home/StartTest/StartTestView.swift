@@ -46,9 +46,6 @@ public struct StartTestView: View {
             store.send(.onAppear)
         }
         .onDisappear {
-            store.send(.onDisappear)
-        }
-        .onDisappear {
             store.send(.stopAnimation)
         }
         .navigationDestination(
