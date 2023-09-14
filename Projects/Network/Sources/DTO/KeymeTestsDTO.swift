@@ -17,7 +17,7 @@ public struct KeymeTestsDTO: Codable {
         public let owner: Owner
         public let questions: [Question]
         public let testId: Int
-        let testResultId: Int?
+        public let testResultId: Int?
         public let title: String
     }
 
@@ -29,14 +29,14 @@ public struct KeymeTestsDTO: Codable {
 
     public struct Question: Codable {
         public let category: Category
-        let keyword: String
+        public let keyword: String
         let questionId: Int
         let title: String
     }
+}
 
-    public struct Category: Codable {
-        public let color: String
-        public let iconUrl: String
-        let name: String
-    }
+public struct Category: Codable {
+    public let color: String
+    public let iconUrl: String
+    let name: String
 }

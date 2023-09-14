@@ -12,7 +12,7 @@ import Core
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
-        @Box var home: KeymeTestsHomeFeature.State
+        @Box var home: HomeFeature.State
         @Box var myPage: MyPageFeature.State
         
         public init(userId: Int, nickname: String) {
@@ -22,13 +22,13 @@ public struct MainPageFeature: Reducer {
     }
     
     public enum Action {
-        case home(KeymeTestsHomeFeature.Action)
+        case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
     }
     
     public var body: some Reducer<State, Action> {
         Scope(state: \.home, action: /Action.home) {
-            KeymeTestsHomeFeature()
+            HomeFeature()
         }
         
         Scope(state: \.myPage, action: /Action.myPage) {

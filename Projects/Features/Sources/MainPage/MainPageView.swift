@@ -28,7 +28,7 @@ struct KeymeMainView: View {
         NavigationStack {
             WithViewStore(store, observe: { $0 }) { _ in
                 TabView(selection: $selectedTab) {
-                    KeymeTestsHomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
+                    HomeView(store: store.scope(state: \.home, action: MainPageFeature.Action.home))
                         .tabItem {
                             homeTabImage
                         }

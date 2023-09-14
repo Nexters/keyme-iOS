@@ -56,6 +56,13 @@ extension KeymeAPIManager: APIRequestable {
 
         return decoded
     }
+    
+    public func requestWithSampleData<T: Decodable>(_ api: KeymeAPI, object: T.Type) async throws -> T {
+        let response = api.sampleData
+        let decoded = try decoder.decode(T.self, from: response)
+        
+        return decoded
+    }
 
     public func request<T: Decodable>(_ api: KeymeAPI, object: T.Type) -> AnyPublisher<T, MoyaError> {
         core.request(api).map(T.self)

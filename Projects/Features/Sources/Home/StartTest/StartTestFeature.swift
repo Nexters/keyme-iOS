@@ -1,5 +1,5 @@
 //
-//  KeymeTestsStartFeature.swift
+//  StartTestFeature.swift
 //  Features
 //
 //  Created by 김영인 on 2023/08/12.
@@ -11,14 +11,14 @@ import ComposableArchitecture
 
 import Domain
 
-public struct KeymeTestsStartFeature: Reducer {
+public struct StartTestFeature: Reducer {
     public struct State: Equatable {
         public let nickname: String
         public let testData: KeymeTestsModel
         let authorizationToken: String
 
         public var icon: IconModel = .EMPTY
-        @PresentationState public var keymeTests: KeymeTestsFeature.State?
+        @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
         public init(nickname: String, testData: KeymeTestsModel, authorizationToken: String) {
@@ -29,11 +29,17 @@ public struct KeymeTestsStartFeature: Reducer {
     }
     
     public enum Action {
-        case viewWillAppear
+        case onAppear
+        case onDisappear
         case startAnimation([IconModel])
         case setIcon(IconModel)
         case startButtonDidTap
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
+        case toggleAnimation(IconModel)
+    }
+    
+    enum CancelID {
+        case startTest
     }
     
     @Dependency(\.continuousClock) var clock
@@ -44,33 +50,45 @@ public struct KeymeTestsStartFeature: Reducer {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
-            case .viewWillAppear:
+            case .onAppear:
+                return .send(.startAnimation(state.testData.tests.map { $0.icon }))
+                
+            case .onDisappear:
                 state.isAnimating = true
-                return .send(.startAnimation(state.testData.icons))
+                return .cancel(id: CancelID.startTest)
                 
             case .startAnimation(let icons):
-                guard state.isAnimating == false else {
-                    return .none
-                }
                 
                 return .run { send in
                     repeat {
                         for icon in icons {
-                            await send(.setIcon(icon))
-                            try await self.clock.sleep(for: .seconds(1.595))
+                            await send(.toggleAnimation(icon))
+                            try await self.clock.sleep(for: .seconds(0.85))
                         }
                     } while true
                 }
+                .cancellable(id: CancelID.startTest)
                 
             case let .setIcon(icon):
                 state.icon = icon
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
-                state.keymeTests = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
+                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
             case .keymeTests(.presented(.close)):
-                state.keymeTests = nil
+                state.keymeTestsState = nil
+                
+            case let .toggleAnimation(icon):
+                state.isAnimating.toggle()
+                
+                return .run {[isAnimating = state.isAnimating] send in
+                    while !isAnimating {
+                        try await self.clock.sleep(for: .seconds(1))
+                    }
+                    await send(.setIcon(icon))
+                }
+                .cancellable(id: CancelID.startTest)
                 
             default:
                 break
@@ -78,7 +96,7 @@ public struct KeymeTestsStartFeature: Reducer {
             
             return .none
         }
-        .ifLet(\.$keymeTests, action: /Action.keymeTests) {
+        .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
             KeymeTestsFeature()
         }
     }

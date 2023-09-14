@@ -29,6 +29,9 @@ public struct KeymeTestsView: View {
                     .onTestSubmitted { testResult in
                         viewStore.send(.showResult(data: testResult))
                     }
+                    .onCloseWebView {
+                        viewStore.send(.closeWebView)
+                    }
                     .toolbar(.hidden, for: .navigationBar)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -19,12 +19,17 @@ struct KeymeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .onOpenURL { url in
-                    print(url)
+                .onOpenURL(perform: { url in
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                        _ = AuthController.handleOpenUrl(url: url)
+                        AuthController.handleOpenUrl(url: url)
                     }
-                }
+                })
+            
+//            // 홈 뷰 테스트용
+//            let keymeStore = Store(initialState: HomeFeature.State(nickname: "영인")) {
+//                HomeFeature()
+//            }
+//            HomeView(store: keymeStore)
         }
     }
 }

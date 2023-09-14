@@ -82,12 +82,11 @@ extension KeymeAPI: BaseAPI {
     }
     
     public var sampleData: Data {
-        """
-        {
-            "id": 1,
-            "name": "Test Item"
+        switch self {
+        case let .test(testAPI):
+            return testAPI.sampleData
+        default:
+            return Data()
         }
-        """
-        .data(using: .utf8)!
     }
 }
