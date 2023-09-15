@@ -49,7 +49,7 @@ public struct CirclePackView<DetailView: View>: View {
         print("init CirclePackView")
         self.option = .init()
         self.namespace = namespace
-        self.circleData = data.rotate(degree: rotationAngle)
+        self.circleData = data.rotate(angle: rotationAngle)
         
         self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
@@ -84,6 +84,7 @@ public struct CirclePackView<DetailView: View>: View {
                                 })
                         }
                     }
+                    .allowsHitTesting(option.enableInteractWithCircles)
                     .frame(width: option.outboundLength, height: option.outboundLength)
                     .padding(option.framePadding)
                     .scaleEffect(option.scale)
@@ -298,6 +299,12 @@ private extension CirclePackView {
 }
 
 extension CirclePackView {
+    /// 원 탭 기능 온오프
+    func interactionWithCircles(_ activated: Bool) -> CirclePackView {
+        self.option.enableInteractWithCircles = activated
+        return self
+    }
+    
     func activateCircleBlink(_ activated: Bool) -> CirclePackView {
         self.option.activateCircleBlink = activated
         return self

@@ -23,6 +23,8 @@ public class CirclePackViewOption<DetailView: View> {
     var magnifiedCircleRatio: CGFloat
     /// 그런거 모르겠고 Scale로 사이즈 조정하고 싶으면 여기
     var scale: CGFloat
+    /// 원 탭 가능/불가능
+    var enableInteractWithCircles: Bool
     
     var onCircleTappedHandler: (CircleData) -> Void
     var onCircleDismissedHandler: (CircleData) -> Void
@@ -37,6 +39,7 @@ public class CirclePackViewOption<DetailView: View> {
         framePadding = 350
         magnifiedCircleRatio =  0.9
         scale = 1
+        enableInteractWithCircles = true
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }
@@ -48,6 +51,7 @@ public class CirclePackViewOption<DetailView: View> {
         framePadding: CGFloat,
         magnifiedCircleRatio: CGFloat,
         scale: CGFloat,
+        enableInteractWithCircles: Bool,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
         onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
@@ -57,6 +61,7 @@ public class CirclePackViewOption<DetailView: View> {
         self.framePadding = framePadding
         self.magnifiedCircleRatio = magnifiedCircleRatio
         self.scale = scale
+        self.enableInteractWithCircles = enableInteractWithCircles
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }

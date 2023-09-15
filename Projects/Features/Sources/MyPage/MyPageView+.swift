@@ -77,12 +77,14 @@ extension MyPageView {
                     .allowsHitTesting(false)
                     
                     HStack {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.white)
-                        Slider(value: $rotationAngle.degrees, in: -Double.pi...Double.pi, step: 0.01)
-                            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                        Spacer()
+                        
+                        Knob(angle: $rotationAngle)
+                            .frame(width: 100, height: 100)
+                            .offset(y: 50)
+                        
+                        Spacer()
                     }
-                    .padding(20)
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
                 }
             }
@@ -177,5 +179,47 @@ public struct MyPageImageExportView<Content: View>: View {
     
     private var horizontalSpacer: some View {
         HStack { Spacer() }
+    }
+}
+
+struct Knob: View {
+    @Binding private var angle: Angle
+    @State private var currentAngle: Angle
+    
+    init(angle: Binding<Angle>) {
+        self._angle = angle
+        self.currentAngle = angle.wrappedValue
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            Circle()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .overlay(
+                    Circle()
+                        .fill(Gradient(colors: [.white, .blue]))
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .rotationEffect(angle)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let dx = value.translation.width
+                                    let width = proxy.size.width
+                                    
+                                    let radians = (Double(dx) / (width/2) * .pi).between(min: -.pi, max: .pi)
+                                    let newAngle = Angle(radians: radians)
+                                    
+                                    if newAngle.degrees.truncatingRemainder(dividingBy: 10.0) == 0 {
+                                        HapticManager.shared.selectionChanged()
+                                    }
+                                    
+                                    angle = currentAngle + newAngle
+                                }
+                                .onEnded { _ in
+                                    currentAngle = angle
+                                }
+                        )
+                )
+        }
     }
 }

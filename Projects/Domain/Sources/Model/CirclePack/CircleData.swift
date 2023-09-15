@@ -142,11 +142,10 @@ extension CircleData: Identifiable {
     }
 }
 
-
 public extension Array where Element == CircleData {
-    func rotate(degree: Angle) -> [CircleData] {
+    func rotate(angle: Angle) -> [CircleData] {
         func formula(xPoint: CGFloat, yPoint: CGFloat) -> (x: CGFloat, y: CGFloat) {
-            let degree = CGFloat(degree.degrees)
+            let degree = CGFloat(angle.radians)
             let newXPoint = xPoint * cos(degree) - yPoint * sin(degree)
             let newYPoint = yPoint * cos(degree) + xPoint * sin(degree)
             
