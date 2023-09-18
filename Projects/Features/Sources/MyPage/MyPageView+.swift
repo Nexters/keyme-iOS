@@ -190,7 +190,7 @@ struct Knob: View {
         self._angle = angle
         self.currentAngle = angle.wrappedValue
     }
-
+    
     var body: some View {
         GeometryReader { proxy in
             Circle()
@@ -206,10 +206,12 @@ struct Knob: View {
                                     let dx = value.translation.width
                                     let width = proxy.size.width
                                     
-                                    let radians = (Double(dx) / (width/2) * .pi).between(min: -.pi, max: .pi)
+                                    let radians = (Double(dx) / (width/2) * .pi).between(min: -.pi * 1.02, max: .pi * 1.02)
                                     let newAngle = Angle(radians: radians)
                                     
-                                    if newAngle.degrees.truncatingRemainder(dividingBy: 10.0) == 0 {
+                                    print(newAngle.degrees)
+                                    let remainder = newAngle.degrees.truncatingRemainder(dividingBy: 15.0)
+                                    if abs(remainder) < 1.0 {
                                         HapticManager.shared.selectionChanged()
                                     }
                                     

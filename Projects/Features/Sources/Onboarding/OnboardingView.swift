@@ -13,7 +13,7 @@ import Core
 import DSKit
 
 public struct OnboardingView: View {
-    @EnvironmentObject var webViewSetup: KeymeWebViewSetup
+    @StateObject var webViewSetup = KeymeWebViewSetup()
 
     private let store: StoreOf<OnboardingFeature>
     
@@ -104,38 +104,43 @@ public struct OnboardingView: View {
             
             Spacer()
             
-            if viewStore.lottieType == .question {
-                Color.clear
-                    .contentShape(Circle())
-                    .onTapGesture {
-                        HapticManager.shared.boong()
-                        viewStore.send(.startButtonDidTap)
-                    }
-            }
-            
-            Spacer()
-            
-            ZStack {
-                Rectangle()
-                    .cornerRadius(16)
-                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-                
-                Text("다음")
-                    .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
-                    .foregroundColor(.black)
-            }
-            .onTapGesture {
-                HapticManager.shared.boong()
-                viewStore.send(.nextButtonDidTap)
-            }
-            .padding(Padding.insets(leading: 16, trailing: 16))
-            .frame(height: 60)
-            .opacity(viewStore.isButtonShown ? 1.0 : 0.0)
-            .animation(Animation.customInteractiveSpring(), value: viewStore.isButtonShown)
+            actionButton(for: viewStore.lottieType)
+                .onTapGesture {
+                    HapticManager.shared.boong()
+                    viewStore.send(
+                        viewStore.lottieType == .question ? .startButtonDidTap : .nextButtonDidTap
+                    )
+                }
+                .padding(Padding.insets(leading: 16, trailing: 16))
+                .frame(height: 60)
+                .opacity(viewStore.isButtonShown ? 1.0 : 0.0)
+                .animation(Animation.customInteractiveSpring(), value: viewStore.isButtonShown)
             
             Spacer()
                 .frame(height: 54)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+private extension OnboardingView {
+    func actionButton(for lottieType: LottieType) -> some View {
+        let buttonText: String
+        switch lottieType {
+        case .splash1, .splash2, .splash3:
+            buttonText = "다음"
+        case .question:
+            buttonText = "시작하기"
+        }
+        
+        return ZStack {
+            Rectangle()
+                .cornerRadius(16)
+                .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
+            
+            Text(buttonText)
+                .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
+                .foregroundColor(.black)
+        }
     }
 }
