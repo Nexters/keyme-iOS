@@ -135,7 +135,7 @@ public struct HomeFeature: Reducer {
                     return .none
                 }
                 
-                state.alertState = AlertState.errorWithMessage(
+                state.alertState = .errorWithMessage(
                     error.localizedDescription,
                     actions: {
                         ButtonState(action: .error(.cannotGetAuthorizationInformation), label: { TextState("닫기") })

@@ -25,6 +25,7 @@ public struct SignInFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
+        @PresentationState var alertState: AlertState<Action.Alert>?
         var isLoading: Bool = false
         var status: Status = .notDetermined
         
@@ -37,10 +38,13 @@ public struct SignInFeature: Reducer {
     
     public enum Action: Equatable {
         case signInWithKakao
-        case signInWithKakaoResponse(TaskResult<AuthDTO>)
-        
         case signInWithApple(ASAuthorization)
-        case signInWithAppleResponse(TaskResult<AuthDTO>)
+        
+        case signInResponse(TaskResult<AuthDTO>)
+        
+        case alert(PresentationAction<Alert>)
+        case handleError
+        public enum Alert: Equatable {}
     }
     
     public var body: some Reducer<State, Action> {
@@ -51,18 +55,8 @@ public struct SignInFeature: Reducer {
                 state.isLoading = true
                 
                 return .run { send in
-                    await send(.signInWithKakaoResponse(TaskResult { try await signInWithKakao() }))
+                    await send(.signInResponse(TaskResult { try await signInWithKakao() }))
                 }
-                
-            case .signInWithKakaoResponse(.success): // 카카오 로그인 성공
-                state.isLoading = false
-                state.status = .loggedIn
-                return .none
-                
-            case .signInWithKakaoResponse(.failure): // 카카오 로그인 실패
-                state.isLoading = false
-                state.status = .loggedOut
-                return .none
                 
             // MARK: - Apple
             case .signInWithApple(let authorization):
@@ -77,27 +71,39 @@ public struct SignInFeature: Reducer {
                 }
                 
                 return .run { send in
-                    await send(.signInWithAppleResponse(
+                    await send(.signInResponse(
                         TaskResult { try await signInWithApple(identityToken: identityToken) }
                     ))
                 }
                 
-            case .signInWithAppleResponse(.success): // 애플 로그인 성공
+            case .signInResponse(.success): // 로그인 성공
+                state.isLoading = false
                 state.status = .loggedIn
+                
                 return .none
                 
-            case .signInWithAppleResponse(.failure): // 애플 로그인 실패
+            case .signInResponse(.failure): // 로그인 실패
+                state.isLoading = false
                 state.status = .loggedOut
+                
+                return .send(.handleError)
+                
+            case .handleError:
+                state.alertState = .errorWithMessage("로그인 중 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
+                return .none
+                
+            case .alert:
                 return .none
             }
         }
+        .ifLet(\.$alertState, action: /Action.alert)
     }
 }
 
 extension SignInFeature {
     // 카카오 로그인 메서드
-    /// Reducer Closure 내부에서 State를 직접 변경할 수 없어서 Async - Await를 활용하여 한 번 더 이벤트(signInWithKakaoResponse)를 발생시키도록 구현했습니다.
-    // TODO: 나중에 별개의 dependency로 분리할 것(테스트가 안 됨)
+    // Reducer Closure 내부에서 State를 직접 변경할 수 없어서
+    // Async - Await를 활용하여 한 번 더 이벤트(signInWithKakaoResponse)를 발생시키도록 구현했습니다.
     private func signInWithKakao() async throws -> AuthDTO {
         let accessToken: String = try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {

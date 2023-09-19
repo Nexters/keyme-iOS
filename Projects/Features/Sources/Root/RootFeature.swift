@@ -127,7 +127,7 @@ public struct RootFeature: Reducer {
                 return .none
                 
             // MARK: - Child actions
-            case .login(.signInWithAppleResponse(let response)):
+            case .login(.signInResponse(let response)):
                 switch response {
                 case .success(let body):
                     let token = body.data.token.accessToken
@@ -137,20 +137,8 @@ public struct RootFeature: Reducer {
                     return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                     
                 case .failure:
-                    return logout
-                }
-                
-            case .login(.signInWithKakaoResponse(let response)):
-                switch response {
-                case .success(let body):
-                    let token = body.data.token.accessToken
-                    userStorage.accessToken = token
-                    network.registerAuthorizationToken(token)
-                    
-                    return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
-                    
-                case .failure:
-                    return logout
+                    // 하위 뷰에서 다루게 두기
+                    return .none
                 }
                 
             case .registration(.finishRegisterResponse(let response)):

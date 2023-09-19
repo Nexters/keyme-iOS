@@ -24,31 +24,32 @@ public struct SignInView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            if viewStore.state.isLoading {
+            if viewStore.isLoading {
                 ProgressView()
             }
-        }
-        
-        ZStack(alignment: .center) {
-            Text.keyme("KEYME", font: .checkResult)
-                .foregroundColor(.white)
-                .offset(y: -39)
             
-            VStack(alignment: .center, spacing: 30) {
-                Spacer()
+            ZStack(alignment: .center) {
+                Text.keyme("KEYME", font: .checkResult)
+                    .foregroundColor(.white)
+                    .offset(y: -39)
                 
-                VStack(spacing: 16) {
-                    KakaoLoginButton(store: store)
-                        .frame(height: 48)
+                VStack(alignment: .center, spacing: 30) {
+                    Spacer()
                     
-                    AppleLoginButton(store: store)
-                        .frame(height: 48)
+                    VStack(spacing: 16) {
+                        KakaoLoginButton(store: store)
+                            .frame(height: 48)
+                        
+                        AppleLoginButton(store: store)
+                            .frame(height: 48)
+                    }
+                    
+                    GuideMessageView()
                 }
-                
-                GuideMessageView()
+                .padding(.horizontal, 32)
+                .padding(.bottom, 56)
             }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 56)
+            .alert(store: store.scope(state: \.$alertState, action: SignInFeature.Action.alert))
         }
     }
     
@@ -84,7 +85,7 @@ public struct SignInView: View {
                     case .success(let appleOAuth):
                         store.send(.signInWithApple(appleOAuth))
                     case .failure:
-                        store.send(.signInWithAppleResponse(.failure(SignInError.noSignIn)))
+                        store.send(.signInResponse(.failure(SignInError.noSignIn)))
                     }
                 })
             .signInWithAppleButtonStyle(.white)

@@ -127,7 +127,6 @@ struct MyPageView: View {
             .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
-            .redacted(reason: viewStore.nowFetching ? .placeholder : [])
         }
         .sheet(item: $tempImage, content: { image in
             // FIXME: 디자인 나오기 전 임시
