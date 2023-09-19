@@ -63,45 +63,53 @@ public struct RootFeature: Reducer {
                 }
                 
             case .updateMemberInformation(let receviedMemberData, let accessToken):
-                return .run(priority: .userInitiated) { send in
-                    let memberInformation: MemberUpdateDTO.MemberData
-                    if let receviedMemberData {
-                        memberInformation = receviedMemberData
-                    } else {
-                        memberInformation = try await network.request(
-                            .member(.fetch),
-                            object: MemberUpdateDTO.self
-                        ).data
-                    }
-                    
-                    userStorage.userId = memberInformation.id
-                    userStorage.nickname = memberInformation.nickname
-                    userStorage.friendCode = memberInformation.friendCode
-                    
-                    if let profileImageURL = URL(string: memberInformation.profileImage) {
-                        userStorage.profileImageURL = profileImageURL
-                    }
-                    
-                    if let profileThumbnailURL = URL(string: memberInformation.profileImage) {
-                        userStorage.profileThumbnailURL = profileThumbnailURL
-                    }
-                    
-                    if let userId = memberInformation.id, let nickname = memberInformation.nickname {
-                        if memberInformation.isOnboardingClear != true {
-                            await send(
-                                .updateState(
-                                    .needOnboarding(OnboardingFeature.State(authorizationToken: accessToken))))
+                return .run(
+                    priority: .userInitiated,
+                    operation: { send in
+                        let memberInformation: MemberUpdateDTO.MemberData
+                        if let receviedMemberData {
+                            memberInformation = receviedMemberData
                         } else {
-                            await send(.updateState(
-                                .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
+                            memberInformation = try await network.request(
+                                .member(.fetch),
+                                object: MemberUpdateDTO.self
+                            ).data
                         }
-                    } else {
-                        await send(.updateState(.needRegistration(RegistrationFeature.State())))
-                    }
+                        
+                        userStorage.userId = memberInformation.id
+                        userStorage.nickname = memberInformation.nickname
+                        userStorage.friendCode = memberInformation.friendCode
+                        
+                        if let profileImageURL = URL(string: memberInformation.profileImage) {
+                            userStorage.profileImageURL = profileImageURL
+                        }
+                        
+                        if let profileThumbnailURL = URL(string: memberInformation.profileImage) {
+                            userStorage.profileThumbnailURL = profileThumbnailURL
+                        }
+                        
+                        if let userId = memberInformation.id, let nickname = memberInformation.nickname {
+                            if memberInformation.isOnboardingClear != true {
+                                await send(
+                                    .updateState(
+                                        .needOnboarding(OnboardingFeature.State(
+                                            authorizationToken: accessToken, nickname: nickname))))
+                            } else {
+                                await send(.updateState(
+                                    .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
+                            }
+                        } else {
+                            await send(.updateState(.needRegistration(RegistrationFeature.State())))
+                        }
+                        
+                        await send(.registerPushNotification)
+                    },
+                    catch: { _, send in
+                        // logout
+                        userStorage.accessToken = nil
+                        await send(.updateState(.needSignIn(SignInFeature.State())))
+                    })
                     
-                    await send(.registerPushNotification)
-                }
-                
             case .updateState(let receivedState):
                 state = receivedState
                 return .none
@@ -129,7 +137,7 @@ public struct RootFeature: Reducer {
                     return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                     
                 case .failure:
-                    return .none
+                    return logout
                 }
                 
             case .login(.signInWithKakaoResponse(let response)):
@@ -142,20 +150,20 @@ public struct RootFeature: Reducer {
                     return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                     
                 case .failure:
-                    return .none
+                    return logout
                 }
                 
             case .registration(.finishRegisterResponse(let response)):
                 guard let token = authorizationToken else {
                     // 로그인 재시도
-                    return gotoSignInState
+                    return logout
                 }
                 return .send(.updateMemberInformation(withMemberData: response.data, authorizationToken: token))
                 
             case .onboarding(.testResult(.closeButtonDidTap)):
                 guard let token = authorizationToken else {
                     // 로그인 재시도
-                    return gotoSignInState
+                    return logout
                 }
                 guard let userId = userStorage.userId, let nickname = userStorage.nickname else {
                     // 멤버 정보 수신 재시도
@@ -164,13 +172,10 @@ public struct RootFeature: Reducer {
                 return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
-                userStorage.accessToken = nil
-                // Logout
-                return gotoSignInState
+                return logout
                 
             case .mainPage(.home(.requestLogout)):
-                // Logout
-                return gotoSignInState
+                return logout
                 
             default:
                 return .none
@@ -190,7 +195,8 @@ public struct RootFeature: Reducer {
         }
     }
     
-    private var gotoSignInState: Effect<RootFeature.Action> {
-        .send(.updateState(.needSignIn(SignInFeature.State())))
+    private var logout: Effect<RootFeature.Action> {
+        userStorage.accessToken = nil
+        return .send(.updateState(.needSignIn(SignInFeature.State())))
     }
 }

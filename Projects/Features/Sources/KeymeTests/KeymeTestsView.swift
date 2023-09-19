@@ -9,10 +9,10 @@
 import SwiftUI
 
 import ComposableArchitecture
-
 import DSKit
 
 public struct KeymeTestsView: View {
+    @EnvironmentObject var webViewSetup: KeymeWebViewSetup
     let store: StoreOf<KeymeTestsFeature>
     
     public init(store: StoreOf<KeymeTestsFeature>) {
@@ -22,19 +22,27 @@ public struct KeymeTestsView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }, send: KeymeTestsFeature.Action.view) { viewStore in
             ZStack {
-                KeymeWebView(url: viewStore.url, accessToken: viewStore.authorizationToken)
-                    .onCloseWebView {
-                        viewStore.send(.closeButtonTapped)
-                    }
-                    .onTestSubmitted { testResult in
-                        viewStore.send(.showResult(data: testResult))
-                    }
-                    .onCloseWebView {
-                        viewStore.send(.closeWebView)
-                    }
-                    .toolbar(.hidden, for: .navigationBar)
+                KeymeWebView(
+                    url: viewStore.url,
+                    accessToken: viewStore.authorizationToken
+                )
+                .onCloseWebView {
+                    viewStore.send(.closeButtonTapped)
+                }
+                .onTestSubmitted { testResult in
+                    viewStore.send(.showResult(data: testResult))
+                }
+                .environmentObject(webViewSetup)
+                .onAppear {
+                    webViewSetup.load(url: viewStore.url, accessToken: viewStore.authorizationToken)
+                }
+                .onDisappear {
+                    webViewSetup.load(url: "about:blank", accessToken: viewStore.authorizationToken)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .toolbar(.hidden, for: .navigationBar)
+        .alert(store: store.scope(state: \.$alertState, action: KeymeTestsFeature.Action.alert))
     }
 }

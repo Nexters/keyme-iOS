@@ -48,6 +48,8 @@ extension ShortUrlAPI: TargetType {
         
         if let accessToken = Bundle.main.object(forInfoDictionaryKey: "BITLY_API_KEY") as? String {
             header["Authorization"] = "Bearer \(accessToken)"
+        } else {
+            print("ERROR: Bitly 토큰 설정에 실패했습니다.")
         }
         
         return header

@@ -33,6 +33,10 @@ public struct KeymeTestsDTO: Codable {
         let questionId: Int
         let title: String
     }
+    
+    public var isSolved: Bool {
+        data.testResultId != nil
+    }
 }
 
 public struct Category: Codable {

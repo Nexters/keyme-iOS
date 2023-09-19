@@ -13,11 +13,14 @@ import ComposableArchitecture
 import Core
 import Util
 import DSKit
+import Domain
 
 public struct StartTestView: View {
+    @StateObject private var webViewSetUp: KeymeWebViewSetup
     public var store: StoreOf<StartTestFeature>
     
     public init(store: StoreOf<StartTestFeature>) {
+        self._webViewSetUp = .init(wrappedValue: KeymeWebViewSetup())
         self.store = store
     }
     
@@ -35,17 +38,7 @@ public struct StartTestView: View {
                     .onTapGesture {
                         viewStore.send(.startButtonDidTap)
                     }
-                    .navigationDestination(
-                        store: store.scope(
-                            state: \.$keymeTestsState,
-                            action: StartTestFeature.Action.keymeTests
-                        ), destination: { store in
-                            KeymeTestsView(store: store)
-                                .ignoresSafeArea(.all)
-                                .transition(.scale.animation(.easeIn))
-                        })
                 
-                Spacer()
                 Spacer()
             }
         }
@@ -53,8 +46,19 @@ public struct StartTestView: View {
             store.send(.onAppear)
         }
         .onDisappear {
-            store.send(.onDisappear)
+            store.send(.stopAnimation)
         }
+        .navigationDestination(
+            store: store.scope(
+                state: \.$keymeTestsState,
+                action: StartTestFeature.Action.keymeTests),
+            destination: { store in
+                KeymeTestsView(store: store)
+                    .ignoresSafeArea(.all)
+                    .transition(.scale.animation(.easeIn))
+                    .environmentObject(webViewSetUp)
+            }
+        )
     }
 }
 

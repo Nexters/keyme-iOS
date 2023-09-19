@@ -48,6 +48,7 @@ public struct RegistrationView: View {
                     Task(priority: .utility) {
                         guard let imageData = try await newImage?.loadTransferable(type: Data.self) else {
                             // TODO: Throw error and show alert
+                            print("IMAGE ERROR")
                             return
                         }
                         
@@ -216,7 +217,7 @@ extension RegistrationView {
                     .foregroundColor(isValid ? .green : .red)
                     .frame(width: 10, height: 10)
                 
-                Text.keyme(isValid ? "사용 가능한 닉네임입니다." : "중복된 닉네임입니다.", font: .caption1)
+                Text.keyme(isValid ? "사용 가능한 닉네임입니다" : "이미 사용 중인 닉네임입니다", font: .caption1)
                     .foregroundColor(.gray)
                 
                 Spacer()

@@ -87,7 +87,9 @@ extension HomeView {
 extension HomeView {
     // 하단 버튼 (시작하기 / 공유하기)
     func bottomButton(_ viewStore: ViewStore<HomeFeature.State.View, HomeFeature.Action>) -> some View {
-        ZStack {
+        @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
+        
+        return ZStack {
             Rectangle()
                 .cornerRadius(16)
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
@@ -100,14 +102,18 @@ extension HomeView {
         .frame(height: 60)
         .onTapGesture {
             Task {
+                guard let testId = viewStore.testId else {
+                    viewStore.send(.showErrorAlert(.cannotGenerateTestLink))
+                    return
+                }
+                
                 if viewStore.isSolvedDailyTest {
-//                    let url = "https://keyme-frontend.vercel.app/test/17"
-                    let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
-                    let shortURL = try await ShortUrlAPIManager.shared.request(
+                    let url = "https://keyme-frontend.vercel.app/test/\(testId)"
+                    let shortURL = try await shortURLAPIManager.request(
                         .shortenURL(longURL: url),
                         object: BitlyResponse.self).link
 
-                    sharedURL = ActivityViewController.SharedURL("www.example.com")
+                    sharedURL = ActivityViewController.SharedURL(shortURL)
                 } else {
                     viewStore.send(.startTest(.presented(.startButtonDidTap)))
                 }

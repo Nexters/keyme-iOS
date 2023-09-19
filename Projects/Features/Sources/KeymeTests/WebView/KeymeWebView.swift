@@ -13,6 +13,28 @@ import Core
 import Domain
 import DSKit
 
+public class KeymeWebViewSetup: ObservableObject {
+    let webView = WKWebView()
+    
+    init() {
+        load(url: "about:blank", accessToken: "")
+    }
+    
+    func load(url: String, accessToken: String) {
+        guard
+            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+            let url = URL(string: encodedUrl)
+        else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+        webView.customUserAgent = "KEYME_\(accessToken)"
+        webView.load(request)
+    }
+}
+
 final class KeymeWebViewOption {
     var onCloseWebView: () -> Void
     var onTestSubmitted: (_ testResult: KeymeWebViewModel) -> Void
@@ -27,29 +49,29 @@ final class KeymeWebViewOption {
 }
 
 public struct KeymeWebView: UIViewRepresentable {
+    @EnvironmentObject var webViewSetup: KeymeWebViewSetup
+    
+    private var url: String
+    private let accessToken: String
     private let option: KeymeWebViewOption
-    private let webView: WKWebView
-    public let url: String
+    
+    private var webView: WKWebView {
+        webViewSetup.webView
+    }
     
     init(url: String, accessToken: String) {
-        self.option = .init()
         self.url = url
-        self.webView = WKWebViewWarmUper.shared.dequeue()
-        
-        if
-            let encodedUrl = url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-            let url = URL(string: encodedUrl)
-        {
-            var request = URLRequest(url: url)
-            request.setValue(accessToken, forHTTPHeaderField: "Authorization")
-            webView.load(request)
-        }
+        self.option = .init()
+        self.accessToken = accessToken
     }
     
     public func makeUIView(context: Context) -> WKWebView {
         // This is the important part
+        webView.navigationDelegate = context.coordinator
+        
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "appInterface")
         webView.configuration.userContentController.add(context.coordinator, name: "appInterface")
-        webView.customUserAgent = "KEYME"
+
         webView.backgroundColor = UIColor(Color.hex("171717"))
         webView.isOpaque = false
         webView.scrollView.isScrollEnabled = false
@@ -57,15 +79,13 @@ public struct KeymeWebView: UIViewRepresentable {
         return webView
     }
     
-    public func updateUIView(_ uiView: WKWebView, context: Context) {
-        
-    }
+    public func updateUIView(_ uiView: WKWebView, context: Context) {}
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(parent: self, option: option)
     }
     
-    public final class Coordinator: NSObject, WKScriptMessageHandler {
+    public final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         private let decoder = JSONDecoder()
         let parent: KeymeWebView
         let option: KeymeWebViewOption

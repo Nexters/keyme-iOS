@@ -13,59 +13,9 @@ import Domain
 import DSKit
 import Foundation
 
-public class CirclePackViewOption<DetailView: View> {
-    var activateCircleBlink: Bool
-    /// Circle pack 그래프 배경색
-    var background: Color
-    /// Circle pack 그래프의 크기
-    var outboundLength: CGFloat
-    /// Circle pack 그래프의 크기에 줄 패딩값. 즉, 뷰 전체 프레임과 그래프 사이에 둘 거리.
-    var framePadding: CGFloat
-    var rotationAngle: Angle
-    /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
-    var magnifiedCircleRatio: CGFloat
-    
-    var onCircleTappedHandler: (CircleData) -> Void
-    var onCircleDismissedHandler: (CircleData) -> Void
-    
-    public init(
-        onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
-    ) {
-        activateCircleBlink = true
-        background = .white
-        outboundLength = 700
-        framePadding = 350
-        rotationAngle = .degrees(0)
-        magnifiedCircleRatio =  0.9
-        self.onCircleTappedHandler = onCircleTappedHandler
-        self.onCircleDismissedHandler = onCircleDismissedHandler
-    }
-    
-    public init(
-        activateCircleBlink: Bool,
-        background: Color,
-        outboundLength: CGFloat,
-        framePadding: CGFloat,
-        rotationAngle: Angle,
-        magnifiedCircleRatio: CGFloat,
-        onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
-        onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
-    ) {
-        self.activateCircleBlink = activateCircleBlink
-        self.background = background
-        self.outboundLength = outboundLength
-        self.framePadding = framePadding
-        self.rotationAngle = rotationAngle
-        self.magnifiedCircleRatio = magnifiedCircleRatio
-        self.onCircleTappedHandler = onCircleTappedHandler
-        self.onCircleDismissedHandler = onCircleDismissedHandler
-    }
-}
-
 public struct CirclePackView<DetailView: View>: View {
-//    @Namespace private var namespace
     private let namespace: Namespace.ID
+    @Binding private var graphScale: CGFloat
     
     // 애니메이션 관련
     @State private var doneDragging = true
@@ -81,7 +31,7 @@ public struct CirclePackView<DetailView: View>: View {
     @State private var focusedCircleData: CircleData?
     @State private var isPersonalityCirclePressed = false
     
-    private let circleData: [CircleData]
+    private var circleData: [CircleData]
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
     
@@ -92,15 +42,19 @@ public struct CirclePackView<DetailView: View>: View {
     public init(
         namespace: Namespace.ID,
         data: [CircleData],
+        scale: Binding<CGFloat>,
+        rotationAngle: Angle = .degrees(45),
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
-        print("init")
-        self.namespace = namespace
-        self.circleData = data
+        print("init CirclePackView")
         self.option = .init()
+        self.namespace = namespace
+        self.circleData = data.rotate(degree: rotationAngle)
         
         self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
         self.detailViewBuilder = detailViewBuilder
+        
+        self._graphScale = scale
     }
         
     public var body: some View {
@@ -111,9 +65,10 @@ public struct CirclePackView<DetailView: View>: View {
                 .zIndex(0)
             
             // Circle pack 메인 뷰
-            // 전체 스크롤, 원상복구되는 줌 들어가 있음
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                ZStack {
+                ZStack(alignment: .center) {
+                    Color.clear.id(0) // Center position
+                    
                     ForEach(circleData) { data in
                         if data == focusedCircleData {
                             Circle().fill(.clear)
@@ -129,13 +84,16 @@ public struct CirclePackView<DetailView: View>: View {
                                 })
                         }
                     }
+                    .frame(width: option.outboundLength, height: option.outboundLength)
+                    .padding(option.framePadding)
+                    .scaleEffect(option.scale)
                 }
                 .frame(width: option.outboundLength, height: option.outboundLength)
+                .scaleEffect(graphScale)
                 .padding(option.framePadding)
-                .rotationEffect(option.rotationAngle)
-                .pinchZooming()
+                .pinchZooming(with: $graphScale)
+                .zIndex(1)
             }
-            .zIndex(1)
             
             // 아래에 깔린 뷰 블러시키는 특수 뷰
             // `opacity`를 이용해서 visibility 조절함
@@ -159,7 +117,7 @@ public struct CirclePackView<DetailView: View>: View {
                         }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
-                            
+                    
                     FocusedCircleView(
                         namespace: namespace,
                         shrinkageDistance: currentSheetOffset,
@@ -177,7 +135,6 @@ public struct CirclePackView<DetailView: View>: View {
                     }
                     .transition(.offset(x: 1, y: 1).combined(with: .opacity))
                     .padding(.vertical, 12)
-//                    .transition(.offset(x: 1, y: 1)) // Magic line. 왠진 모르겠지만 돌아가는 중이니 건들지 말 것
                     
                     VStack {
                         BottomSheetWrapperView {
@@ -207,6 +164,9 @@ public struct CirclePackView<DetailView: View>: View {
         .animation(
             Animation.customInteractiveSpring(),
             value: isPersonalityCirclePressed)
+        .animation(
+            Animation.customInteractiveSpring(),
+            value: graphScale)
         .animation(
             Animation.customInteractiveSpring(),
             value: focusedCircleData)
@@ -365,11 +325,11 @@ extension CirclePackView {
         return self
     }
     
-    /// 그래프를 돌려봅니다.
+    /// 버블차트의 원 크기 스케일을 잡습니다.
     ///
-    /// 기본값은 0도(`Angle(degree: 0))`입니다.
-    func graphRotation(angle: Angle) -> CirclePackView {
-        self.option.rotationAngle = angle
+    /// 기본값은 당연히 1입니다.
+    func graphScale(_ factor: CGFloat) -> CirclePackView {
+        self.option.scale = factor
         return self
     }
     

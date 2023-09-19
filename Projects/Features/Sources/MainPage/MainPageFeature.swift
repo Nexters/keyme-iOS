@@ -15,9 +15,13 @@ public struct MainPageFeature: Reducer {
         @Box var home: HomeFeature.State
         @Box var myPage: MyPageFeature.State
         
+        var view: View = .none
+        enum View: Equatable { case none }
+        
         public init(userId: Int, nickname: String) {
+            // TODO: 테스트 아이디를 더 위에서 조회해서 내려줘야 될 듯
             self._home = .init(.init(nickname: nickname))
-            self._myPage = .init(.init(userId: userId, nickname: nickname))
+            self._myPage = .init(.init(userId: userId, nickname: nickname, testId: 17))
         }
     }
     

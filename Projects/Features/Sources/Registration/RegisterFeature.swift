@@ -66,7 +66,7 @@ public struct RegistrationFeature: Reducer {
                         id: CancelID.debouncedNicknameUpdate,
                         cancelInFlight: true
                     ) {
-                        try await self.clock.sleep(for: .seconds(0.3))
+                        try await self.clock.sleep(for: .seconds(0.5))
                         
                         await send(.checkDuplicatedNickname(nicknameString))
                     }
@@ -80,7 +80,7 @@ public struct RegistrationFeature: Reducer {
                         object: VerifyNicknameDTO.self
                     )
                     
-                    await send(.checkDuplicatedNicknameResponse(result.data.valid))
+                    await send(.checkDuplicatedNicknameResponse(result.data?.valid ?? false))
                 }
                 
             case .checkDuplicatedNicknameResponse(let isNicknameDuplicated):

@@ -65,8 +65,10 @@ public struct OnboardingFeature: Reducer {
         public var isShared: Bool = false
         
         let authorizationToken: String
-        public init(authorizationToken: String) {
+        let nickname: String
+        public init(authorizationToken: String, nickname: String) {
             self.authorizationToken = authorizationToken
+            self.nickname = nickname
         }
     }
     
@@ -99,17 +101,17 @@ public struct OnboardingFeature: Reducer {
                 state.isButtonShown = false
                 
             case .lottieEnded:
+                state.isButtonShown = true
+
                 if state.lottieType == .splash3 {
                     state.lottieType = .question
                     state.isLoop = true
                     return .run { send in
                         await send(.fetchOnboardingTests(
-                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests()
-                            }
+                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests() }
                         ))
                     }
                 } else {
-                    state.isButtonShown = true
                     state.isLoop = true
                 }
                 
