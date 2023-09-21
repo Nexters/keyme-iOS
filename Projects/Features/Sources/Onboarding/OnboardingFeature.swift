@@ -40,7 +40,7 @@ public enum LottieType: CaseIterable {
         case .splash3:
             return ""
         case .question:
-            return "환영해요 키미님!\n이제 문제를 풀어볼까요?"
+            return "환영해요 키미님!\n이제 문제를 풀어볼까요?" // FIXME: fixme
         }
     }
 }
@@ -57,7 +57,7 @@ public struct OnboardingFeature: Reducer {
         public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
-        public var testId: Int = 17 // TODO: 바꾸기
+        public var testId: Int
         public var lottieType: LottieType = .splash1
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
@@ -66,16 +66,16 @@ public struct OnboardingFeature: Reducer {
         
         let authorizationToken: String
         let nickname: String
-        public init(authorizationToken: String, nickname: String) {
+        public init(authorizationToken: String, nickname: String, testId: Int) {
             self.authorizationToken = authorizationToken
             self.nickname = nickname
+            self.testId = testId
         }
     }
     
     public enum Action: Equatable {
         case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
         case testResult(TestResultFeature.Action)
-        case fetchOnboardingTests(TaskResult<KeymeTestsModel>)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
@@ -106,20 +106,9 @@ public struct OnboardingFeature: Reducer {
                 if state.lottieType == .splash3 {
                     state.lottieType = .question
                     state.isLoop = true
-                    return .run { send in
-                        await send(.fetchOnboardingTests(
-                            TaskResult { try await self.keymeTestsClient.fetchOnboardingTests() }
-                        ))
-                    }
                 } else {
                     state.isLoop = true
                 }
-                
-            case let .fetchOnboardingTests(.success(tests)):
-                state.testId = tests.testId
-                
-            case .fetchOnboardingTests(.failure):
-                return .none
                 
             case .startButtonDidTap:
                 let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"

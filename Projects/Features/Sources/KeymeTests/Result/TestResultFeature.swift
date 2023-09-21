@@ -27,7 +27,7 @@ public struct TestResultFeature: Reducer {
         case binding(BindingAction<State>)
         case viewWillAppear
         case fetchTestResult(TaskResult<[TestResultModel]>)
-        case closeButtonDidTap
+        case closeButtonDidTap(testId: Int)
     }
     
     @Dependency(\.keymeTestsClient) var keymeTestsClient

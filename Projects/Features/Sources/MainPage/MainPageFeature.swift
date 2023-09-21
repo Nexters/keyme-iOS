@@ -12,22 +12,24 @@ import Core
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
+        var testId: Int?
+        
         @Box var home: HomeFeature.State
         @Box var myPage: MyPageFeature.State
         
         var view: View = .none
         enum View: Equatable { case none }
         
-        public init(userId: Int, nickname: String) {
-            // TODO: 테스트 아이디를 더 위에서 조회해서 내려줘야 될 듯
+        public init(userId: Int, testId: Int, nickname: String) {
             self._home = .init(.init(nickname: nickname))
-            self._myPage = .init(.init(userId: userId, nickname: nickname, testId: 17))
+            self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
         }
     }
     
     public enum Action {
         case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
+        case getTestId
     }
     
     public var body: some Reducer<State, Action> {
@@ -39,7 +41,19 @@ public struct MainPageFeature: Reducer {
             MyPageFeature()
         }
         
-        Reduce { _, _ in
+        Reduce { state, action in
+            switch action {
+            case .getTestId:
+                guard state.testId == nil else {
+                    return .none
+                }
+                
+//                testId =
+                
+            default:
+                break
+            }
+            
             return .none
         }
     }

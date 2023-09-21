@@ -64,7 +64,7 @@ public struct TestResultView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(Padding.insets(trailing: 17))
             .onTapGesture {
-                viewStore.send(.closeButtonDidTap)
+                viewStore.send(.closeButtonDidTap(testId: viewStore.testId))
             }
     }
     

@@ -93,10 +93,17 @@ public struct RootFeature: Reducer {
                                 await send(
                                     .updateState(
                                         .needOnboarding(OnboardingFeature.State(
-                                            authorizationToken: accessToken, nickname: nickname))))
+                                            authorizationToken: accessToken,
+                                            nickname: nickname,
+                                            testId: try await onboardingTestId))))
                             } else {
-                                await send(.updateState(
-                                    .canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
+                                await send(
+                                    .updateState(
+                                        .canUseApp(
+                                            MainPageFeature.State(
+                                                userId: userId,
+                                                testId: try await onboardingTestId,
+                                                nickname: nickname))))
                             }
                         } else {
                             await send(.updateState(.needRegistration(RegistrationFeature.State())))
@@ -148,7 +155,7 @@ public struct RootFeature: Reducer {
                 }
                 return .send(.updateMemberInformation(withMemberData: response.data, authorizationToken: token))
                 
-            case .onboarding(.testResult(.closeButtonDidTap)):
+            case .onboarding(.testResult(.closeButtonDidTap(let testId))):
                 guard let token = authorizationToken else {
                     // 로그인 재시도
                     return logout
@@ -157,7 +164,11 @@ public struct RootFeature: Reducer {
                     // 멤버 정보 수신 재시도
                     return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                 }
-                return .send(.updateState(.canUseApp(MainPageFeature.State(userId: userId, nickname: nickname))))
+                
+                // Goto main page
+                return .send(
+                    .updateState(
+                        .canUseApp(MainPageFeature.State(userId: userId, testId: testId, nickname: nickname))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
                 return logout
@@ -182,9 +193,25 @@ public struct RootFeature: Reducer {
             MainPageFeature()
         }
     }
-    
-    private var logout: Effect<RootFeature.Action> {
+}
+
+private extension RootFeature {
+    var logout: Effect<RootFeature.Action> {
         userStorage.accessToken = nil
         return .send(.updateState(.needSignIn(SignInFeature.State())))
+    }
+    
+    var onboardingTestId: Int {
+        get async throws {
+            let testIdObject = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
+            return testIdObject.data.testId
+        }
+    }
+    
+    var dailyTestId: Int {
+        get async throws {
+            let testIdObject = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
+            return testIdObject.data.testId
+        }
     }
 }
