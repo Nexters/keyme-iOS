@@ -79,8 +79,8 @@ extension MyPageView {
                     HStack {
                         Image(systemName: "arrow.clockwise")
                             .foregroundColor(.white)
-                        Slider(value: $rotationAngle.degrees, in: -Double.pi...Double.pi, step: 0.01)
-                            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                        
+                        CustomSlider(value: $rotationAngle.degrees, range: -Double.pi...Double.pi)
                     }
                     .padding(20)
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
@@ -134,6 +134,7 @@ extension MyPageView {
             ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .reverseMask { maskingShape(isFilled: true).padding(32) }
+                    .opacity(0.9)
                 
                 ZStack {
                     maskingShape(isFilled: false)
