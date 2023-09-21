@@ -134,7 +134,6 @@ extension MyPageView {
             ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .reverseMask { maskingShape(isFilled: true).padding(32) }
-                    .opacity(0.9)
                 
                 ZStack {
                     maskingShape(isFilled: false)
