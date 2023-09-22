@@ -26,9 +26,6 @@ struct DailyTestListView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(alignment: .leading) {
-                Spacer()
-                    .frame(height: 75)
-                
                 welcomeText(nickname: viewStore.testData.nickname)
                 
                 Spacer()
@@ -55,8 +52,7 @@ struct DailyTestListView: View {
             .onDisappear {
                 viewStore.send(.onDisappear)
             }
-            .fullFrame()
-            .padding([.leading, .trailing], 16)
+            .padding(.horizontal, 16)
         }
     }
 }

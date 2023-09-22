@@ -11,6 +11,7 @@ import Domain
 import Network
 import Foundation
 
+// MARK: MMVP에 한해서 Daily 테스트를 Onboarding 테스트로 대체합니다.
 public struct HomeFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
@@ -27,13 +28,12 @@ public struct HomeFeature: Reducer {
         
         struct View: Equatable {
             let nickname: String
-            var dailyTestId: Int?
-            var isSolvedDailyTest: Bool = false
-            var testId: Int?
+            var testId: Int
+            var isSolvedDailyTest: Bool?
         }
         
-        public init(nickname: String) {
-            self.view = View(nickname: nickname)
+        public init(nickname: String, testId: Int) {
+            self.view = View(nickname: nickname, testId: testId)
         }
     }
     
@@ -85,7 +85,8 @@ public struct HomeFeature: Reducer {
             switch action {
             case .fetchDailyTests:
                 return .run { send in
-                    let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
+                    // MARK: 나중에 daily로 변경
+                    let fetchedTest = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
                     
                     let testData = fetchedTest.toKeymeTestsModel()
                     
@@ -108,7 +109,6 @@ public struct HomeFeature: Reducer {
                 state.view.testId = testId
                 
             case .showTestStartView(let testData):
-                state.view.dailyTestId = testData.testId
                 guard let authorizationToken = state.authorizationToken else {
                     return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
                 }
@@ -120,8 +120,7 @@ public struct HomeFeature: Reducer {
                 )
 
             case .showTestResultView(let testData):
-                state.view.dailyTestId = testData.testId
-                guard let authorizationToken = state.authorizationToken else {
+                guard state.authorizationToken != nil else {
                     return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
                 }
                 

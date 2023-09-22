@@ -16,6 +16,7 @@ import Network
 
 public struct HomeView: View {
     @State var sharedURL: ActivityViewController.SharedURL?
+    @State var hideButton = false
     
     public var store: StoreOf<HomeFeature>
     
@@ -25,32 +26,64 @@ public struct HomeView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0.view }) { viewStore in
-            ZStack(alignment: .center) {
+            ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                 
-                if(viewStore.dailyTestId != nil) {
-                    VStack {
-                        if(viewStore.isSolvedDailyTest) {
+                if let isSolvedTest = viewStore.isSolvedDailyTest {
+                    if isSolvedTest {
+                        ScrollView {
                             dailyTestListView
-                        } else {
-                            startTestView
+                            Spacer().frame(height: 60) // 아래 공간 띄우기
                         }
-                        
-                        Spacer()
-                        
-                        bottomButton(viewStore)
-                        
-                        Spacer()
-                            .frame(height: 26)
+                        .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
+                        .refreshable {
+                            viewStore.send(.fetchDailyTests)
+                        }
+                        .simultaneousGesture(
+                            DragGesture().onChanged {
+                                let isScrollDown = 0 < $0.translation.height
+                                if isScrollDown {
+                                    self.hideButton = true
+                                } else {
+                                    self.hideButton = false
+                                }
+                            })
+                    } else {
+                        startTestView
                     }
+                    
+                    VStack {
+                        Spacer()
+                        
+                        if !hideButton {
+                            bottomButton(isSolved: isSolvedTest) {
+                                @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
+
+                                if isSolvedTest {
+                                    let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                                    let shortURL = try await shortURLAPIManager.request(
+                                        .shortenURL(longURL: url),
+                                        object: BitlyResponse.self).link
+
+                                    sharedURL = ActivityViewController.SharedURL(shortURL)
+                                } else {
+                                    viewStore.send(.startTest(.presented(.startButtonDidTap)))
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 26)
+                } else {
+                    ProgressView()
                 }
             }
             .onAppear {
-                if viewStore.dailyTestId == nil {
+                if viewStore.isSolvedDailyTest == nil {
                     viewStore.send(.fetchDailyTests)
                 }
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .alert(store: store.scope(state: \.$alertState, action: HomeFeature.Action.alert))
     }
 }
@@ -85,38 +118,23 @@ extension HomeView {
 }
 
 extension HomeView {
+    typealias AsyncThrowClosure = @Sendable () async throws -> Void
+    
     // 하단 버튼 (시작하기 / 공유하기)
-    func bottomButton(_ viewStore: ViewStore<HomeFeature.State.View, HomeFeature.Action>) -> some View {
-        @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
-        
+    func bottomButton(isSolved: Bool, action: @escaping AsyncThrowClosure) -> some View {
         return ZStack {
             Rectangle()
                 .cornerRadius(16)
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
 
-            Text(viewStore.isSolvedDailyTest ? "친구에게 공유하기" : "시작하기")
-                .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
+            Text.keyme(isSolved ? "친구에게 공유하기" : "시작하기", font: .body2)
                 .foregroundColor(.black)
         }
-        .padding([.leading, .trailing], 16)
+        .padding(.horizontal, 16)
         .frame(height: 60)
         .onTapGesture {
             Task {
-                guard let testId = viewStore.testId else {
-                    viewStore.send(.showErrorAlert(.cannotGenerateTestLink))
-                    return
-                }
-                
-                if viewStore.isSolvedDailyTest {
-                    let url = "https://keyme-frontend.vercel.app/test/\(testId)"
-                    let shortURL = try await shortURLAPIManager.request(
-                        .shortenURL(longURL: url),
-                        object: BitlyResponse.self).link
-
-                    sharedURL = ActivityViewController.SharedURL(shortURL)
-                } else {
-                    viewStore.send(.startTest(.presented(.startButtonDidTap)))
-                }
+                try await action()
             }
         }
         .sheet(item: $sharedURL) { item in

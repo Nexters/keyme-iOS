@@ -21,7 +21,7 @@ public struct MainPageFeature: Reducer {
         enum View: Equatable { case none }
         
         public init(userId: Int, testId: Int, nickname: String) {
-            self._home = .init(.init(nickname: nickname))
+            self._home = .init(.init(nickname: nickname, testId: testId))
             self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
         }
     }
