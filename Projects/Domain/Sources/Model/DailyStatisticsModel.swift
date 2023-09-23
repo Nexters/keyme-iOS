@@ -26,6 +26,7 @@ public extension StatisticsDTO {
             TestsStatisticsModel(
                 keymeTests: KeymeTestsInfoModel(
                     keyword: $0.keyword,
+                    title: $0.title,
                     icon: IconModel(
                         imageURL: $0.category.iconUrl,
                         color: Color.hex($0.category.color)

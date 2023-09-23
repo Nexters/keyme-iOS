@@ -60,7 +60,7 @@ struct DailyTestListView: View {
 extension DailyTestListView {
     func welcomeText(nickname: String) -> some View {
         Text.keyme(
-            "\(nickname)님 친구들의\n답변이 쌓이고 있어요!",
+            "친구들의\n답변이 쌓이고 있어요!",
             font: .heading1)
         .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -69,16 +69,10 @@ extension DailyTestListView {
     func dailyTestList(_ viewStore: DailyTestStore) -> some View {
         LazyVStack(spacing: 12) {
             ForEach(viewStore.dailyStatistics.testsStatistics, id: \.self) { testStatistics in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .foregroundColor(.white.opacity(0.05))
-                        .frame(height: 86)
-                        .cornerRadius(14)
-                    
+                // 메인 텍스트
+                VStack(alignment: .leading, spacing: 7) {
                     HStack(spacing: 12) {
-                        Spacer()
-                            .frame(width: 14)
-                        
+                        // 아이콘
                         ZStack {
                             Circle()
                                 .foregroundColor(testStatistics.keymeTests.icon.color)
@@ -89,14 +83,25 @@ extension DailyTestListView {
                         }
                         .frame(width: 40, height: 40)
                         
-                        VStack(alignment: .leading, spacing: 7) {
-                            Text.keyme("\(viewStore.testData.nickname)님의 \(testStatistics.keymeTests.keyword)정도는?",
-                                       font: .body3Semibold)
-                                .foregroundColor(.white)
-                            
-                            statisticsScoreText(score: testStatistics.avarageScore)
-                        }
+                        // 메인 텍스트
+                        Text.keyme(
+                            "\(viewStore.testData.nickname)님은 \(testStatistics.keymeTests.title)",
+                            font: .body3Semibold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .truncationMode(.tail)
+                        .foregroundColor(.white)
                     }
+                    
+                    HStack(spacing: 12) {
+                        Spacer().frame(width: 40)
+                        statisticsScoreText(score: testStatistics.avarageScore)
+                    }
+                }
+                .padding(20)
+                .background {
+                    Rectangle()
+                        .foregroundColor(.white.opacity(0.05))
+                        .cornerRadius(14)
                 }
             }
         }
@@ -106,8 +111,10 @@ extension DailyTestListView {
 extension DailyTestListView {
     func statisticsScoreText(score: Double?) -> some View {
         let text: String
-        if let score {
-            text = "평균점수 | \(score)점"
+
+        if var score {
+            let formattedScore = String(format: "%.1lf", score)
+            text = "평균점수 | \(formattedScore)점"
         } else {
             text = "아직 아무도 풀지 않았어요"
         }

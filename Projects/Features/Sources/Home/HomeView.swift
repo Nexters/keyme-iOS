@@ -32,7 +32,10 @@ public struct HomeView: View {
                 if let isSolvedTest = viewStore.isSolvedDailyTest {
                     if isSolvedTest {
                         ScrollView {
+                            Spacer().frame(height: 75)
+                            
                             dailyTestListView
+                            
                             Spacer().frame(height: 60) // 아래 공간 띄우기
                         }
                         .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
