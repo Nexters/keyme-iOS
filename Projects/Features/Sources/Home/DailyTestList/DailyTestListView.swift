@@ -11,16 +11,22 @@ import SwiftUI
 import ComposableArchitecture
 
 import Core
+import Domain
 import DSKit
 import Util
 
 struct DailyTestListView: View {
-    var store: StoreOf<DailyTestListFeature>
     typealias DailyTestStore = ViewStore<DailyTestListFeature.State,
                                            DailyTestListFeature.Action>
+    var store: StoreOf<DailyTestListFeature>
+    let onItemTapped: (TestsStatisticsModel) -> Void
     
-    init(store: StoreOf<DailyTestListFeature>) {
+    init(
+        store: StoreOf<DailyTestListFeature>,
+        onItemTapped: @escaping (TestsStatisticsModel) -> Void
+    ) {
         self.store = store
+        self.onItemTapped = onItemTapped
     }
     
     var body: some View {
@@ -102,6 +108,9 @@ extension DailyTestListView {
                     Rectangle()
                         .foregroundColor(.white.opacity(0.05))
                         .cornerRadius(14)
+                }
+                .onTapGesture {
+                    onItemTapped(testStatistics)
                 }
             }
         }

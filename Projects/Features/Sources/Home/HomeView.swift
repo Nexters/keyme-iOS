@@ -26,64 +26,68 @@ public struct HomeView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0.view }) { viewStore in
-            ZStack {
-                DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
-                
-                if let isSolvedTest = viewStore.isSolvedDailyTest {
-                    if isSolvedTest {
-                        ScrollView {
-                            Spacer().frame(height: 75)
-                            
-                            dailyTestListView
-                            
-                            Spacer().frame(height: 60) // 아래 공간 띄우기
-                        }
-                        .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
-                        .overlay {
-                            LinearGradient(
-                                colors: [.black.opacity(0), .black],
-                                startPoint: .init(x: 0.5, y: 0.8),
-                                endPoint: .bottom)
-                            .allowsHitTesting(false)
-                        }
-                        .refreshable {
-                            viewStore.send(.fetchDailyTests)
-                        }
-                        .simultaneousGesture(
-                            DragGesture().onChanged {
-                                let isScrollDown = 0 < $0.translation.height
-                                if isScrollDown {
-                                    self.hideButton = true
-                                } else {
-                                    self.hideButton = false
-                                }
-                            })
-                    } else {
-                        startTestView
-                    }
+            NavigationStack {
+                ZStack {
+                    DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                     
-                    VStack {
-                        Spacer()
-                        //                        if !hideButton {
-                        bottomButton(isSolved: isSolvedTest) {
-                            @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
-                            
-                            if isSolvedTest {
-                                let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
-                                let shortURL = try await shortURLAPIManager.request(
-                                    .shortenURL(longURL: url),
-                                    object: BitlyResponse.self).link
+                    if let isSolvedTest = viewStore.isSolvedDailyTest {
+                        if isSolvedTest {
+                            ScrollView {
+                                Spacer().frame(height: 75)
                                 
-                                sharedURL = ActivityViewController.SharedURL(shortURL)
-                            } else {
-                                viewStore.send(.startTest(.presented(.startButtonDidTap)))
+                                dailyTestListView { stat in
+                                    viewStore.send(.showScoreList)
+                                }
+                                
+                                Spacer().frame(height: 100) // 아래 공간 띄우기
                             }
+                            .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
+                            .overlay {
+                                LinearGradient(
+                                    colors: [.black.opacity(0), .black],
+                                    startPoint: .init(x: 0.5, y: 0.8),
+                                    endPoint: .bottom)
+                                .allowsHitTesting(false)
+                            }
+                            .refreshable {
+                                viewStore.send(.fetchDailyTests)
+                            }
+                            .simultaneousGesture(
+                                DragGesture().onChanged {
+                                    let isScrollDown = 0 < $0.translation.height
+                                    if isScrollDown {
+                                        self.hideButton = true
+                                    } else {
+                                        self.hideButton = false
+                                    }
+                                })
+                        } else {
+                            startTestView
                         }
-                        //                        }
+                        
+                        VStack {
+                            Spacer()
+                            //                        if !hideButton {
+                            bottomButton(isSolved: isSolvedTest) {
+                                @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
+                                
+                                if isSolvedTest {
+                                    let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                                    let shortURL = try await shortURLAPIManager.request(
+                                        .shortenURL(longURL: url),
+                                        object: BitlyResponse.self).link
+                                    
+                                    sharedURL = ActivityViewController.SharedURL(shortURL)
+                                } else {
+                                    viewStore.send(.startTest(.presented(.startButtonDidTap)))
+                                }
+                            }
+                            //                        }
+                        }
+                        .padding(.bottom, 26)
+                    } else {
+                        ProgressView()
                     }
-                    .padding(.bottom, 26)
-                } else {
-                    ProgressView()
                 }
             }
             .onAppear {
@@ -93,6 +97,12 @@ public struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(
+            store: store.scope(
+                state: \.$scoreListState,
+                action: HomeFeature.Action.circleAndScoreList),
+            destination: { CircleAndScoreListView(store: $0) }
+        )
         .alert(store: store.scope(state: \.$alertState, action: HomeFeature.Action.alert))
     }
 }
@@ -114,14 +124,16 @@ extension HomeView {
         }
     }
     
-    var dailyTestListView: some View {
+    func dailyTestListView(
+        _ onItemTapped: @escaping (TestsStatisticsModel) -> Void
+    ) -> some View {
         let dailyTestListStore = store.scope(
             state: \.$dailyTestListState,
             action: HomeFeature.Action.dailyTestList
         )
         
         return IfLetStore(dailyTestListStore) { store in
-            DailyTestListView(store: store)
+            DailyTestListView(store: store, onItemTapped: onItemTapped)
         }
     }
 }

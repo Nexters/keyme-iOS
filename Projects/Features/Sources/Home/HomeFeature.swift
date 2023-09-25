@@ -20,6 +20,8 @@ public struct HomeFeature: Reducer {
         @PresentationState var alertState: AlertState<Action.Alert>?
         @PresentationState var startTestState: StartTestFeature.State?
         @PresentationState var dailyTestListState: DailyTestListFeature.State?
+        @PresentationState var scoreListState: CircleAndScoreListFeature.State?
+        
         var authorizationToken: String? {
             @Dependency(\.keymeAPIManager.authorizationToken) var authorizationToken
             return authorizationToken
@@ -46,11 +48,13 @@ public struct HomeFeature: Reducer {
         case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
         case showTestResultView(testData: KeymeTestsModel)
+        case showScoreList
         case showErrorAlert(HomeFeatureError)
 
         case alert(PresentationAction<Alert>)
         case startTest(PresentationAction<StartTestFeature.Action>)
         case dailyTestList(PresentationAction<DailyTestListFeature.Action>)
+        case circleAndScoreList(PresentationAction<CircleAndScoreListFeature.Action>)
         
         enum View {}
         
@@ -128,6 +132,9 @@ public struct HomeFeature: Reducer {
                     testData: testData
                 )
                 
+            case .showScoreList:
+                state.scoreListState = CircleAndScoreListFeature.State()
+                
             case .showErrorAlert(let error):
                 if case .network = error {
                     state.alertState = .errorWhileNetworking
@@ -159,6 +166,9 @@ public struct HomeFeature: Reducer {
         }
         .ifLet(\.$dailyTestListState, action: /Action.dailyTestList) {
             DailyTestListFeature()
+        }
+        .ifLet(\.$scoreListState, action: /Action.circleAndScoreList) {
+            CircleAndScoreListFeature()
         }
     }
 }
