@@ -10,7 +10,25 @@ import Foundation
 import ComposableArchitecture
 import Core
 
+public final class EnvironmentVariable {
+    var userId: Int!
+    var nickname: String!
+}
+
+extension EnvironmentVariable: DependencyKey {
+    public static var liveValue = EnvironmentVariable()
+}
+
+extension DependencyValues {
+    public var environmentVariable: EnvironmentVariable {
+        get { self[EnvironmentVariable.self] }
+        set { self[EnvironmentVariable.self] = newValue }
+    }
+}
+
+
 public struct MainPageFeature: Reducer {
+    
     public struct State: Equatable {
         var testId: Int?
         
@@ -21,8 +39,14 @@ public struct MainPageFeature: Reducer {
         enum View: Equatable { case none }
         
         public init(userId: Int, testId: Int, nickname: String) {
+            @Dependency(\.environmentVariable) var environmentVariable
+
+            environmentVariable.userId = userId
+            environmentVariable.nickname = nickname
+            
             self._home = .init(.init(nickname: nickname, testId: testId))
             self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
+            
         }
     }
     

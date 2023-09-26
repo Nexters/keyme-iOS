@@ -133,7 +133,20 @@ public struct HomeFeature: Reducer {
                 )
                 
             case .showScoreList:
-                state.scoreListState = CircleAndScoreListFeature.State()
+                state.scoreListState = CircleAndScoreListFeature.State(
+                    circleData: CircleData(
+                        color: .red,
+                        xPoint: 0,
+                        yPoint: 0,
+                        radius: 0.8,
+                        metadata: CircleMetadata(
+                            ownerId: 1,
+                            questionId: 1,
+                            iconURL: nil,
+                            keyword: "ss",
+                            averageScore: 1.2,
+                            myScore: 1.3
+                        )))
                 
             case .showErrorAlert(let error):
                 if case .network = error {

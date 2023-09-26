@@ -112,6 +112,7 @@ public extension CircleData.NetworkResult {
             let color = Color.hex(category.color)
             
             let metadata = CircleMetadata(
+                ownerId: data.memberId,
                 questionId: questionStatistic.questionId,
                 iconURL: URL(string: category.iconUrl),
                 keyword: questionStatistic.keyword,
@@ -141,7 +142,6 @@ extension CircleData: Identifiable {
         metadata.animationId
     }
 }
-
 
 public extension Array where Element == CircleData {
     func rotate(degree: Angle) -> [CircleData] {
