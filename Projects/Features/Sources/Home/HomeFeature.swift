@@ -30,12 +30,13 @@ public struct HomeFeature: Reducer {
         
         struct View: Equatable {
             let nickname: String
+            let userId: Int
             var testId: Int
             var isSolvedDailyTest: Bool?
         }
         
-        public init(nickname: String, testId: Int) {
-            self.view = View(nickname: nickname, testId: testId)
+        public init(userId: Int, nickname: String, testId: Int) {
+            self.view = View(nickname: nickname, userId: userId, testId: testId)
         }
     }
     
@@ -48,7 +49,7 @@ public struct HomeFeature: Reducer {
         case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
         case showTestResultView(testData: KeymeTestsModel)
-        case showScoreList
+        case showScoreList(circleData: CircleData)
         case showErrorAlert(HomeFeatureError)
 
         case alert(PresentationAction<Alert>)
@@ -132,21 +133,8 @@ public struct HomeFeature: Reducer {
                     testData: testData
                 )
                 
-            case .showScoreList:
-                state.scoreListState = CircleAndScoreListFeature.State(
-                    circleData: CircleData(
-                        color: .red,
-                        xPoint: 0,
-                        yPoint: 0,
-                        radius: 0.8,
-                        metadata: CircleMetadata(
-                            ownerId: 1,
-                            questionId: 1,
-                            iconURL: nil,
-                            keyword: "ss",
-                            averageScore: 1.2,
-                            myScore: 1.3
-                        )))
+            case .showScoreList(let circleData):
+                state.scoreListState = CircleAndScoreListFeature.State(circleData: circleData)
                 
             case .showErrorAlert(let error):
                 if case .network = error {

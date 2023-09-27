@@ -46,7 +46,6 @@ public struct CirclePackView<DetailView: View>: View {
         rotationAngle: Angle = .degrees(45),
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
-        print("init CirclePackView")
         self.option = .init()
         self.namespace = namespace
         self.circleData = data.rotate(degree: rotationAngle)
@@ -181,17 +180,17 @@ public struct CirclePackView<DetailView: View>: View {
             }
         }
         .fullScreenCover(isPresented: $showMorePersonalitySheet) {
-            FocusedCircleOverlayView(
-                focusedCircle: CircleData.emptyCircle(radius: 0.9),
-                maxShrinkageDistance: maxSheetOffset,
-                detailViewBuilder: {
-                    MorePersonalityView(store: morePersonalitystore)
-                })
-            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-            .showTopBar(true)
-            .onDismiss {
-                self.showMorePersonalitySheet = false
-            }
+//            FocusedCircleOverlayView( // use `FocusedCircleDetailView`
+//                focusedCircle: CircleData.emptyCircle( radius: 0.9),
+//                maxShrinkageDistance: maxSheetOffset,
+//                detailViewBuilder: {
+//                    MorePersonalityView(store: morePersonalitystore)
+//                })
+//            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+//            .showTopBar(true)
+//            .onDismiss {
+//                self.showMorePersonalitySheet = false
+//            }
         }
     }
 }

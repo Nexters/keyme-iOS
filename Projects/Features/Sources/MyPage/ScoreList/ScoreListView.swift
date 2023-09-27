@@ -55,7 +55,7 @@ struct ScoreListView: View {
                     Divider()
                         .overlay(keymeWhite.opacity(0.1))
                     
-                    ForEach(viewStore.state.scores) { scoreData in
+                    ForEach(viewStore.state.scores, id: \.id) { scoreData in
                         ZStack {
                             HStack {
                                 Spacer()
@@ -77,17 +77,18 @@ struct ScoreListView: View {
                         .background(keymeWhite.opacity(0.05))
                         .cornerRadius(16)
                         .onAppear {
-                            if
-                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
-                                thirdToLastItem == scoreData
-                            {
-                                guard viewStore.canFetch else { return }
-                                viewStore.send(
-                                    .loadScores(
-                                        ownerId: self.ownerId,
-                                        questionId: self.questionId,
-                                        limit: scoreFetchLimit))
-                            }
+                            // 무한스크롤
+//                            if
+//                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
+//                                thirdToLastItem == scoreData
+//                            {
+//                                guard viewStore.canFetch else { return }
+//                                viewStore.send(
+//                                    .loadScores(
+//                                        ownerId: self.ownerId,
+//                                        questionId: self.questionId,
+//                                        limit: scoreFetchLimit))
+//                            }
                         }
                     }
                 }

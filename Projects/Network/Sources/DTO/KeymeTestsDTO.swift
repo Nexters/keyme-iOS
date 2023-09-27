@@ -39,7 +39,7 @@ public struct KeymeTestsDTO: Codable {
     }
 }
 
-public struct Category: Codable {
+public struct Category: Codable, Hashable {
     public let color: String
     public let iconUrl: String
     let name: String

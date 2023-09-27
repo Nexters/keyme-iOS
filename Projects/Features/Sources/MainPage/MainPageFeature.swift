@@ -26,7 +26,6 @@ extension DependencyValues {
     }
 }
 
-
 public struct MainPageFeature: Reducer {
     
     public struct State: Equatable {
@@ -44,7 +43,7 @@ public struct MainPageFeature: Reducer {
             environmentVariable.userId = userId
             environmentVariable.nickname = nickname
             
-            self._home = .init(.init(nickname: nickname, testId: testId))
+            self._home = .init(.init(userId: userId, nickname: nickname, testId: testId))
             self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
             
         }

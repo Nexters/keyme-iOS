@@ -35,8 +35,21 @@ public struct HomeView: View {
                             ScrollView {
                                 Spacer().frame(height: 75)
                                 
-                                dailyTestListView { stat in
-                                    viewStore.send(.showScoreList)
+                                dailyTestListView { questionsStat in
+                                    viewStore.send(.showScoreList(
+                                        circleData: CircleData(
+                                            color: Color.hex(questionsStat.category.color),
+                                            xPoint: 0,
+                                            yPoint: 0,
+                                            radius: 0.8,
+                                            metadata: CircleMetadata(
+                                                ownerId: viewStore.userId,
+                                                questionId: questionsStat.questionId,
+                                                iconURL: URL(string: questionsStat.category.iconUrl),
+                                                keyword: questionsStat.keyword,
+                                                averageScore: Float(questionsStat.avgScore ?? 0.0),
+                                                myScore: Float(questionsStat.myScore ?? 0)
+                                            ))))
                                 }
                                 
                                 Spacer().frame(height: 100) // 아래 공간 띄우기
@@ -125,7 +138,7 @@ extension HomeView {
     }
     
     func dailyTestListView(
-        _ onItemTapped: @escaping (TestsStatisticsModel) -> Void
+        _ onItemTapped: @escaping (QuestionsStatisticsData) -> Void
     ) -> some View {
         let dailyTestListStore = store.scope(
             state: \.$dailyTestListState,

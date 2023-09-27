@@ -20,7 +20,7 @@ public struct QuestionResultScoresDTO: Decodable {
     }
 
     public struct ResultItem: Decodable {
-        public let createdAt: Date
+        public let createdAt: String
         public let id: Int
         public let score: Int
     }

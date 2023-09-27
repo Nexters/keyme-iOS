@@ -20,7 +20,7 @@ public struct TestsStatisticsModel: Hashable, Equatable {
     public let avarageScore: Double?
 }
 
-public extension StatisticsDTO {
+public extension TestStatisticsDTO {
     func toDailyStatisticsModel() -> DailyStatisticsModel {
         let testsStatistics = data.questionsStatistics.map {
             TestsStatisticsModel(

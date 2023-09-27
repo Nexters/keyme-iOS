@@ -15,14 +15,14 @@ public struct CircleAndScoreListFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
-        var nickname: String {
-            @Dependency(\.environmentVariable) var environmentVariable
-            return environmentVariable.nickname
-        }
         var scoreListState: ScoreListFeature.State?
         
         var view: View
         struct View: Equatable {
+            var nickname: String {
+                @Dependency(\.environmentVariable) var environmentVariable
+                return environmentVariable.nickname
+            }
             let circleData: CircleData
         }
         
@@ -96,29 +96,53 @@ struct CircleAndScoreListView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0.view }) { viewStore in
-            FocusedCircleOverlayView(
-                focusedCircle: viewStore.circleData,
-                maxShrinkageDistance: 1.0
-            ) {
+        WithViewStore(store, observe: { $0.view }, send: CircleAndScoreListFeature.Action.view) { viewStore in
+            FocusedCircleDetailView(focusedCircle: viewStore.circleData) { circleData in
                 IfLetStore(store.scope(
                     state: \.scoreListState,
                     action: CircleAndScoreListFeature.Action.scoreListAction
                 )) { scoreStore in
-                    let circleData = viewStore.circleData
                     let metaData = circleData.metadata
                     
                     ScoreListView(
                         ownerId: metaData.ownerId,
                         questionId: metaData.questionId,
-                        nickname: "",
+                        nickname: viewStore.nickname,
                         keyword: metaData.keyword,
                         store: scoreStore
                     )
                 } else: {
                     ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
-
+            
+//            FocusedCircleOverlayView(
+//                focusedCircle: viewStore.circleData,
+//                maxShrinkageDistance: 1.0
+//            ) {
+//                IfLetStore(store.scope(
+//                    state: \.scoreListState,
+//                    action: CircleAndScoreListFeature.Action.scoreListAction
+//                )) { scoreStore in
+//                    let circleData = viewStore.circleData
+//                    let metaData = circleData.metadata
+//                    
+//                    ScoreListView(
+//                        ownerId: metaData.ownerId,
+//                        questionId: metaData.questionId,
+//                        nickname: viewStore.nickname,
+//                        keyword: metaData.keyword,
+//                        store: scoreStore
+//                    )
+//                } else: {
+//                    ProgressView()
+//                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+//                }
+            }
+            .onAppear {
+                DispatchQueue.global().async {
+                    viewStore.send(.fetchScoreList)
+                }
             }
         }
     }

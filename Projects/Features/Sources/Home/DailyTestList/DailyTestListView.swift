@@ -12,6 +12,7 @@ import ComposableArchitecture
 
 import Core
 import Domain
+import Network
 import DSKit
 import Util
 
@@ -19,11 +20,11 @@ struct DailyTestListView: View {
     typealias DailyTestStore = ViewStore<DailyTestListFeature.State,
                                            DailyTestListFeature.Action>
     var store: StoreOf<DailyTestListFeature>
-    let onItemTapped: (TestsStatisticsModel) -> Void
+    let onItemTapped: (QuestionsStatisticsData) -> Void
     
     init(
         store: StoreOf<DailyTestListFeature>,
-        onItemTapped: @escaping (TestsStatisticsModel) -> Void
+        onItemTapped: @escaping (QuestionsStatisticsData) -> Void
     ) {
         self.store = store
         self.onItemTapped = onItemTapped
@@ -36,19 +37,25 @@ struct DailyTestListView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    Image(uiImage: DSKitAsset.Image.person.image)
-                        .resizable()
-                        .frame(width: 16, height: 16)
+                if let dailyStatistics  = viewStore.dailyStatistics {
+                    HStack(spacing: 4) {
+                        Image(uiImage: DSKitAsset.Image.person.image)
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                        
+                        Text.keyme(
+                            "\(dailyStatistics.solvedCount)명의 친구가 문제를 풀었어요",
+                            font: .body4
+                        )
+                        .foregroundColor(.white)
+                    }
                     
-                    Text.keyme(
-                        "\(viewStore.dailyStatistics.solvedCount)명의 친구가 문제를 풀었어요",
-                        font: .body4
-                    )
-                    .foregroundColor(.white)
+                    dailyTestList(
+                        nickname: viewStore.testData.nickname,
+                        dailyStatistics: dailyStatistics)
+                } else {
+                    ProgressView()
                 }
-                
-                dailyTestList(viewStore)
                 
                 Spacer()
             }
@@ -72,18 +79,19 @@ extension DailyTestListView {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    func dailyTestList(_ viewStore: DailyTestStore) -> some View {
+    func dailyTestList(nickname: String, dailyStatistics: StatisticsData) -> some View {
         LazyVStack(spacing: 12) {
-            ForEach(viewStore.dailyStatistics.testsStatistics, id: \.self) { testStatistics in
+            ForEach(dailyStatistics.questionsStatistics, id: \.self) { questionsStat in
+                
                 // 메인 텍스트
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(spacing: 12) {
                         // 아이콘
                         ZStack {
                             Circle()
-                                .foregroundColor(testStatistics.keymeTests.icon.color)
+                                .foregroundColor(Color.hex(questionsStat.category.color))
                             
-                            KFImageManager.shared.toImage(url: testStatistics.keymeTests.icon.imageURL)
+                            KFImageManager.shared.toImage(url: questionsStat.category.iconUrl)
                                 .scaledToFit()
                                 .frame(width: 20)
                         }
@@ -91,7 +99,7 @@ extension DailyTestListView {
                         
                         // 메인 텍스트
                         Text.keyme(
-                            "\(viewStore.testData.nickname)님은 \(testStatistics.keymeTests.title)",
+                            "\(nickname)님은 \(questionsStat.title)",
                             font: .body3Semibold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .truncationMode(.tail)
@@ -100,7 +108,7 @@ extension DailyTestListView {
                     
                     HStack(spacing: 12) {
                         Spacer().frame(width: 40)
-                        statisticsScoreText(score: testStatistics.avarageScore)
+                        statisticsScoreText(score: questionsStat.avgScore)
                     }
                 }
                 .padding(20)
@@ -110,7 +118,7 @@ extension DailyTestListView {
                         .cornerRadius(14)
                 }
                 .onTapGesture {
-                    onItemTapped(testStatistics)
+                    onItemTapped(questionsStat)
                 }
             }
         }

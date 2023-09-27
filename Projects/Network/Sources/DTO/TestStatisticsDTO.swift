@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct StatisticsDTO: Codable {
+public struct TestStatisticsDTO: Codable {
     let code: Int
     let message: String
     public let data: StatisticsData
@@ -25,5 +25,16 @@ public struct StatisticsDTO: Codable {
         public let avgScore: Double?
         public let questionId: Int
         public let myScore: Int?
+    }
+}
+
+public typealias StatisticsData = TestStatisticsDTO.StatisticsData
+public typealias QuestionsStatisticsData = TestStatisticsDTO.QuestionsStatisticsData
+
+extension StatisticsData: Equatable {}
+
+extension QuestionsStatisticsData: Equatable, Hashable {
+    public static func == (lhs: TestStatisticsDTO.QuestionsStatisticsData, rhs: TestStatisticsDTO.QuestionsStatisticsData) -> Bool {
+        lhs.questionId == rhs.questionId
     }
 }
