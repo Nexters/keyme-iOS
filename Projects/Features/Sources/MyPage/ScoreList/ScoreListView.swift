@@ -77,18 +77,20 @@ struct ScoreListView: View {
                         .background(keymeWhite.opacity(0.05))
                         .cornerRadius(16)
                         .onAppear {
+                            guard viewStore.hasNext else { return }
+                            
                             // 무한스크롤
-//                            if
-//                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
-//                                thirdToLastItem == scoreData
-//                            {
-//                                guard viewStore.canFetch else { return }
-//                                viewStore.send(
-//                                    .loadScores(
-//                                        ownerId: self.ownerId,
-//                                        questionId: self.questionId,
-//                                        limit: scoreFetchLimit))
-//                            }
+                            if
+                                let thirdToLastItem = viewStore.state.scores.dropLast(2).last,
+                                thirdToLastItem == scoreData
+                            {
+                                guard viewStore.canFetch else { return }
+                                viewStore.send(
+                                    .loadScores(
+                                        ownerId: self.ownerId,
+                                        questionId: self.questionId,
+                                        limit: scoreFetchLimit))
+                            }
                         }
                     }
                 }

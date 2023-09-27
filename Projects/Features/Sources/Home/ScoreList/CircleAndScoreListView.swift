@@ -115,29 +115,6 @@ struct CircleAndScoreListView: View {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
-            
-//            FocusedCircleOverlayView(
-//                focusedCircle: viewStore.circleData,
-//                maxShrinkageDistance: 1.0
-//            ) {
-//                IfLetStore(store.scope(
-//                    state: \.scoreListState,
-//                    action: CircleAndScoreListFeature.Action.scoreListAction
-//                )) { scoreStore in
-//                    let circleData = viewStore.circleData
-//                    let metaData = circleData.metadata
-//                    
-//                    ScoreListView(
-//                        ownerId: metaData.ownerId,
-//                        questionId: metaData.questionId,
-//                        nickname: viewStore.nickname,
-//                        keyword: metaData.keyword,
-//                        store: scoreStore
-//                    )
-//                } else: {
-//                    ProgressView()
-//                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-//                }
             }
             .onAppear {
                 DispatchQueue.global().async {

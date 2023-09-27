@@ -15,6 +15,7 @@ public struct ScoreListFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     public struct State: Equatable {
+        var hasNext = true
         var canFetch = true
         var totalCount: Int?
         var scores: [CharacterScore]
@@ -26,7 +27,7 @@ public struct ScoreListFeature: Reducer {
     
     public enum Action: Equatable {
         case loadScores(ownerId: Int, questionId: Int, limit: Int)
-        case saveScores(totalCount: Int, scores: [CharacterScore])
+        case saveScores(totalCount: Int, scores: [CharacterScore], hasNext: Bool)
     }
     
     public var body: some ReducerOf<Self> {
@@ -36,22 +37,24 @@ public struct ScoreListFeature: Reducer {
                 state.canFetch = false
 
                 return .run { send in
-                    let questionScores = try await network.request(
+                    let response = try await network.request(
                         .question(
                             .scores(ownerId: ownerId, questionId: questionId, limit: limit)
                         ),
                         object: QuestionResultScoresDTO.self
-                    ).toCharacterScores()
+                    )
                     
+                    let questionScores = response.toCharacterScores()
                     await send(.saveScores(
                         totalCount: questionScores.count,
-                        scores: questionScores))
+                        scores: questionScores,
+                        hasNext: response.data.hasNext))
                 }
                 
-            case let .saveScores(totalCount, data):
+            case let .saveScores(totalCount, data, hasNext):
                 state.totalCount = totalCount
                 state.scores.append(contentsOf: data)
-                
+                state.hasNext = hasNext
                 state.canFetch = true
             }
             return .none
