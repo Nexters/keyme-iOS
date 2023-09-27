@@ -83,9 +83,6 @@ public struct CirclePackView<DetailView: View>: View {
                                 })
                         }
                     }
-                    .frame(width: option.outboundLength, height: option.outboundLength)
-                    .padding(option.framePadding)
-                    .scaleEffect(option.scale)
                 }
                 .frame(width: option.outboundLength, height: option.outboundLength)
                 .scaleEffect(graphScale)

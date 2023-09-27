@@ -9,14 +9,13 @@
 import SwiftUI
 
 import ComposableArchitecture
-
+import Core
 import DSKit
 import Domain
 import Network
 
 public struct HomeView: View {
     @State var sharedURL: ActivityViewController.SharedURL?
-    @State var hideButton = false
     
     public var store: StoreOf<HomeFeature>
     
@@ -31,56 +30,35 @@ public struct HomeView: View {
                     DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                     
                     if let isSolvedTest = viewStore.isSolvedDailyTest {
-                        if isSolvedTest {
-                            ScrollView {
-                                Spacer().frame(height: 75)
-                                
-                                dailyTestListView { questionsStat in
-                                    viewStore.send(.showScoreList(
-                                        circleData: CircleData(
-                                            color: Color.hex(questionsStat.category.color),
-                                            xPoint: 0,
-                                            yPoint: 0,
-                                            radius: 0.8,
-                                            metadata: CircleMetadata(
-                                                ownerId: viewStore.userId,
-                                                questionId: questionsStat.questionId,
-                                                iconURL: URL(string: questionsStat.category.iconUrl),
-                                                keyword: questionsStat.keyword,
-                                                averageScore: Float(questionsStat.avgScore ?? 0.0),
-                                                myScore: Float(questionsStat.myScore ?? 0)
-                                            ))))
-                                }
-                                
-                                Spacer().frame(height: 100) // 아래 공간 띄우기
-                            }
-                            .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
-                            .overlay {
-                                LinearGradient(
-                                    colors: [.black.opacity(0), .black],
-                                    startPoint: .init(x: 0.5, y: 0.8),
-                                    endPoint: .bottom)
-                                .allowsHitTesting(false)
-                            }
-                            .refreshable {
-                                viewStore.send(.fetchDailyTests)
-                            }
-                            .simultaneousGesture(
-                                DragGesture().onChanged {
-                                    let isScrollDown = 0 < $0.translation.height
-                                    if isScrollDown {
-                                        self.hideButton = true
-                                    } else {
-                                        self.hideButton = false
-                                    }
-                                })
+                        if isSolvedTest {                                dailyTestListView { questionsStat in
+                            viewStore.send(.showScoreList(
+                                circleData: CircleData(
+                                    color: Color.hex(questionsStat.category.color),
+                                    xPoint: 0,
+                                    yPoint: 0,
+                                    radius: 0.8,
+                                    metadata: CircleMetadata(
+                                        ownerId: viewStore.userId,
+                                        questionId: questionsStat.questionId,
+                                        iconURL: URL(string: questionsStat.category.iconUrl),
+                                        keyword: questionsStat.keyword,
+                                        averageScore: Float(questionsStat.avgScore ?? 0.0),
+                                        myScore: Float(questionsStat.myScore ?? 0)
+                                    ))))
+                        }
+                        .overlay {
+                            LinearGradient(
+                                colors: [.black.opacity(0), .black],
+                                startPoint: .init(x: 0.5, y: 0.75),
+                                endPoint: .bottom)
+                            .allowsHitTesting(false)
+                        }
                         } else {
                             startTestView
                         }
                         
                         VStack {
                             Spacer()
-                            //                        if !hideButton {
                             bottomButton(isSolved: isSolvedTest) {
                                 @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
                                 
@@ -95,11 +73,10 @@ public struct HomeView: View {
                                     viewStore.send(.startTest(.presented(.startButtonDidTap)))
                                 }
                             }
-                            //                        }
                         }
                         .padding(.bottom, 26)
                     } else {
-                        ProgressView()
+                        CustomProgressView()
                     }
                 }
             }
@@ -146,7 +123,7 @@ extension HomeView {
         )
         
         return IfLetStore(dailyTestListStore) { store in
-            DailyTestListView(store: store, onItemTapped: onItemTapped)
+            return DailyTestListView(store: store, onItemTapped: onItemTapped)
         }
     }
 }
@@ -160,7 +137,7 @@ extension HomeView {
             Rectangle()
                 .cornerRadius(16)
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-
+            
             Text.keyme(isSolved ? "테스트 공유하기" : "시작하기", font: .body2)
                 .foregroundColor(.black)
         }

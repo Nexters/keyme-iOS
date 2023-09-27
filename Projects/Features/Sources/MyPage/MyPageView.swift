@@ -39,7 +39,7 @@ struct MyPageView: View {
                 
                 switch viewStore.nowFetching {
                 case true:
-                    ProgressView()
+                    CustomProgressView()
                     
                 case false:
                     if viewStore.shownCircleDatalist.isEmpty {

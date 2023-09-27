@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Core
 import ComposableArchitecture
 import Domain
 import Network
@@ -112,8 +113,7 @@ struct CircleAndScoreListView: View {
                         store: scoreStore
                     )
                 } else: {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    CustomProgressView()
                 }
             }
             .onAppear {

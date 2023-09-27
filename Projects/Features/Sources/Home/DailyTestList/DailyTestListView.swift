@@ -32,40 +32,54 @@ struct DailyTestListView: View {
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack(alignment: .leading) {
-                welcomeText(nickname: viewStore.testData.nickname)
+            ScrollView {
+                Spacer().frame(height: 75)
                 
-                Spacer()
-                
-                if let dailyStatistics  = viewStore.dailyStatistics {
-                    HStack(spacing: 4) {
-                        Image(uiImage: DSKitAsset.Image.person.image)
-                            .resizable()
-                            .frame(width: 16, height: 16)
+                VStack(alignment: .leading, spacing: 20) {
+                    welcomeText(nickname: viewStore.testData.nickname)
+                    
+                    Spacer()
+                    
+                    if let dailyStatistics  = viewStore.dailyStatistics {
+                        HStack(spacing: 4) {
+                            Image(uiImage: DSKitAsset.Image.person.image)
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                            
+                            Text.keyme(
+                                "\(dailyStatistics.solvedCount)명의 친구가 문제를 풀었어요",
+                                font: .body4
+                            )
+                            .foregroundColor(.white)
+                        }
                         
-                        Text.keyme(
-                            "\(dailyStatistics.solvedCount)명의 친구가 문제를 풀었어요",
-                            font: .body4
-                        )
-                        .foregroundColor(.white)
+                        dailyTestList(
+                            nickname: viewStore.testData.nickname,
+                            dailyStatistics: dailyStatistics)
+                    } else {
+                        HStack {
+                            Spacer()
+                            CustomProgressView()
+                            Spacer()
+                        }
                     }
                     
-                    dailyTestList(
-                        nickname: viewStore.testData.nickname,
-                        dailyStatistics: dailyStatistics)
-                } else {
-                    ProgressView()
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding(.horizontal, 16)
+
+                Spacer().frame(height: 100) // 아래 공간 띄우기
             }
+            .refreshable {
+                viewStore.send(.fetchDailyStatistics)
+            }
+            .padding(.vertical, 1) // 왜인지는 모르지만 영역 넘치는 문제를 해결해주니 놔둘 것..
             .onAppear {
                 viewStore.send(.onAppear)
             }
             .onDisappear {
                 viewStore.send(.onDisappear)
             }
-            .padding(.horizontal, 16)
         }
     }
 }
@@ -118,6 +132,7 @@ extension DailyTestListView {
                         .cornerRadius(14)
                 }
                 .onTapGesture {
+                    HapticManager.shared.boong()
                     onItemTapped(questionsStat)
                 }
             }
@@ -129,7 +144,7 @@ extension DailyTestListView {
     func statisticsScoreText(score: Double?) -> some View {
         let text: String
 
-        if var score {
+        if let score {
             let formattedScore = String(format: "%.1lf", score)
             text = "평균점수 | \(formattedScore)점"
         } else {

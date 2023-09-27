@@ -25,7 +25,7 @@ public struct SignInView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             if viewStore.isLoading {
-                ProgressView()
+                CustomProgressView()
             }
             
             ZStack(alignment: .center) {

@@ -149,6 +149,7 @@ public struct HomeFeature: Reducer {
                     })
                 return .none
                 
+            // MARK: Child stores
             case .alert(.presented(.error(let error))):
                 if case .cannotGetAuthorizationInformation = error {
                     return .send(.requestLogout)

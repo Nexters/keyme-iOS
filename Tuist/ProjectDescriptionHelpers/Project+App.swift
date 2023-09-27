@@ -26,7 +26,7 @@ extension Project {
             infoPlist: .extendingDefault(with: Project.infoPlist),
             sources: ["Sources/**"],
             resources: [.glob(pattern: "Resources/**", excluding: [])],
-            entitlements: .file(path: .relativeToRoot("Keyme.entitlements")),
+            entitlements: .relativeToRoot("Keyme.entitlements"),
             scripts: Project.lintScript + Project.encryptionScript,
             dependencies: internalDependencies + externalDependencies,
             settings: .settings(base: .baseSettings, configurations: XCConfig.project)
