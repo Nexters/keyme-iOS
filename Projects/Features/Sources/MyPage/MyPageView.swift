@@ -38,7 +38,14 @@ struct MyPageView: View {
                 
                 switch viewStore.nowFetching {
                 case true:
-                    CustomProgressView()
+                    VStack {
+                        Spacer()
+                        CustomProgressView()
+                        Spacer()
+                        
+                        HStack { Spacer() }
+                    }
+                    .fullFrame()
                     
                 case false:
                     if viewStore.shownCircleDatalist.isEmpty {
