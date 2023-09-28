@@ -18,7 +18,6 @@ struct MyPageView: View {
     
     private let store: StoreOf<MyPageFeature>
     private let exportModeScale = 0.7
-    private let imageSaver = ImageSaver()
     
     @State private var tempImage: ScreenImage?
     @State private var screenshotFired: Bool = false
@@ -130,56 +129,9 @@ struct MyPageView: View {
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
         }
         .sheet(item: $tempImage, content: { image in
-            // FIXME: 디자인 나오기 전 임시
-            ZStack {
-                DSKitAsset.Color.keymeBlack.swiftUIColor
-                Image(uiImage: image.image)
-                    .resizable()
-                    .scaledToFit()
-                    .fullFrame()
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Button(action: {
-                            let image = image.image
-
-                            if let storiesUrl = URL(string: "instagram-stories://share?source_application=969563760790586") {
-                                if UIApplication.shared.canOpenURL(storiesUrl) {
-                                    guard let imageData = image.pngData() else { return }
-                                    let pasteboardItems: [String: Any] = [
-                                        "com.instagram.sharedSticker.stickerImage": imageData,
-                                        "com.instagram.sharedSticker.backgroundTopColor": "#171717",
-                                        "com.instagram.sharedSticker.backgroundBottomColor": "#171717"
-                                    ]
-                                    let pasteboardOptions = [
-                                        UIPasteboard.OptionsKey.expirationDate:
-                                            Date().addingTimeInterval(300)
-                                    ]
-                                    UIPasteboard.general.setItems([pasteboardItems], options:
-                                                                    pasteboardOptions)
-                                    UIApplication.shared.open(storiesUrl, options: [:],
-                                                              completionHandler: nil)
-                                } else {
-                                    print("Sorry the application is not installed")
-                                }
-                            }
-                            
-                            
-                        }) {
-                            Text("스토리")
-                        }
-                        
-                        Button(action: { imageSaver.save(image.image) { error in
-                            // TODO: Show alert
-                        } }) {
-                            Text("앨범에 저장하기")
-                        }
-                        
-                        ShareLink(item: Image(uiImage: image.image), preview: SharePreview("Keyme - 나의 성격", image: Image(uiImage: image.image)))
-                    }
-                }
-            }
+            MypageImageExportPreviewView(image: image, onDismissButtonTapped: {
+                tempImage = nil
+            })
         })
         .sheet(
             store: store.scope(
@@ -309,11 +261,6 @@ private extension MyPageView {
 
 // MARK: - Tools
 private extension MyPageView {
-    struct ScreenImage: Identifiable {
-        let id = UUID()
-        let image: UIImage
-    }
-
     @MainActor func saveScreenShotWith(graphImage image: UIImage?, title: String, nickname: String) {
         guard let image else {
             // TODO: Show alert
@@ -326,7 +273,7 @@ private extension MyPageView {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .scaleEffect(1.0 / 0.81)
+                    .scaleEffect(1.0 / 0.7) // 여기로 캡처 스케일 조정하면 됨
             }
         }
         .frame(width: 310, height: 570) // Image size

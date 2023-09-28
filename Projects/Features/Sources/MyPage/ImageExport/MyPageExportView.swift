@@ -11,19 +11,35 @@ import ComposableArchitecture
 import DSKit
 import SwiftUI
 
+struct ScreenImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 public struct ImageExportOverlayFeature: Reducer {
     public struct State: Equatable {
         let title: String
         let nickname: String
+        
+        var isEditMode = true
     }
     
     public enum Action: Equatable {
         case dismissImageExportMode
+        case enableEditMode(Bool)
         case captureImage
     }
     
     public var body: some ReducerOf<Self> {
-        Reduce { _, _ in
+        Reduce { state, action in
+            switch action {
+            case .enableEditMode(let enabled):
+                state.isEditMode = enabled
+                
+            default:
+                break
+            }
+            
             return .none
         }
     }
@@ -76,11 +92,17 @@ extension MyPageView {
                         nickname: viewStore.nickname)
                     .allowsHitTesting(false)
                     
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.white)
-                        
-                        CustomSlider(value: $rotationAngle.degrees, range: -Double.pi...Double.pi)
+                    Group {
+                        if viewStore.isEditMode {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .foregroundColor(.white)
+                                
+                                CustomSlider(value: $rotationAngle.degrees, range: -Double.pi...Double.pi)
+                            }
+                        } else {
+                            Text("Something")
+                        }
                     }
                     .padding(20)
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
@@ -121,7 +143,7 @@ extension MyPageView {
                         .resizable()
                         .frame(width: 20, height: 20)
                         .scaledToFit()
-                    Text.keyme("이미지 저장", font: .body4)
+                    Text.keyme("자랑하기", font: .body4)
                 }
             }
             .foregroundColor(.white)
