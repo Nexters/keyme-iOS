@@ -129,9 +129,12 @@ public struct MyPageFeature: Reducer {
                 switch taskResult {
                 case .success(let received):
                     data = received
-                case .failure:
-                    state.alertState = AlertState.errorWhileNetworking
+                case .failure(let error):
                     data = [CircleData]()
+                    
+                    if !(error is DecodingError) {
+                        state.alertState = AlertState.errorWhileNetworking
+                    }
                 }
                 
                 switch rate {
