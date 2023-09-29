@@ -138,10 +138,10 @@ public struct RegistrationView: View {
                     }
                 }
                 .foregroundColor(.white)
-                .background(viewStore.state.canRegister ? .black : .white.opacity(0.3))
+                .background(viewStore.state.canRegister && !nickname.isEmpty ? .black : .white.opacity(0.3))
                 .cornerRadius(16)
                 .padding(.bottom, 20)
-                .disabled(viewStore.state.canRegister ? false : true)
+                .disabled(viewStore.state.canRegister && !nickname.isEmpty ? false : true)
             }
             .padding(.horizontal, 16)
             .onChange(of: nickname) { newValue in
