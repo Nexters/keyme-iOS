@@ -60,7 +60,15 @@ struct DailyTestListView: View {
                 dailyUserStatistics(dailyStatistics: dailyStatistics)
                 dailyTestList(
                     nickname: viewStore.testData.nickname,
-                    dailyStatistics: dailyStatistics)
+                    dailyStatistics: dailyStatistics
+                ) { questionStat in
+                    guard dailyStatistics.solvedCount != 0 else {
+                        return
+                    }
+                    
+                    HapticManager.shared.boong()
+                    self.onItemTapped(questionStat)
+                }
             } else {
                 loadingView()
             }
@@ -90,7 +98,11 @@ struct DailyTestListView: View {
         }
     }
     
-    private func dailyTestList(nickname: String, dailyStatistics: StatisticsData) -> some View {
+    private func dailyTestList(
+        nickname: String,
+        dailyStatistics: StatisticsData,
+        onItemTapped: @escaping (QuestionsStatisticsData) -> Void
+    ) -> some View {
         LazyVStack(spacing: 12) {
             ForEach(dailyStatistics.questionsStatistics, id: \.self) { questionsStat in
                 VStack(alignment: .leading, spacing: 7) {
@@ -119,7 +131,6 @@ struct DailyTestListView: View {
                     Rectangle().foregroundColor(.white.opacity(0.05)).cornerRadius(14)
                 }
                 .onTapGesture {
-                    HapticManager.shared.boong()
                     onItemTapped(questionsStat)
                 }
             }

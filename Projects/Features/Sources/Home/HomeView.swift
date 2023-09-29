@@ -30,29 +30,30 @@ public struct HomeView: View {
                     DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                     
                     if let isSolvedTest = viewStore.isSolvedDailyTest {
-                        if isSolvedTest {                                dailyTestListView { questionsStat in
-                            viewStore.send(.showScoreList(
-                                circleData: CircleData(
-                                    color: Color.hex(questionsStat.category.color),
-                                    xPoint: 0,
-                                    yPoint: 0,
-                                    radius: 0.8,
-                                    metadata: CircleMetadata(
-                                        ownerId: viewStore.userId,
-                                        questionId: questionsStat.questionId,
-                                        iconURL: URL(string: questionsStat.category.iconUrl),
-                                        keyword: questionsStat.keyword,
-                                        averageScore: Float(questionsStat.avgScore ?? 0.0),
-                                        myScore: Float(questionsStat.myScore ?? 0)
-                                    ))))
-                        }
-                        .overlay {
-                            LinearGradient(
-                                colors: [.black.opacity(0), .black],
-                                startPoint: .init(x: 0.5, y: 0.75),
-                                endPoint: .bottom)
-                            .allowsHitTesting(false)
-                        }
+                        if isSolvedTest {                                
+                            dailyTestListView { questionsStat in
+                                viewStore.send(.showScoreList(
+                                    circleData: CircleData(
+                                        color: Color.hex(questionsStat.category.color),
+                                        xPoint: 0,
+                                        yPoint: 0,
+                                        radius: 0.8,
+                                        metadata: CircleMetadata(
+                                            ownerId: viewStore.userId,
+                                            questionId: questionsStat.questionId,
+                                            iconURL: URL(string: questionsStat.category.iconUrl),
+                                            keyword: questionsStat.keyword,
+                                            averageScore: Float(questionsStat.avgScore ?? 0.0),
+                                            myScore: Float(questionsStat.myScore ?? 0)
+                                        ))))
+                            }
+                            .overlay {
+                                LinearGradient(
+                                    colors: [.black.opacity(0), .black],
+                                    startPoint: .init(x: 0.5, y: 0.75),
+                                    endPoint: .bottom)
+                                .allowsHitTesting(false)
+                            }
                         } else {
                             startTestView
                         }
