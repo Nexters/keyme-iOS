@@ -16,6 +16,7 @@ import Network
 
 public struct HomeView: View {
     @State var sharedURL: ActivityViewController.SharedURL?
+    @State var needToShowProgressView = false
     
     public var store: StoreOf<HomeFeature>
     
@@ -62,7 +63,8 @@ public struct HomeView: View {
                             Spacer()
                             bottomButton(isSolved: isSolvedTest) {
                                 @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
-                                
+                                needToShowProgressView = true
+
                                 if isSolvedTest {
                                     let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
                                     let shortURL = try await shortURLAPIManager.request(
@@ -76,7 +78,9 @@ public struct HomeView: View {
                             }
                         }
                         .padding(.bottom, 26)
-                    } else {
+                    }
+                    
+                    if viewStore.isSolvedDailyTest == nil || needToShowProgressView {
                         CustomProgressView()
                     }
                 }
@@ -86,6 +90,8 @@ public struct HomeView: View {
                     viewStore.send(.fetchDailyTests)
                 }
             }
+            .animation(Animation.customInteractiveSpring(), value: viewStore.isSolvedDailyTest)
+            .animation(Animation.customInteractiveSpring(), value: needToShowProgressView)
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(
@@ -155,6 +161,9 @@ extension HomeView {
                     get: { sharedURL != nil },
                     set: { if !$0 { sharedURL = nil } }),
                 activityItems: [item.sharedURL])
+            .onAppear {
+                needToShowProgressView = false
+            }
         }
     }
 }
