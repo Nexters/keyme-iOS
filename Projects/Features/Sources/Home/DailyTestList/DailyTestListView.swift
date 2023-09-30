@@ -45,10 +45,13 @@ struct DailyTestListView: View {
                 Spacer().frame(height: bottomSpacerHeight)
             }
             .padding(.horizontal, horizontalPadding)
-            .refreshable { viewStore.send(.fetchDailyStatistics) }
+            .refreshable {
+                viewStore.send(.fetchDailyStatistics)
+            }
             .padding(.vertical, 1)
             .onAppear { viewStore.send(.onAppear) }
             .onDisappear { viewStore.send(.onDisappear) }
+            .animation(Animation.customInteractiveSpring(), value: viewStore.dailyStatistics)
         }
     }
     
@@ -138,11 +141,12 @@ struct DailyTestListView: View {
     }
     
     private func loadingView() -> some View {
-        HStack {
-            Spacer()
-            CustomProgressView()
-            Spacer()
-        }
+        dailyTestList(
+            nickname: "NICKNAME",
+            dailyStatistics: StatisticsData.mockData(questionCount: 7),
+            onItemTapped: { _ in }
+        )
+        .redacted(reason: .placeholder)
     }
     
     private func statisticsScoreText(score: Double?) -> some View {

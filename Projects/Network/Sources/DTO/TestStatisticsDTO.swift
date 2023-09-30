@@ -32,6 +32,28 @@ public typealias StatisticsData = TestStatisticsDTO.StatisticsData
 public typealias QuestionsStatisticsData = TestStatisticsDTO.QuestionsStatisticsData
 
 extension StatisticsData: Equatable {}
+public extension StatisticsData {
+    static func mockData(questionCount: Int) -> StatisticsData {
+        let questions = (1...questionCount).map { i -> QuestionsStatisticsData in
+            return QuestionsStatisticsData(
+                category: .init(color: "", iconUrl: "", name: ""),
+                keyword: "Keyword \(i)",
+                title: "Title \(i)",
+                avgScore: Double(i * 10 % 101),
+                questionId: i,
+                myScore: i * 5 % 101
+            )
+        }
+        
+        let statisticsData = StatisticsData(
+            averageRate: Double(questionCount * 50 % 101),
+            questionsStatistics: questions,
+            solvedCount: questionCount
+        )
+        
+        return statisticsData
+    }
+}
 
 extension QuestionsStatisticsData: Equatable, Hashable {
     public static func == (lhs: TestStatisticsDTO.QuestionsStatisticsData, rhs: TestStatisticsDTO.QuestionsStatisticsData) -> Bool {

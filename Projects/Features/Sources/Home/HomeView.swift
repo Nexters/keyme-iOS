@@ -80,7 +80,7 @@ public struct HomeView: View {
                         .padding(.bottom, 26)
                     }
                     
-                    if viewStore.isSolvedDailyTest == nil || needToShowProgressView {
+                    if needToShowProgressView {
                         CustomProgressView()
                     }
                 }

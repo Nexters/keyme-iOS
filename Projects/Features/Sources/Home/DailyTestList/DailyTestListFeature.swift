@@ -45,6 +45,8 @@ public struct DailyTestListFeature: Reducer {
                 return .cancel(id: CancelID.dailyTestList)
                 
             case .fetchDailyStatistics:
+                state.dailyStatistics = nil
+                
                 return .run { [testId = state.testData.testId] send in
                     let dailyStatisticsData = try await network.request(
                         .test(.statistics(testId)), object: TestStatisticsDTO.self
