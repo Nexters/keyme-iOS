@@ -22,7 +22,9 @@ public class CirclePackViewOption<DetailView: View> {
     /// Circle pack 그래프가 확대됐을 때 그 원이 가질 화면 가로길이에 대한 비율입니다.
     var magnifiedCircleRatio: CGFloat
     /// 그런거 모르겠고 Scale로 사이즈 조정하고 싶으면 여기
-    var scale: CGFloat
+    var scale: CGFloat 
+    /// 하위 원 탭 상호작용 설정
+    var enableTapOnSubCircles: Bool
     
     var onCircleTappedHandler: (CircleData) -> Void
     var onCircleDismissedHandler: (CircleData) -> Void
@@ -37,6 +39,7 @@ public class CirclePackViewOption<DetailView: View> {
         framePadding = 350
         magnifiedCircleRatio =  0.9
         scale = 1
+        enableTapOnSubCircles = true
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }
@@ -48,6 +51,7 @@ public class CirclePackViewOption<DetailView: View> {
         framePadding: CGFloat,
         magnifiedCircleRatio: CGFloat,
         scale: CGFloat,
+        enableTapOnSubCircles: Bool,
         onCircleTappedHandler: @escaping (CircleData) -> Void = { _ in },
         onCircleDismissedHandler: @escaping (CircleData) -> Void = { _ in }
     ) {
@@ -57,6 +61,8 @@ public class CirclePackViewOption<DetailView: View> {
         self.framePadding = framePadding
         self.magnifiedCircleRatio = magnifiedCircleRatio
         self.scale = scale
+        self.enableTapOnSubCircles = enableTapOnSubCircles
+        
         self.onCircleTappedHandler = onCircleTappedHandler
         self.onCircleDismissedHandler = onCircleDismissedHandler
     }

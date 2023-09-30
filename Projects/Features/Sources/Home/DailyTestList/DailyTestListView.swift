@@ -44,6 +44,7 @@ struct DailyTestListView: View {
                 
                 Spacer().frame(height: bottomSpacerHeight)
             }
+            .scrollIndicators(.never)
             .padding(.horizontal, horizontalPadding)
             .refreshable {
                 viewStore.send(.fetchDailyStatistics)

@@ -189,6 +189,7 @@ private extension MyPageView {
             })
         .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
         .activateCircleBlink(viewStore.state.shownFirstTime)
+        .enableTapOnSubCircles(!viewStore.state.imageExportMode)
         .onCircleTapped { _ in
             viewStore.send(.circleTapped)
         }

@@ -40,7 +40,7 @@ public extension StatisticsData {
                 keyword: "Keyword \(i)",
                 title: "Title \(i)",
                 avgScore: Double(i * 10 % 101),
-                questionId: i,
+                questionId: -i,
                 myScore: i * 5 % 101
             )
         }

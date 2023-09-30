@@ -78,6 +78,8 @@ public struct CirclePackView<DetailView: View>: View {
                                 circleData: data,
                                 onTapGesture: {
                                     guard animationEnded else { return }
+                                    guard option.enableTapOnSubCircles else { return }
+                                    
                                     option.onCircleTappedHandler(data)
                                     focusedCircleData = data
                                 })
@@ -326,6 +328,11 @@ extension CirclePackView {
     /// 기본값은 당연히 1입니다.
     func graphScale(_ factor: CGFloat) -> CirclePackView {
         self.option.scale = factor
+        return self
+    }
+    
+    func enableTapOnSubCircles(_ enabled: Bool) -> CirclePackView {
+        self.option.enableTapOnSubCircles = enabled
         return self
     }
     
