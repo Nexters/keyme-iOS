@@ -40,8 +40,7 @@ public extension Project {
             "instagram",
             "instagram-stories"
         ],
-        "NSPhotoLibraryAddUsageDescription": "스크린샷을 저장하기 위해서 앨범 접근 권한이 필요합니다"
-    ]
+        "NSPhotoLibraryAddUsageDescription": "스크린샷을 저장하기 위해서 앨범 접근 권한이 필요합니다"    ]
     
     static let baseUrlInfoPlist: [String: InfoPlist.Value] =  [
         "API_BASE_URL": "$(API_BASE_URL)",
