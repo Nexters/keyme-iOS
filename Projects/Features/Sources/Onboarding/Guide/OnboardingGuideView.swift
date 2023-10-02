@@ -13,7 +13,9 @@ import SwiftUI
 
 public struct OnboardingGuideFeature: Reducer {
     public struct State: Equatable {}
-    public enum Action: Equatable {}
+    public enum Action: Equatable {
+        case dismiss
+    }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -39,73 +41,72 @@ struct OnboardingGuideView: View {
     }
     
     var body: some View {
-        VStack {
-            Group {
-                if !isLastPage {
-                    topBar {
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            VStack {
+                Group {
+                    if !isLastPage {
+                        topBar(dismissAction: {
+                            viewStore.send(.dismiss)
+                        })
+                    } else {
+                        EmptyView()
+                    }
+                }
+                .transition(.opacity)
+                .padding(.horizontal, 16)
+                .padding(.top, 30)
+                
+                Spacer()
+                
+                TabView(selection: $currentTabIndex) {
+                    ForEach(0..<images.count, id: \.self) { index in
+                        let guideImage = images[index]
                         
+                        guideImage.image
+                            .modifyForGuideView()
+                            .tag(index)
                     }
-                } else {
-                    EmptyView()
                 }
-            }
-            .transition(.opacity)
-            .padding(.horizontal, 16)
-            .padding(.top, 30)
-            
-            Spacer()
-            
-            TabView(selection: $currentTabIndex) {
-                ForEach(0..<images.count, id: \.self) { index in
-                    let guideImage = images[index]
-                    
-                    guideImage.image
-                        .modifyForGuideView()
-                        .tag(index)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            
-            Group {
-                if isLastPage {
-                    Button(action: {
-                        HapticManager.shared.boong()
-                    }) {
-                        HStack {
-                            Spacer()
-                            Text.keyme("시작해볼까요?", font: .body2).frame(height: 60)
-                            Spacer()
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                
+                Group {
+                    if isLastPage {
+                        Button(action: {
+                            HapticManager.shared.boong()
+                            viewStore.send(.dismiss)
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text.keyme("시작해볼까요?", font: .body2).frame(height: 60)
+                                Spacer()
+                            }
                         }
+                        .foregroundColor(.black)
+                        .background(.white)
+                        .cornerRadius(16)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 20)
+                    } else {
+                        Spacer().frame(height: 60)
                     }
-                    .foregroundColor(.black)
-                    .background(.white)
-                    .cornerRadius(16)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 20)
-                } else {
-                    Spacer().frame(height: 60)
                 }
+                .transition(.opacity)
             }
-            .transition(.opacity)
+            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            .animation(Animation.customInteractiveSpring(), value: currentTabIndex)
         }
-        .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
-        .animation(Animation.customInteractiveSpring(), value: currentTabIndex)
     }
     
-    private func topBar(action: @escaping () -> Void) -> some View {
+    private func topBar(dismissAction: @escaping () -> Void) -> some View {
         HStack {
-            Button(action: { }) {
+            Button(action: dismissAction) {
                 Text.keyme("건너뛰기", font: .body4)
             }
             
             Spacer()
             
             Button(action: {
-                print(images.endIndex)
-                guard !isLastPage else {
-                    return
-                }
-                
+                guard !isLastPage else { return }
                 currentTabIndex += 1
             }) {
                 Text.keyme("다음 >", font: .body4)

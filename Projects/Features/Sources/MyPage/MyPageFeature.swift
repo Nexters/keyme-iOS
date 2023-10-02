@@ -183,7 +183,6 @@ public struct MyPageFeature: Reducer {
                 return .none
                 
             case .view(.prepareSettingView):
-                print("@@ init from mypage")
                 state.settingViewState = SettingFeature.State()
                 return .none
                 

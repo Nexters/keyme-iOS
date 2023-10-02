@@ -35,7 +35,7 @@ public struct RegistrationView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: 0) {
-                Text.keyme("회원가입", font: .body3Semibold)
+                Text.keyme(viewStore.isForMyPage ? "프로필 변경" : "회원가입", font: .body3Semibold)
                     .foregroundColor(.white)
                     .padding(.top, 16)
                     .padding(.bottom, 24)
@@ -48,7 +48,6 @@ public struct RegistrationView: View {
                     Task(priority: .utility) {
                         guard let imageData = try await newImage?.loadTransferable(type: Data.self) else {
                             // TODO: Throw error and show alert
-                            print("IMAGE ERROR")
                             return
                         }
                         
@@ -105,17 +104,19 @@ public struct RegistrationView: View {
                 Spacer(minLength: 50)
                 
                 // 닉네임 관련 안내메세지
-                Rectangle()
-                    .frame(height: 80)
-                    .foregroundColor(
-                        DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
-                    .cornerRadius(8)
-                    .overlay(
-                        Text.keyme("친구들이 원활하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요.", font: .body4)
-                            .lineSpacing(10)
-                            .foregroundColor(.white)
-                    )
-                    .padding(.bottom, 64)
+                if viewStore.isForMyPage == false {
+                    Rectangle()
+                        .frame(height: 80)
+                        .foregroundColor(
+                            DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
+                        .cornerRadius(8)
+                        .overlay(
+                            Text.keyme("친구들이 원활하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요.", font: .body4)
+                                .lineSpacing(10)
+                                .foregroundColor(.white)
+                        )
+                        .padding(.bottom, 64)
+                }
                 
                 // 다음 페이지로 넘어가기 위한 Button
                 Button(action: {
@@ -129,7 +130,7 @@ public struct RegistrationView: View {
                     HStack {
                         Spacer()
                         
-                        Text("다음")
+                        Text(viewStore.isForMyPage ? "완료" : "다음")
                             .font(.system(size: 18))
                             .fontWeight(.bold)
                             .frame(height: 60)

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import StoreKit
 import ComposableArchitecture
 import Core
 
@@ -40,7 +41,7 @@ public struct MainPageFeature: Reducer {
         public init(userId: Int, testId: Int, nickname: String) {
             @Dependency(\.environmentVariable) var environmentVariable
             @Dependency(\.userStorage) var userStorage
-            let currentLaunchCount = userStorage.launchCount ?? 0
+            let currentLaunchCount = userStorage.launchCount ?? 0 // 실행한 적 없으면 nil == 0
             
             environmentVariable.userId = userId
             environmentVariable.nickname = nickname
@@ -48,13 +49,24 @@ public struct MainPageFeature: Reducer {
             self._home = .init(.init(userId: userId, nickname: nickname, testId: testId))
             self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
             
-//            if currentLaunchCount == 0 {
+            print("[KEYME] Keyme launched \(currentLaunchCount) times")
+            if currentLaunchCount == 0 {
                 onboardingGuideState = OnboardingGuideFeature.State()
-//            } else if currentLaunchCount == 3 {
-//                // Request review
-//            }
+            } else if currentLaunchCount == 3 {
+                // Request review
+                requestReview()
+            }
             
             userStorage.launchCount = currentLaunchCount + 1
+        }
+        
+        /// 앱스토어 리뷰 요청하는 뷰 띄우기
+        private func requestReview() {
+            DispatchQueue.main.async {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    SKStoreReviewController.requestReview(in: windowScene)
+                }
+            }
         }
     }
     
@@ -82,6 +94,9 @@ public struct MainPageFeature: Reducer {
                 }
                 
 //                testId =
+                
+            case .onboardingGuide(.presented(.dismiss)):
+                state.onboardingGuideState = nil
                 
             default:
                 break

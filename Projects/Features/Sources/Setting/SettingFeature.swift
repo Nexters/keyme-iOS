@@ -17,17 +17,19 @@ public struct SettingFeature: Reducer {
     
     public struct State: Equatable {
         @PresentationState var alerState: AlertState<Action.Alert>?
+        @PresentationState var changeProfileState: RegistrationFeature.State?
+        
         var isPushNotificationEnabled: Bool
         
         init() {
             @Dependency(\.notificationManager.isPushNotificationGranted) var isPushNotificationGranted
             self.isPushNotificationEnabled = isPushNotificationGranted
-            print("@@ init")
         }
     }
     
     public enum Action: Equatable {
         public enum View: Equatable {
+            case changeProfile
             case logout
             case withdrawal
             case togglePushNotification
@@ -39,6 +41,8 @@ public struct SettingFeature: Reducer {
         case alert(Alert)
         case showAlert(message: String)
         case setPushNotificationStatus(Bool)
+        
+        case changeProfileAction(PresentationAction<RegistrationFeature.Action>)
     }
     
     public init() { }
@@ -46,14 +50,14 @@ public struct SettingFeature: Reducer {
     public var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            // MARK: - View actions
             case .view(.logout):
-                print("logout from setting")
                 return .none
                 
             case .view(.withdrawal):
                 return .run { send in
                     do {
-                        try await network.request(.setting(.withdrawal))
+                        _ = try await network.request(.setting(.withdrawal))
                         await send(.view(.logout))
                     } catch {
                         await send(.showAlert(message: "작업을 실행할 수 없습니다. 잠시 후 다시 시도해주세요."))
@@ -75,16 +79,33 @@ public struct SettingFeature: Reducer {
                     return .send(.setPushNotificationStatus(false))
                 }
                 
+            case .view(.changeProfile):
+                state.changeProfileState = RegistrationFeature.State(isForMyPage: true)
+                return .none
+                
+            // MARK: - Internal actions
             case .showAlert(let message):
                 state.alerState = AlertState.errorWithMessage(message)
                 
                 return .none
                 
+            // MARK: - Child action
             case .setPushNotificationStatus(let value):
                 state.isPushNotificationEnabled = value
-                print("@@", value)
+                return .none
+                
+            case .changeProfileAction(.presented(.finishRegisterResponse(let response))):
+                let changedNickname = response.data.nickname
+                
+                state.changeProfileState = nil
+                return .none
+                
+            default:
                 return .none
             }
+        }
+        .ifLet(\.$changeProfileState, action: /Action.changeProfileAction) {
+            RegistrationFeature()
         }
     }
 }
