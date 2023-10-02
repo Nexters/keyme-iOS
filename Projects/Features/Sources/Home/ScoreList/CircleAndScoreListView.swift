@@ -22,8 +22,8 @@ public struct CircleAndScoreListFeature: Reducer {
         var view: View
         struct View: Equatable {
             var nickname: String {
-                @Dependency(\.environmentVariable) var environmentVariable
-                return environmentVariable.nickname
+                @Dependency(\.commonVariable) var commonVariable
+                return commonVariable.nickname
             }
             let circleData: CircleData
         }
@@ -113,8 +113,8 @@ struct CircleAndScoreListView: View {
                 )
             }
             .addCommonNavigationBar()
+            .ignoresSafeArea(edges: .bottom)
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
         }
-        .toolbar(.hidden, for: .navigationBar)
     }
 }

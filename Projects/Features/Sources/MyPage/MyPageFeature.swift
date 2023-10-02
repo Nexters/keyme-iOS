@@ -36,7 +36,10 @@ public struct MyPageFeature: Reducer {
         
         struct View: Equatable {            
             let userId: Int
-            let nickname: String
+            var nickname: String {
+                @Dependency(\.commonVariable) var commonVariable
+                return commonVariable.nickname
+            }
             let testId: Int
             var testURL: String { "https://keyme-frontend.vercel.app/test/\(testId)" }
             
@@ -50,8 +53,8 @@ public struct MyPageFeature: Reducer {
             var nowFetching: Bool = false
         }
         
-        init(userId: Int, nickname: String, testId: Int) {
-            self.view = View(userId: userId, nickname: nickname, testId: testId)
+        init(userId: Int, testId: Int) {
+            self.view = View(userId: userId, testId: testId)
             self._scoreListState = .init(.init())
         }
     }
@@ -187,9 +190,7 @@ public struct MyPageFeature: Reducer {
                 return .none
                 
             case .view(.enableImageExportMode):
-                state.imageExportModeState = ImageExportOverlayFeature.State(
-                    title: state.view.selectedSegment.title,
-                    nickname: state.view.nickname)
+                state.imageExportModeState = ImageExportOverlayFeature.State(title: state.view.selectedSegment.title)
                 
                 return .none
                 

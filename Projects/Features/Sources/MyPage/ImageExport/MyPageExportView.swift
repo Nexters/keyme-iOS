@@ -19,8 +19,10 @@ struct ScreenImage: Identifiable {
 public struct ImageExportOverlayFeature: Reducer {
     public struct State: Equatable {
         let title: String
-        let nickname: String
-        
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
+        }
         var isEditMode = true
     }
     

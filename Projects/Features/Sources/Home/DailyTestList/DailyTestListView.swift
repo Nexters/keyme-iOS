@@ -58,12 +58,12 @@ struct DailyTestListView: View {
     
     private func content(for viewStore: DailyTestStore) -> some View {
         VStack(alignment: .leading, spacing: 20) {
-            welcomeText(nickname: viewStore.testData.nickname)
+            welcomeText()
             
             if let dailyStatistics = viewStore.dailyStatistics {
                 dailyUserStatistics(dailyStatistics: dailyStatistics)
                 dailyTestList(
-                    nickname: viewStore.testData.nickname,
+                    nickname: viewStore.nickname,
                     dailyStatistics: dailyStatistics
                 ) { questionStat in
                     guard dailyStatistics.solvedCount != 0 else {
@@ -80,7 +80,7 @@ struct DailyTestListView: View {
     }
     
     // MARK: - Helper Views
-    private func welcomeText(nickname: String) -> some View {
+    private func welcomeText() -> some View {
         Text.keyme("친구들의\n답변이 쌓이고 있어요!", font: .heading1)
             .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
             .frame(maxWidth: .infinity, alignment: .leading)

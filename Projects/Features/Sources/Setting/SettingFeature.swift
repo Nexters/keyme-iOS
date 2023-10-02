@@ -12,6 +12,7 @@ import Domain
 import Network
 
 public struct SettingFeature: Reducer {
+    @Dependency(\.commonVariable) var commonVariable
     @Dependency(\.notificationManager) var notificationManager
     @Dependency(\.keymeAPIManager) var network
     
@@ -96,7 +97,7 @@ public struct SettingFeature: Reducer {
                 
             case .changeProfileAction(.presented(.finishRegisterResponse(let response))):
                 let changedNickname = response.data.nickname
-                
+                commonVariable.nickname = changedNickname
                 state.changeProfileState = nil
                 return .none
                 

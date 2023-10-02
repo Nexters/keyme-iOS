@@ -15,6 +15,10 @@ public struct DailyTestListFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
 
     public struct State: Equatable {
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
+        }
         let testData: KeymeTestsModel
         var dailyStatistics: StatisticsData?
         

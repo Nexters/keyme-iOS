@@ -29,14 +29,17 @@ public struct HomeFeature: Reducer {
         var view: View
         
         struct View: Equatable {
-            let nickname: String
+            var nickname: String {
+                @Dependency(\.commonVariable) var commonVariable
+                return commonVariable.nickname
+            }
             let userId: Int
             var testId: Int
             var isSolvedDailyTest: Bool?
         }
         
-        public init(userId: Int, nickname: String, testId: Int) {
-            self.view = View(nickname: nickname, userId: userId, testId: testId)
+        public init(userId: Int, testId: Int) {
+            self.view = View(userId: userId, testId: testId)
         }
     }
     
@@ -119,7 +122,6 @@ public struct HomeFeature: Reducer {
                 }
                 
                 state.startTestState = StartTestFeature.State(
-                    nickname: state.view.nickname,
                     testData: testData,
                     authorizationToken: authorizationToken
                 )

@@ -11,8 +11,8 @@ import DSKit
 import SwiftUI
 
 struct MypageImageExportPreviewView: View {
-    @State var imageToShare: ScreenImage?
-    @State var showAlert: Bool = false
+    @State private var imageToShare: ScreenImage?
+    @State private var showAlert: AlertItem?
     
     let image: ScreenImage
     let onDismissButtonTapped: () -> Void
@@ -47,10 +47,10 @@ struct MypageImageExportPreviewView: View {
                     set: { if !$0 { imageToShare = nil } }),
                 activityItems: [image.image])
         }
-        .alert(isPresented: $showAlert) {
+        .alert(item: $showAlert) { item in
             Alert(
-                title: Text("이미지 저장 중 오류가 발생했어요"),
-                message: Text("잠시후 다시 시도해주세요"),
+                title: Text(item.title),
+                message: Text(item.message),
                 dismissButton: .default(Text("Ok"))
             )
         }
@@ -127,7 +127,7 @@ struct MypageImageExportPreviewView: View {
         Task {
             do {
                 guard let localIdentifier = try await imageSaver.save(image.image) else {
-                    showAlert = true
+                    showAlert = AlertItem.error
                     return
                 }
                 
@@ -142,7 +142,7 @@ struct MypageImageExportPreviewView: View {
                 
                 await UIApplication.shared.open(url)
             } catch {
-                showAlert = true
+                showAlert = AlertItem.error
             }
         }
     }
@@ -155,8 +155,9 @@ struct MypageImageExportPreviewView: View {
         Task {
             do {
                 _ = try await imageSaver.save(image.image)
+                showAlert = AlertItem(title: "성공!", message: "이미지가 앨범에 저장되었어요")
             } catch {
-                showAlert = true
+                showAlert = AlertItem.error
             }
         }
     }
@@ -168,6 +169,16 @@ private extension MypageImageExportPreviewView {
         let image: Image
         let text: String
         let action: () -> Void
+    }
+    
+    struct AlertItem: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+        
+        static var error: Self {
+            AlertItem(title: "이미지 저장 중 오류가 발생했어요", message: "잠시후 다시 시도해주세요")
+        }
     }
     
     func commonShapedButton(_ data: ExportButton, width: CGFloat, height: CGFloat) -> some View {

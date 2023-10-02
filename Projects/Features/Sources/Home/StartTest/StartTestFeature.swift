@@ -15,7 +15,10 @@ public struct StartTestFeature: Reducer {
     enum CancelID { case startAnimation }
     
     public struct State: Equatable {
-        public let nickname: String
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
+        }
         public let testData: KeymeTestsModel
         let authorizationToken: String
 
@@ -23,8 +26,7 @@ public struct StartTestFeature: Reducer {
         @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
         public var isAnimating: Bool = false
         
-        public init(nickname: String, testData: KeymeTestsModel, authorizationToken: String) {
-            self.nickname = nickname
+        public init(testData: KeymeTestsModel, authorizationToken: String) {
             self.testData = testData
             self.authorizationToken = authorizationToken
         }

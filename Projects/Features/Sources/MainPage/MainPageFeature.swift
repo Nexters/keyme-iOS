@@ -11,22 +11,6 @@ import StoreKit
 import ComposableArchitecture
 import Core
 
-public final class EnvironmentVariable {
-    var userId: Int!
-    var nickname: String!
-}
-
-extension EnvironmentVariable: DependencyKey {
-    public static var liveValue = EnvironmentVariable()
-}
-
-extension DependencyValues {
-    public var environmentVariable: EnvironmentVariable {
-        get { self[EnvironmentVariable.self] }
-        set { self[EnvironmentVariable.self] = newValue }
-    }
-}
-
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
         var testId: Int?
@@ -39,15 +23,15 @@ public struct MainPageFeature: Reducer {
         enum View: Equatable { case none }
         
         public init(userId: Int, testId: Int, nickname: String) {
-            @Dependency(\.environmentVariable) var environmentVariable
+            @Dependency(\.commonVariable) var commonVariable
             @Dependency(\.userStorage) var userStorage
             let currentLaunchCount = userStorage.launchCount ?? 0 // 실행한 적 없으면 nil == 0
             
-            environmentVariable.userId = userId
-            environmentVariable.nickname = nickname
+            commonVariable.userId = userId
+            commonVariable.nickname = nickname
             
-            self._home = .init(.init(userId: userId, nickname: nickname, testId: testId))
-            self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
+            self._home = .init(.init(userId: userId, testId: testId))
+            self._myPage = .init(.init(userId: userId, testId: testId))
             
             print("[KEYME] Keyme launched \(currentLaunchCount) times")
             if currentLaunchCount == 0 {
