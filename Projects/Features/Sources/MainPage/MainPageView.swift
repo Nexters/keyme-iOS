@@ -62,6 +62,12 @@ struct KeymeMainView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .fullScreenCover(store: store.scope(
+            state: \.$onboardingGuideState,
+            action: MainPageFeature.Action.onboardingGuide
+        )) { store in
+            OnboardingGuideView(store: store)
+        }
     }
 }
 

@@ -27,31 +27,41 @@ extension DependencyValues {
 }
 
 public struct MainPageFeature: Reducer {
-    
     public struct State: Equatable {
         var testId: Int?
         
         @Box var home: HomeFeature.State
         @Box var myPage: MyPageFeature.State
+        @PresentationState var onboardingGuideState: OnboardingGuideFeature.State?
         
         var view: View = .none
         enum View: Equatable { case none }
         
         public init(userId: Int, testId: Int, nickname: String) {
             @Dependency(\.environmentVariable) var environmentVariable
-
+            @Dependency(\.userStorage) var userStorage
+            let currentLaunchCount = userStorage.launchCount ?? 0
+            
             environmentVariable.userId = userId
             environmentVariable.nickname = nickname
             
             self._home = .init(.init(userId: userId, nickname: nickname, testId: testId))
             self._myPage = .init(.init(userId: userId, nickname: nickname, testId: testId))
             
+//            if currentLaunchCount == 0 {
+                onboardingGuideState = OnboardingGuideFeature.State()
+//            } else if currentLaunchCount == 3 {
+//                // Request review
+//            }
+            
+            userStorage.launchCount = currentLaunchCount + 1
         }
     }
     
     public enum Action {
         case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
+        case onboardingGuide(PresentationAction<OnboardingGuideFeature.Action>)
         case getTestId
     }
     
@@ -78,6 +88,9 @@ public struct MainPageFeature: Reducer {
             }
             
             return .none
+        }
+        .ifLet(\.$onboardingGuideState, action: /Action.onboardingGuide) {
+            OnboardingGuideFeature()
         }
     }
 }

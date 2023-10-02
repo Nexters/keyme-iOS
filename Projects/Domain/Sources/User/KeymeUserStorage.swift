@@ -32,6 +32,7 @@ public final class KeymeUserStorage {
         case userId
         case friendCode
         case nickname
+        case launchCount
         case profileImageURL
         case profileThumbnailURL
 
@@ -60,6 +61,11 @@ public extension KeymeUserStorage {
     var nickname: String? {
         get { get(.nickname) as? String }
         set { set(newValue, forKey: .nickname) }
+    }
+    
+    var launchCount: Int? {
+        get { get(.launchCount) as? Int }
+        set { set(newValue, forKey: .launchCount) }
     }
     
     var profileImageURL: URL? {
