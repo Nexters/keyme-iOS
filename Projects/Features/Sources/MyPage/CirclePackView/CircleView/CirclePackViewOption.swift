@@ -35,8 +35,8 @@ public class CirclePackViewOption<DetailView: View> {
     ) {
         activateCircleBlink = true
         background = .white
-        outboundLength = 700
-        framePadding = 350
+        outboundLength = 600
+        framePadding = 300
         magnifiedCircleRatio =  0.9
         scale = 1
         enableTapOnSubCircles = true

@@ -12,6 +12,7 @@ import SwiftUI
 
 struct MypageImageExportPreviewView: View {
     @State var imageToShare: ScreenImage?
+    @State var showAlert: Bool = false
     
     let image: ScreenImage
     let onDismissButtonTapped: () -> Void
@@ -46,6 +47,13 @@ struct MypageImageExportPreviewView: View {
                     set: { if !$0 { imageToShare = nil } }),
                 activityItems: [image.image])
         }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("이미지 저장 중 오류가 발생했어요"),
+                message: Text("잠시후 다시 시도해주세요"),
+                dismissButton: .default(Text("Ok"))
+            )
+        }
     }
     
     private var backgroundView: some View {
@@ -75,9 +83,10 @@ struct MypageImageExportPreviewView: View {
     
     private var actionButtonsView: some View {
         let buttons: [ExportButton] = [
+            ExportButton(image: DSImage.gallery.swiftUIImage, text: "저장", action: saveToAlbum),
+            ExportButton(image: DSImage.insta.swiftUIImage, text: "Instagram", action: postToInstagram),
             ExportButton(image: DSImage.instaStory.swiftUIImage, text: "스토리", action: shareToInstagramStory),
-            ExportButton(image: DSImage.instaStory.swiftUIImage, text: "앨범에 저장하기", action: saveToAlbum),
-            ExportButton(image: DSImage.instaStory.swiftUIImage, text: "공유하기", action: shareImageFile)
+            ExportButton(image: DSImage.link.swiftUIImage, text: "Share", action: shareImageFile)
         ]
         
         return HStack(spacing: 10) {
@@ -85,10 +94,6 @@ struct MypageImageExportPreviewView: View {
                 commonShapedButton(button, width: .infinity, height: 79)
             }
         }
-    }
-    
-    private func shareImageFile() {
-        imageToShare = image
     }
     
     private func shareToInstagramStory() {
@@ -118,9 +123,41 @@ struct MypageImageExportPreviewView: View {
         }
     }
     
+    private func postToInstagram() {
+        Task {
+            do {
+                guard let localIdentifier = try await imageSaver.save(image.image) else {
+                    showAlert = true
+                    return
+                }
+                
+                let urlString = "instagram://library?LocalIdentifier=\(localIdentifier)"
+                
+                guard
+                    let url = URL(string: urlString),
+                    await UIApplication.shared.canOpenURL(url)
+                else {
+                    return
+                }
+                
+                await UIApplication.shared.open(url)
+            } catch {
+                showAlert = true
+            }
+        }
+    }
+    
+    private func shareImageFile() {
+        imageToShare = image
+    }
+    
     private func saveToAlbum() {
-        imageSaver.save(image.image) { error in
-            // TODO: Show alert
+        Task {
+            do {
+                _ = try await imageSaver.save(image.image)
+            } catch {
+                showAlert = true
+            }
         }
     }
 }

@@ -37,16 +37,19 @@ struct MyPageView: View {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .ignoresSafeArea()
                 
-                if viewStore.shownCircleDatalist.isEmpty {
+                if viewStore.nowFetching {
+                    loadingView()
+                } else if viewStore.shownCircleDatalist.isEmpty {
                     topBar(viewStore, showExportImageButton: false)
                         .padding(.top, 10)
                         .padding(.horizontal, 24)
                     
                     emptyCircleView(shareButtonAction: {
+                        HapticManager.shared.boong()
+                        
                         needToShowProgressView = true
                         viewStore.send(.requestTestURL)
                     })
-                    
                 } else {
                     // Content에 있는 뷰를 캡처하는 래퍼 뷰
                     Screenshotter(
@@ -116,27 +119,25 @@ struct MyPageView: View {
                     
                 }
                 
-                if viewStore.nowFetching || needToShowProgressView {
-                    VStack {
-                        Spacer()
-                        CustomProgressView()
-                        Spacer()
-                        
-                        HStack { Spacer() }
-                    }
-                    .fullFrame()
+                // 로딩 뷰
+                if self.needToShowProgressView {
+                    Color.black
+                        .opacity(0.3)
+                        .ignoresSafeArea()
+                    
+                    CustomProgressView()
                 }
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)
-            .navigationDestination(
-                store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
-                destination: { SettingView(store: $0) })
             .alert(store: store.scope(state: \.$alertState, action: MyPageFeature.Action.alert))
             .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
             .animation(Animation.customInteractiveSpring(), value: viewStore.nowFetching)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
         }
+        .navigationDestination(
+            store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
+            destination: { SettingView(store: $0) })
         .sheet(item: $tempImage, content: { image in
             MypageImageExportPreviewView(image: image, onDismissButtonTapped: {
                 tempImage = nil
@@ -154,8 +155,6 @@ struct MyPageView: View {
         .onAppear {
             store.send(.requestCircle(.top5))
             store.send(.requestCircle(.low5))
-            
-            store.send(.view(.selectSegement(.similar)))
         }
     }
     
@@ -216,12 +215,11 @@ private extension MyPageView {
                 .foregroundColor(DSKitAsset.Color.keymeMediumgray.swiftUIColor)
                 .padding(.bottom, 45)
             
-            // TODO: change
             Button(action: shareButtonAction) {
                 HStack {
                     Spacer()
                     
-                    Text.keyme("친구에게 공유하기", font: .mypage).frame(height: 60)
+                    Text.keyme("테스트 공유하기", font: .body2).frame(height: 60)
                     
                     Spacer()
                 }
@@ -237,12 +235,12 @@ private extension MyPageView {
     }
     
     func topBar(
-        _ viewStore: ViewStore<MyPageFeature.State.View, MyPageFeature.Action.View>,
+        _ viewStore: ViewStore<MyPageFeature.State.View, MyPageFeature.Action.View>?,
         showExportImageButton: Bool
     ) -> some View {
         HStack(spacing: 4) {
             Button(action: {
-                viewStore.send(.enableImageExportMode)
+                viewStore?.send(.enableImageExportMode)
                 graphScale *= exportModeScale
             }) {
                 DSKitAsset.Image.photoExport.swiftUIImage
@@ -254,20 +252,31 @@ private extension MyPageView {
             Spacer()
             
             Text.keyme("마이", font: .body3Semibold)
-            Image(systemName: "info.circle")
-                .resizable()
-                .frame(width: 16, height: 16)
-                .scaledToFit()
             
             Spacer()
             
-            Button(action: { viewStore.send(.prepareSettingView) }) {
+            Button(action: { viewStore?.send(.prepareSettingView) }) {
                 DSKitAsset.Image.setting.swiftUIImage
                     .resizable()
                     .frame(width: 24, height: 24)
             }
         }
         .foregroundColor(.white)
+    }
+    
+    func loadingView() -> some View {
+        VStack {
+            topBar(nil, showExportImageButton: false)
+                .padding(.top, 10)
+                .padding(.horizontal, 24)
+            
+            Spacer()
+            CustomProgressView()
+            Spacer()
+            
+            HStack { Spacer() }
+        }
+        .fullFrame()
     }
 }
 

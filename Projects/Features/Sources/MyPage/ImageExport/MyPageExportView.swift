@@ -79,6 +79,7 @@ extension MyPageView {
                         Spacer()
                         
                         photoCaptureButton(action: {
+                            HapticManager.shared.boong()
                             viewStore.send(.captureImage)
                             captureAction()
                         })
@@ -138,8 +139,8 @@ extension MyPageView {
         
         private func photoCaptureButton(action: @escaping Action) -> some View {
             Button(action: action) {
-                HStack {
-                    Image(systemName: "photo")
+                HStack(spacing: 4) {
+                    DSKitAsset.Image.bragging.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
                         .scaledToFit()
@@ -147,8 +148,8 @@ extension MyPageView {
                 }
             }
             .foregroundColor(.white)
-            .padding(.vertical, 7)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 15)
             .overlay { Capsule().stroke(DSKitAsset.Color.keymeMediumgray.swiftUIColor) }
         }
         

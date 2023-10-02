@@ -196,7 +196,7 @@ extension RegistrationView {
                             .foregroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor.opacity(0.8))
                             .frame(width: outercircleSize - 20, height: outercircleSize - 20)
                         
-                        Image(systemName: "photo")
+                        DSKitAsset.Image.gallery.swiftUIImage
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: iconSize, height: iconSize)

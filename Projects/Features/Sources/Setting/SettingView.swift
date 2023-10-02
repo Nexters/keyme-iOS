@@ -49,6 +49,7 @@ struct SettingView: View {
                     .padding(.horizontal, 34)
                     .padding(.top, 40)
                 }
+                .addCommonNavigationBar()
                 .alert("앗!", isPresented: $showAlert, presenting: alertItem) { item in
                     Button("취소", role: .cancel) { }
                     Button(item.actionButtonName) { item.action() }

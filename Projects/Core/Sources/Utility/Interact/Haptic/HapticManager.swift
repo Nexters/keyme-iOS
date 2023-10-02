@@ -61,6 +61,13 @@ public class HapticManager {
         generator.impactOccurred()
     }
     
+    /// 드르륵
+    public func selectionChanged() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepare()
+        generator.selectionChanged()
+    }
+    
     /// 패턴 재생(패턴은 추후 협의 후 개발해서 추가)
     public func playHapticPattern() {
         do {

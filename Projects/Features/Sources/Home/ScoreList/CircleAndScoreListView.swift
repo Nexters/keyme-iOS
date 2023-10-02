@@ -10,13 +10,14 @@ import SwiftUI
 import Core
 import ComposableArchitecture
 import Domain
+import DSKit
 import Network
 
 public struct CircleAndScoreListFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
-        var scoreListState: ScoreListFeature.State?
+        var scoreListState: ScoreListFeature.State
         
         var view: View
         struct View: Equatable {
@@ -28,6 +29,7 @@ public struct CircleAndScoreListFeature: Reducer {
         }
         
         init(circleData: CircleData) {
+            self.scoreListState = .init()
             self.view = View(circleData: circleData)
         }
     }
@@ -45,6 +47,10 @@ public struct CircleAndScoreListFeature: Reducer {
     }
     
     public var body: some ReducerOf<Self> {
+        Scope(state: \.scoreListState, action: /Action.scoreListAction) {
+            ScoreListFeature()
+        }
+        
         Reduce { state, action in
             switch action {
                 // MARK: - Internal actions
@@ -80,47 +86,35 @@ public struct CircleAndScoreListFeature: Reducer {
                 }
             }
         }
-        .ifLet(
-            \.scoreListState,
-             action: /Action.scoreListAction
-        ) {
-            ScoreListFeature()
-        }
     }
 }
 
 struct CircleAndScoreListView: View {
     private let store: StoreOf<CircleAndScoreListFeature>
-    
+
     init(store: StoreOf<CircleAndScoreListFeature>) {
         self.store = store
     }
     
     var body: some View {
         WithViewStore(store, observe: { $0.view }, send: CircleAndScoreListFeature.Action.view) { viewStore in
-            FocusedCircleDetailView(focusedCircle: viewStore.circleData) { circleData in
-                IfLetStore(store.scope(
+            FocusedCircleDetailView(focusedCircle: viewStore.circleData) { circleData -> ScoreListView in
+                let metaData = circleData.metadata
+                let scoreListStore = store.scope(
                     state: \.scoreListState,
-                    action: CircleAndScoreListFeature.Action.scoreListAction
-                )) { scoreStore in
-                    let metaData = circleData.metadata
-                    
-                    ScoreListView(
-                        ownerId: metaData.ownerId,
-                        questionId: metaData.questionId,
-                        nickname: viewStore.nickname,
-                        keyword: metaData.keyword,
-                        store: scoreStore
-                    )
-                } else: {
-                    CustomProgressView()
-                }
+                    action: CircleAndScoreListFeature.Action.scoreListAction)
+                
+                return ScoreListView(
+                    ownerId: metaData.ownerId,
+                    questionId: metaData.questionId,
+                    nickname: viewStore.nickname,
+                    keyword: metaData.keyword,
+                    store:  scoreListStore
+                )
             }
-            .onAppear {
-                DispatchQueue.global().async {
-                    viewStore.send(.fetchScoreList)
-                }
-            }
+            .addCommonNavigationBar()
+            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
 }

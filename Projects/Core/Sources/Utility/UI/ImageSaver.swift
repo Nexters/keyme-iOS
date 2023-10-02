@@ -10,24 +10,31 @@ import SwiftUI
 import Photos
 
 public class ImageSaver: NSObject {
-    private var completion: ((Error?) -> Void)?
+    private let permissionError = NSError(
+        domain: "ImageSaver",
+        code: -1,
+        userInfo: [NSLocalizedDescriptionKey: "앨범에 접근할 수 없습니다."])
     
-    public func save(_ image: UIImage, completion: @escaping (Error?) -> Void) {
-        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveError), nil)
-        self.completion = completion
-    }
-
-    @objc private func saveError(
-        _ image: UIImage,
-        didFinishSavingWithError error: Error?,
-        contextInfo: UnsafeRawPointer
-    ) {
-        DispatchQueue.main.async {
-            if let error {
-                self.completion?(error)
-            } else {
-                self.completion?(nil)
-            }
+    public func save(_ image: UIImage) async throws -> String? {
+        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        
+        switch status {
+        case .authorized:
+            return try await self.saveImageToLibrary(image: image)
+            
+        default:
+            throw permissionError
         }
+    }
+    
+    private func saveImageToLibrary(image: UIImage) async throws -> String? {
+        var assetIdentifier: String?
+        
+        try await PHPhotoLibrary.shared().performChanges {
+            let creationRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            assetIdentifier = creationRequest.placeholderForCreatedAsset?.localIdentifier
+        }
+        
+        return assetIdentifier
     }
 }

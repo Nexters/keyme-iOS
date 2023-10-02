@@ -16,7 +16,7 @@ public struct ScoreListFeature: Reducer {
     
     public struct State: Equatable {
         var hasNext = true
-        var canFetch = true
+        var nowFetching = false
         var totalCount: Int?
         var scores: [CharacterScore]
         
@@ -28,13 +28,14 @@ public struct ScoreListFeature: Reducer {
     public enum Action: Equatable {
         case loadScores(ownerId: Int, questionId: Int, limit: Int)
         case saveScores(totalCount: Int, scores: [CharacterScore], hasNext: Bool)
+        case clear
     }
     
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case let .loadScores(ownerId, questionId, limit):
-                state.canFetch = false
+                state.nowFetching = true
 
                 return .run { send in
                     let response = try await network.request(
@@ -55,8 +56,12 @@ public struct ScoreListFeature: Reducer {
                 state.totalCount = totalCount
                 state.scores.append(contentsOf: data)
                 state.hasNext = hasNext
-                state.canFetch = true
+                state.nowFetching = false
+                
+            case .clear:
+                state = .init()
             }
+        
             return .none
         }
     }

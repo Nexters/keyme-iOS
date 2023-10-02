@@ -109,7 +109,7 @@ struct DailyTestListView: View {
     ) -> some View {
         LazyVStack(spacing: 12) {
             ForEach(dailyStatistics.questionsStatistics, id: \.self) { questionsStat in
-                VStack(alignment: .leading, spacing: 7) {
+                VStack(alignment: .leading, spacing: 7.5) {
                     HStack(spacing: 12) {
                         ZStack {
                             Circle().foregroundColor(Color.hex(questionsStat.category.color))
@@ -120,9 +120,10 @@ struct DailyTestListView: View {
                         .frame(width: 40, height: 40)
                         
                         Text.keyme("\(nickname)님은 \(questionsStat.title)", font: .body3Semibold)
+                            .lineHeight(140, forFont: .body3Semibold)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .truncationMode(.tail)
-                            .foregroundColor(.white)
+                            .foregroundColor(.white)       
                     }
                     
                     HStack(spacing: 12) {
@@ -142,11 +143,16 @@ struct DailyTestListView: View {
     }
     
     private func loadingView() -> some View {
-        dailyTestList(
-            nickname: "NICKNAME",
-            dailyStatistics: StatisticsData.mockData(questionCount: 7),
-            onItemTapped: { _ in }
-        )
+        let mockData = StatisticsData.mockData(questionCount: 7)
+        return Group {
+            dailyUserStatistics(dailyStatistics: mockData)
+            
+            dailyTestList(
+                nickname: "NICKNAME",
+                dailyStatistics: mockData,
+                onItemTapped: { _ in }
+            )
+        }
         .redacted(reason: .placeholder)
     }
     

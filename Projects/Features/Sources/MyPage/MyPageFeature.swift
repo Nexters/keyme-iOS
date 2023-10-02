@@ -144,7 +144,6 @@ public struct MyPageFeature: Reducer {
                     state.differentCircleDataList = data
                 }
                 
-                state.view.nowFetching = false
                 return .send(.showCircle(state.view.selectedSegment))
                 
             case .showCircle(let segment):
@@ -155,6 +154,8 @@ public struct MyPageFeature: Reducer {
                     state.view.shownCircleDatalist = state.differentCircleDataList
                 }
                 
+                state.view.nowFetching = false
+
                 return .none
                 
             case .showShareSheet(let url):

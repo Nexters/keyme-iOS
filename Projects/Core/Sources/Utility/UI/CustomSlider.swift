@@ -12,7 +12,7 @@ import Foundation
 public struct CustomSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
-    
+
     public init(value: Binding<Double>, range: ClosedRange<Double>) {
         self._value = value
         self.range = range
@@ -49,6 +49,11 @@ public struct CustomSlider: View {
 }
 
 extension CustomSlider {
+    private var currentStep: Int {
+        let step = (range.upperBound - range.lowerBound) / 50
+        return Int(value / step)
+    }
+    
     // 엄지손가락 위치 계산하기
     private func thumbPosition(in geometry: GeometryProxy) -> CGFloat {
         let fraction = (value - range.lowerBound) / (range.upperBound - range.lowerBound)

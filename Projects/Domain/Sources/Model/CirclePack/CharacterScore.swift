@@ -26,6 +26,12 @@ public struct CharacterScore: Identifiable, Equatable {
     }
 }
 
+public extension CharacterScore {
+    static var mock: Self {
+        return CharacterScore(score: 100, date: "2023-09-28T12:34:56.123456")
+    }
+}
+
 public extension QuestionResultScoresDTO {
     func toCharacterScores() -> [CharacterScore] {
         return self.data.results.map { resultItem in
