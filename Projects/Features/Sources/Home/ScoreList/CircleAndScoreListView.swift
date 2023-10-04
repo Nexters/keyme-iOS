@@ -19,30 +19,27 @@ public struct CircleAndScoreListFeature: Reducer {
     public struct State: Equatable {
         var scoreListState: ScoreListFeature.State
         
-        var view: View
-        struct View: Equatable {
-            var nickname: String {
-                @Dependency(\.commonVariable) var commonVariable
-                return commonVariable.nickname
-            }
-            let circleData: CircleData
+        var circleData: CircleData
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
         }
         
         init(circleData: CircleData) {
             self.scoreListState = .init()
-            self.view = View(circleData: circleData)
+            self.circleData = circleData
         }
     }
     
     public enum Action: Equatable {
-        case saveScoresList(totalCount: Int, scores: [CharacterScore])
+        case saveMyScore(myScore: Int)
         
         case scoreListAction(ScoreListFeature.Action)
         
         case view(View)
         
         public enum View {
-            case fetchScoreList
+            case updateMyScore
         }
     }
     
@@ -54,35 +51,30 @@ public struct CircleAndScoreListFeature: Reducer {
         Reduce { state, action in
             switch action {
                 // MARK: - Internal actions
-            case .saveScoresList(let totalCount, let scores):
-                state.scoreListState = ScoreListFeature.State(
-                    totalCount: totalCount,
-                    scores: scores
-                )
-                
+            case .saveMyScore(let myScore):
+                state.circleData = state.circleData.withUpdatedMyScore(Float(myScore))
                 return .none
                 
             case .scoreListAction:
                 return .none
                 
                 // MARK: - View actions
-            case .view(.fetchScoreList):
-                let circleData = state.view.circleData
+            case .view(.updateMyScore):
+                let circleData = state.circleData
                 let metadata = circleData.metadata
                 
                 return .run { send in
-                    let response = try await network.request(
-                        .question(
-                            .scores(ownerId: metadata.ownerId,
-                                    questionId: metadata.questionId,
-                                    limit: 20)
+                    async let questionStat = network.request(
+                        .question(.statistics(
+                            ownerId: metadata.ownerId,
+                            questionId: metadata.questionId)
                         ),
-                        object: QuestionResultScoresDTO.self)
-                    
-                    let totalCount = response.data.totalCount
-                    let scores = response.toCharacterScores()
-                    
-                    await send(.saveScoresList(totalCount: totalCount, scores: scores))
+                        object: QuestionStatisticsDTO.self).data
+                            
+                    await send(.saveMyScore(myScore: try questionStat.myScore))
+                } catch: { error, _ in
+                    // TODO: Show alert
+                    print("@@", error)
                 }
             }
         }
@@ -97,7 +89,7 @@ struct CircleAndScoreListView: View {
     }
     
     var body: some View {
-        WithViewStore(store, observe: { $0.view }, send: CircleAndScoreListFeature.Action.view) { viewStore in
+        WithViewStore(store, observe: { $0 }, send: CircleAndScoreListFeature.Action.view) { viewStore in
             FocusedCircleDetailView(focusedCircle: viewStore.circleData) { circleData -> ScoreListView in
                 let metaData = circleData.metadata
                 let scoreListStore = store.scope(
@@ -115,6 +107,9 @@ struct CircleAndScoreListView: View {
             .addCommonNavigationBar()
             .ignoresSafeArea(edges: .bottom)
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+            .onAppear {
+                viewStore.send(.updateMyScore)
+            }
         }
     }
 }

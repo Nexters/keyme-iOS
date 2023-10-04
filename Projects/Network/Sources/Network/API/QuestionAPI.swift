@@ -11,6 +11,7 @@ import Foundation
 
 public enum QuestionAPI {
     case scores(ownerId: Int, questionId: Int, limit: Int)
+    case statistics(ownerId: Int, questionId: Int)
 }
 
 extension QuestionAPI: BaseAPI {
@@ -18,12 +19,14 @@ extension QuestionAPI: BaseAPI {
         switch self {
         case .scores(_, let questionId, _):
             return "questions/\(questionId)/result/scores"
+        case .statistics(_, let questionId):
+            return "questions/\(questionId)/result/statistics"
         }
     }
     
     public var method: Moya.Method {
         switch self {
-        case .scores:
+        case .scores, .statistics:
             return .get
         }
     }
@@ -48,6 +51,26 @@ extension QuestionAPI: BaseAPI {
               "message": "SUCCESS"
             }
             """.data(using: .utf8)!
+        
+        case .statistics:
+            return """
+            {
+              "code": 200,
+              "data": {
+                "avgScore": 0,
+                "category": {
+                  "color": "string",
+                  "iconUrl": "string",
+                  "name": "string"
+                },
+                "keyword": "참군인",
+                "myScore": 0,
+                "questionId": 0,
+                "title": "불의를 보면 참지 않는다"
+              },
+              "message": "SUCCESS"
+            }
+            """.data(using: .utf8)!
         }
     }
     
@@ -57,6 +80,13 @@ extension QuestionAPI: BaseAPI {
             return .requestParameters(
                 parameters: [
                     "limit": limit,
+                    "ownerId": ownerId
+                ],
+                encoding: URLEncoding.queryString)
+            
+        case let .statistics(ownerId, _):
+            return .requestParameters(
+                parameters: [
                     "ownerId": ownerId
                 ],
                 encoding: URLEncoding.queryString)

@@ -23,6 +23,7 @@ public struct RegistrationFeature: Reducer {
 
         /// 온보딩에서 쓰는 게 아니라 마이페이지에서 쓸 거라면 `true`를
         var isForMyPage = false
+        /// 온보딩에서 쓰는 게 아니라 마이페이지에서 쓸 거라면 `true`를
         
         var status: Status = .notDetermined
         var isNicknameAvailable: Bool?
@@ -41,8 +42,12 @@ public struct RegistrationFeature: Reducer {
             case complete
         }
         
-        public init(isForMyPage: Bool = false) {
+        public init(isForMyPage: Bool = false, nicknamePreset: String? = nil) {
             self.isForMyPage = isForMyPage
+            
+            if let nicknamePreset {
+                nicknameTextFieldString = nicknamePreset
+            }
         }
     }
     

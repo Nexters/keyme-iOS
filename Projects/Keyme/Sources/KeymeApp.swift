@@ -29,7 +29,7 @@ struct KeymeApp: App {
 }
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    @Dependency(\.notificationManager) var notificationManager
+//    @Dependency(\.notificationManager) var notificationManager
     
     func application(
         _ application: UIApplication,
@@ -40,7 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         FirebaseApp.configure()
 
-        Task { await notificationManager.registerPushNotification() }
+//        Task { await notificationManager.registerPushNotification() }
 
         return true
     }

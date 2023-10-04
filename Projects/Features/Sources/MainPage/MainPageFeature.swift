@@ -13,7 +13,7 @@ import Core
 
 public struct MainPageFeature: Reducer {
     public struct State: Equatable {
-        var testId: Int?
+        var testId: Int
         
         @Box var home: HomeFeature.State
         @Box var myPage: MyPageFeature.State
@@ -22,10 +22,12 @@ public struct MainPageFeature: Reducer {
         var view: View = .none
         enum View: Equatable { case none }
         
-        public init(userId: Int, testId: Int, nickname: String) {
+        public init(userId: Int, testId: Int, nickname: String, needsToShowGuideView: Bool) {
             @Dependency(\.commonVariable) var commonVariable
             @Dependency(\.userStorage) var userStorage
             let currentLaunchCount = userStorage.launchCount ?? 0 // 실행한 적 없으면 nil == 0
+            
+            self.testId = testId
             
             commonVariable.userId = userId
             commonVariable.nickname = nickname
@@ -34,7 +36,7 @@ public struct MainPageFeature: Reducer {
             self._myPage = .init(.init(userId: userId, testId: testId))
             
             print("[KEYME] Keyme launched \(currentLaunchCount) times")
-            if currentLaunchCount == 0 {
+            if needsToShowGuideView {
                 onboardingGuideState = OnboardingGuideFeature.State()
             } else if currentLaunchCount == 3 {
                 // Request review
@@ -58,7 +60,6 @@ public struct MainPageFeature: Reducer {
         case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
         case onboardingGuide(PresentationAction<OnboardingGuideFeature.Action>)
-        case getTestId
     }
     
     public var body: some Reducer<State, Action> {
@@ -72,13 +73,6 @@ public struct MainPageFeature: Reducer {
         
         Reduce { state, action in
             switch action {
-            case .getTestId:
-                guard state.testId == nil else {
-                    return .none
-                }
-                
-//                testId =
-                
             case .onboardingGuide(.presented(.dismiss)):
                 state.onboardingGuideState = nil
                 

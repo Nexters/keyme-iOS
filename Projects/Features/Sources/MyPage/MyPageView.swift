@@ -126,6 +126,8 @@ struct MyPageView: View {
                         .ignoresSafeArea()
                     
                     CustomProgressView()
+                        .zIndex(ViewZIndex.high.rawValue)
+                        .center()
                 }
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)

@@ -65,6 +65,18 @@ public extension CircleData {
         let code: Int
         let data: ResponseData
     }
+    
+    func withUpdatedMyScore(_ newScore: Float) -> CircleData {
+        let updatedMetadata = self.metadata.withUpdatedMyScore(newScore)
+        return CircleData(
+            isEmptyCircle: self.isEmptyCircle,
+            color: self.color,
+            xPoint: self.xPoint,
+            yPoint: self.yPoint,
+            radius: self.radius,
+            metadata: updatedMetadata
+        )
+    }
 }
 
 extension CircleData.NetworkResult {

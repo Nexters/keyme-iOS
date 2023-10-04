@@ -115,6 +115,7 @@ private extension SettingView {
             Spacer()
             
             Toggle("", isOn: binding)
+                .tint(DSKitAsset.Color.keymeSkyblue.swiftUIColor)
         }
     }
     

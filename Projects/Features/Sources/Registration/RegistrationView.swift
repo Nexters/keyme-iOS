@@ -145,6 +145,9 @@ public struct RegistrationView: View {
                 .disabled(viewStore.state.canRegister && !nickname.isEmpty ? false : true)
             }
             .padding(.horizontal, 16)
+            .onAppear {
+                nickname = viewStore.nicknameTextFieldString
+            }
             .onChange(of: nickname) { newValue in
                 guard 1 <= newValue.count, newValue.count <= 6 else {
                     if newValue.count > 6 {  // 최대 글자 수를 넘겼으므로 Shake Start

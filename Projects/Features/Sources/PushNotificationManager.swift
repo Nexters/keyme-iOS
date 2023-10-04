@@ -17,35 +17,51 @@ import UserNotifications
 import Network
 
 public final class PushNotificationManager: NSObject {
-    public private(set) var isPushNotificationGranted: Bool = false
+    @Dependency(\.userStorage) var userStorage
+    
+    public var isPushNotificationGranted: Bool {
+        userStorage.pushNotificationEnabled ?? true
+    }
     private let userNotificationCenter = UNUserNotificationCenter.current()
     private var application: UIApplication = .shared
     
     private var fcmToken: String?
     private let tokenSemaphore = DispatchSemaphore(value: 0)
     
+    override init() {
+        super.init()
+        
+        if isPushNotificationGranted {
+            Task { await registerPushNotification() }
+        }
+    }
+    
     /// 쓰레드 블로킹이라 웬만하면 비동기로 처리하세요. 까딱하다 앱 작살남
     public func registerPushNotification() async -> String? {
+        print("@@ reg called")
         userNotificationCenter.delegate = self
         Messaging.messaging().delegate = self
 
         do {
-            isPushNotificationGranted = try await userNotificationCenter.requestAuthorization(
-                options: [.alert, .badge, .sound])
-            
-            guard isPushNotificationGranted else {
-                return nil
-            }
+            try await userNotificationCenter.requestAuthorization(options: [.alert, .badge, .sound])
             
             // 푸시토큰 애플 서버에 등록하기
             let settings = await userNotificationCenter.notificationSettings()
             guard settings.authorizationStatus == .authorized else {
-                isPushNotificationGranted = false
+                userStorage.pushNotificationEnabled = false
                 return nil
             }
             
-            return await waitForToken(for: application)
+            guard let result = await waitForToken(for: application) else {
+                userStorage.pushNotificationEnabled = false
+                return nil
+            }
+            
+            userStorage.pushNotificationEnabled = true
+            return result
         } catch {
+            userStorage.pushNotificationEnabled = false
+            print("@@", error)
             return nil
         }
     }
@@ -53,6 +69,7 @@ public final class PushNotificationManager: NSObject {
     public func unregisterPushNotification() {
         DispatchQueue.main.async {
             self.application.unregisterForRemoteNotifications()
+            self.userStorage.pushNotificationEnabled = false
         }
     }
 

@@ -17,15 +17,13 @@ public struct SettingFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
+        var isPushNotificationEnabled: Bool {
+            @Dependency(\.notificationManager.isPushNotificationGranted) var value
+            return value
+        }
+        
         @PresentationState var alerState: AlertState<Action.Alert>?
         @PresentationState var changeProfileState: RegistrationFeature.State?
-        
-        var isPushNotificationEnabled: Bool
-        
-        init() {
-            @Dependency(\.notificationManager.isPushNotificationGranted) var isPushNotificationGranted
-            self.isPushNotificationEnabled = isPushNotificationGranted
-        }
     }
     
     public enum Action: Equatable {
@@ -66,7 +64,9 @@ public struct SettingFeature: Reducer {
                 }
                 
             case .view(.togglePushNotification):
-                if state.isPushNotificationEnabled == false {
+                let isPushNotificationGranted = notificationManager.isPushNotificationGranted
+                
+                if isPushNotificationGranted == false {
                     // 푸시알림 설정
                     return .run { send in
                         guard await notificationManager.registerPushNotification() != nil else {
@@ -81,7 +81,7 @@ public struct SettingFeature: Reducer {
                 }
                 
             case .view(.changeProfile):
-                state.changeProfileState = RegistrationFeature.State(isForMyPage: true)
+                state.changeProfileState = RegistrationFeature.State(isForMyPage: true, nicknamePreset: commonVariable.nickname)
                 return .none
                 
             // MARK: - Internal actions
@@ -92,7 +92,8 @@ public struct SettingFeature: Reducer {
                 
             // MARK: - Child action
             case .setPushNotificationStatus(let value):
-                state.isPushNotificationEnabled = value
+                
+//                state.isPushNotificationEnabled = value
                 return .none
                 
             case .changeProfileAction(.presented(.finishRegisterResponse(let response))):

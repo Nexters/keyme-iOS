@@ -88,8 +88,9 @@ public struct RootFeature: Reducer {
                             userStorage.profileThumbnailURL = profileThumbnailURL
                         }
                         
+                        let isOnboardingClear = memberInformation.isOnboardingClear ?? false
                         if let userId = memberInformation.id, let nickname = memberInformation.nickname {
-                            if memberInformation.isOnboardingClear != true {
+                            if isOnboardingClear == false {
                                 await send(
                                     .updateState(
                                         .needOnboarding(OnboardingFeature.State(
@@ -97,13 +98,15 @@ public struct RootFeature: Reducer {
                                             nickname: nickname,
                                             testId: try await onboardingTestId))))
                             } else {
+                                // 온보딩 진행한 유저로서 메인페이지 이동
                                 await send(
                                     .updateState(
                                         .canUseApp(
                                             MainPageFeature.State(
                                                 userId: userId,
                                                 testId: try await onboardingTestId,
-                                                nickname: nickname))))
+                                                nickname: nickname, 
+                                                needsToShowGuideView: false))))
                             }
                         } else {
                             await send(.updateState(.needRegistration(RegistrationFeature.State())))
@@ -165,10 +168,12 @@ public struct RootFeature: Reducer {
                     return .send(.updateMemberInformation(withMemberData: nil, authorizationToken: token))
                 }
                 
-                // Goto main page
+                // 온보딩 진행하지 않았떤 유저로서 메인페이지 이동
                 return .send(
                     .updateState(
-                        .canUseApp(MainPageFeature.State(userId: userId, testId: testId, nickname: nickname))))
+                        .canUseApp(
+                            MainPageFeature.State(
+                                userId: userId, testId: testId, nickname: nickname, needsToShowGuideView: true))))
                 
             case .mainPage(.myPage(.setting(.presented(.view(.logout))))):
                 return logout

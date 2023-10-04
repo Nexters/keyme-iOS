@@ -24,7 +24,6 @@ public struct TestStatisticsDTO: Codable {
         public let keyword, title: String
         public let avgScore: Double?
         public let questionId: Int
-        public let myScore: Int?
     }
 }
 
@@ -40,8 +39,7 @@ public extension StatisticsData {
                 keyword: "Keyword \(i)",
                 title: "Title \(i)",
                 avgScore: Double(i * 10 % 101),
-                questionId: -i,
-                myScore: i * 5 % 101
+                questionId: -i
             )
         }
         

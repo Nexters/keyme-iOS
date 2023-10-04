@@ -172,7 +172,7 @@ public struct HomeFeature: Reducer {
             DailyTestListFeature()
         }
         .ifLet(\.$scoreListState, action: /Action.circleAndScoreList) {
-            CircleAndScoreListFeature()
+            CircleAndScoreListFeature()._printChanges()
         }
     }
 }
