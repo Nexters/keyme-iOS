@@ -45,7 +45,6 @@ public struct RootFeature: Reducer {
         
         case updateState(State)
         case updateMemberInformation(withMemberData: MemberUpdateDTO.MemberData?, authorizationToken: String)
-        case registerPushNotification
     }
     
     public var body: some ReducerOf<Self> {
@@ -111,8 +110,6 @@ public struct RootFeature: Reducer {
                         } else {
                             await send(.updateState(.needRegistration(RegistrationFeature.State())))
                         }
-                        
-                        await send(.registerPushNotification)
                     },
                     catch: { _, send in
                         // logout
@@ -122,18 +119,6 @@ public struct RootFeature: Reducer {
                     
             case .updateState(let receivedState):
                 state = receivedState
-                return .none
-                
-            case .registerPushNotification:
-                Task {
-                    guard let token = await notificationManager.registerPushNotification() else {
-                        print("푸시토큰 등록 중 에러 발생")
-                        return
-                    }
-
-                    _ = try await network.request(.registerPushToken(.register(token)))
-                }
-                
                 return .none
                 
             // MARK: - Child actions

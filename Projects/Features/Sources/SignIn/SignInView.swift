@@ -24,10 +24,6 @@ public struct SignInView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            if viewStore.isLoading {
-                CustomProgressView()
-            }
-            
             ZStack(alignment: .center) {
                 Text.keyme("KEYME", font: .checkResult)
                     .foregroundColor(.white)
@@ -50,6 +46,7 @@ public struct SignInView: View {
                 .padding(.bottom, 56)
             }
             .alert(store: store.scope(state: \.$alertState, action: SignInFeature.Action.alert))
+            .fullscreenProgressView(isShown: viewStore.isLoading)
         }
     }
     

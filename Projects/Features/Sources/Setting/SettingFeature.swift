@@ -17,13 +17,16 @@ public struct SettingFeature: Reducer {
     @Dependency(\.keymeAPIManager) var network
     
     public struct State: Equatable {
-        var isPushNotificationEnabled: Bool {
-            @Dependency(\.notificationManager.isPushNotificationGranted) var value
-            return value
-        }
+        var isPushNotificationEnabled: Bool
+        var needToShowProgressView: Bool = false
         
         @PresentationState var alerState: AlertState<Action.Alert>?
         @PresentationState var changeProfileState: RegistrationFeature.State?
+        
+        init() {
+            @Dependency(\.notificationManager.isPushNotificationGranted) var isPushNotificationGranted
+            isPushNotificationEnabled = isPushNotificationGranted
+        }
     }
     
     public enum Action: Equatable {
@@ -65,23 +68,28 @@ public struct SettingFeature: Reducer {
                 
             case .view(.togglePushNotification):
                 let isPushNotificationGranted = notificationManager.isPushNotificationGranted
+                state.needToShowProgressView = true
                 
                 if isPushNotificationGranted == false {
                     // 푸시알림 설정
                     return .run { send in
-                        guard await notificationManager.registerPushNotification() != nil else {
-                            return
-                        }
+                        try await notificationManager.registerPushNotification()
                         await send(.setPushNotificationStatus(true))
+                    } catch: { _, send in
+                        await send(.showAlert(message: "작업을 실행할 수 없습니다. 잠시 후 다시 시도해주세요."))
+                        await send(.setPushNotificationStatus(false))
                     }
                 } else {
                     // 푸시알림 해제
-                    notificationManager.unregisterPushNotification()
-                    return .send(.setPushNotificationStatus(false))
+                    return .run { send in
+                        await notificationManager.unregisterPushNotification()
+                        await send(.setPushNotificationStatus(false))
+                    }
                 }
                 
             case .view(.changeProfile):
-                state.changeProfileState = RegistrationFeature.State(isForMyPage: true, nicknamePreset: commonVariable.nickname)
+                state.changeProfileState = RegistrationFeature.State(
+                    isForMyPage: true, nicknamePreset: commonVariable.nickname)
                 return .none
                 
             // MARK: - Internal actions
@@ -92,8 +100,8 @@ public struct SettingFeature: Reducer {
                 
             // MARK: - Child action
             case .setPushNotificationStatus(let value):
-                
-//                state.isPushNotificationEnabled = value
+                state.isPushNotificationEnabled = value
+                state.needToShowProgressView = false
                 return .none
                 
             case .changeProfileAction(.presented(.finishRegisterResponse(let response))):

@@ -80,14 +80,6 @@ public struct HomeView: View {
                     }
                     .padding(.bottom, 26)
                 }
-                
-                if needToShowProgressView {
-                    Color.black
-                        .opacity(0.3)
-                        .ignoresSafeArea()
-                    
-                    CustomProgressView()
-                }
             }
             .onAppear {
                 if viewStore.isSolvedDailyTest == nil {
@@ -96,6 +88,7 @@ public struct HomeView: View {
             }
             .animation(Animation.customInteractiveSpring(), value: viewStore.isSolvedDailyTest)
             .animation(Animation.customInteractiveSpring(), value: needToShowProgressView)
+            .fullscreenProgressView(isShown: needToShowProgressView)
         }
         .navigationDestination(
             store: store.scope(

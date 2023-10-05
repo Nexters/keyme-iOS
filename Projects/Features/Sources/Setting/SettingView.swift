@@ -57,6 +57,8 @@ struct SettingView: View {
                 } message: { item in
                     Text(item.message)
                 }
+                .fullscreenProgressView(isShown: viewStore.needToShowProgressView)
+                .animation(Animation.customInteractiveSpring(), value: viewStore.needToShowProgressView)
             }
         }
         .navigationDestination(store: store.scope(

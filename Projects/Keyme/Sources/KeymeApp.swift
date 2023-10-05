@@ -19,17 +19,28 @@ struct KeymeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .onOpenURL(perform: { url in
+                .onOpenURL { url in
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
                         AuthController.handleOpenUrl(url: url)
                     }
-                })
+                }
         }
     }
 }
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-//    @Dependency(\.notificationManager) var notificationManager
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        @Dependency(\.notificationManager) var notificationManager
+
+        Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token {
+                notificationManager.passFCMToken(token)
+            }
+        }
+    }
     
     func application(
         _ application: UIApplication,
@@ -38,9 +49,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if let kakaoAPIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_API_KEY") as? String {
             KakaoSDK.initSDK(appKey: kakaoAPIKey)
         }
+        
         FirebaseApp.configure()
-
-//        Task { await notificationManager.registerPushNotification() }
 
         return true
     }

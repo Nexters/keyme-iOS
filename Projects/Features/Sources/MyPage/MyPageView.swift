@@ -118,17 +118,6 @@ struct MyPageView: View {
                     .zIndex(ViewZIndex.high.rawValue)
                     
                 }
-                
-                // 로딩 뷰
-                if self.needToShowProgressView {
-                    Color.black
-                        .opacity(0.3)
-                        .ignoresSafeArea()
-                    
-                    CustomProgressView()
-                        .zIndex(ViewZIndex.high.rawValue)
-                        .center()
-                }
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)
             .alert(store: store.scope(state: \.$alertState, action: MyPageFeature.Action.alert))
@@ -136,6 +125,7 @@ struct MyPageView: View {
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
             .animation(Animation.customInteractiveSpring(), value: viewStore.nowFetching)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
+            .fullscreenProgressView(isShown: needToShowProgressView)
         }
         .navigationDestination(
             store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),

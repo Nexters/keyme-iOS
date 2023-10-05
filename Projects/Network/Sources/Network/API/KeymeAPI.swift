@@ -11,7 +11,7 @@ import Moya
 
 public enum KeymeAPI {
     case myPage(MyPageAPI)
-    case registerPushToken(PushTokenAPI)
+    case pushToken(PushTokenAPI)
     case auth(AuthorizationAPI)
     case registration(RegistrationAPI)
     case member(MemberAPI)
@@ -25,7 +25,7 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .myPage(let api):
             return api.path
-        case .registerPushToken(let api):
+        case .pushToken(let api):
             return api.path
         case .auth(let api):
             return api.path
@@ -46,7 +46,7 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .myPage(let api):
             return api.method
-        case .registerPushToken(let api):
+        case .pushToken(let api):
             return api.method
         case .auth(let api):
             return api.method
@@ -67,7 +67,7 @@ extension KeymeAPI: BaseAPI {
         switch self {
         case .myPage(let api):
             return api.task
-        case .registerPushToken(let api):
+        case .pushToken(let api):
             return api.task
         case .auth(let api):
             return api.task

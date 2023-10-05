@@ -15,3 +15,31 @@ public struct CustomProgressView: View {
         ProgressView().tint(Color.white)
     }
 }
+
+public extension View {
+    func fullscreenProgressView(isShown: Bool) -> some View {
+        self.modifier(FullScreenProgressView(isShown: isShown))
+    }
+}
+
+private struct FullScreenProgressView: ViewModifier {
+    let isShown: Bool
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            content
+                .zIndex(0)
+            
+            if isShown {
+                Color.black
+                    .opacity(0.3)
+                    .ignoresSafeArea()
+                    .zIndex(1)
+                
+                CustomProgressView()
+                    .zIndex(2)
+                    .center()
+            }
+        }
+    }
+}

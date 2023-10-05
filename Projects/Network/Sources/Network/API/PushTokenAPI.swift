@@ -11,12 +11,13 @@ import Moya
 
 public enum PushTokenAPI {
     case register(String)
+    case delete(String)
 }
 
 extension PushTokenAPI: BaseAPI {
     public var path: String {
         switch self {
-        case .register:
+        case .register, .delete:
             return "members/devices"
         }
     }
@@ -25,12 +26,14 @@ extension PushTokenAPI: BaseAPI {
         switch self {
         case .register:
             return .post
+        case .delete:
+            return .delete
         }
     }
     
     public var task: Moya.Task {
         switch self {
-        case .register(let token):
+        case .register(let token), .delete(let token):
             return .requestParameters(parameters: ["token": token], encoding: JSONEncoding.default)
         }
     }
