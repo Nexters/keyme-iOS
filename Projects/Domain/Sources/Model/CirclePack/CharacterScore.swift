@@ -17,8 +17,7 @@ public struct CharacterScore: Identifiable, Equatable {
     public let date: Date
     
     public init(score: Int, date: String) {
-        globalDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
-        globalDateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        globalDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         globalDateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         
         self.score = score
@@ -28,7 +27,7 @@ public struct CharacterScore: Identifiable, Equatable {
 
 public extension CharacterScore {
     static var mock: Self {
-        return CharacterScore(score: 100, date: "2023-09-28T12:34:56.123456")
+        return CharacterScore(score: 100, date: "2000-01-01T12:34:56")
     }
 }
 

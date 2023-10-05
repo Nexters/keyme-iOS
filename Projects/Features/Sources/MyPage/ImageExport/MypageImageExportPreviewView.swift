@@ -140,7 +140,9 @@ struct MypageImageExportPreviewView: View {
                     return
                 }
                 
-                await UIApplication.shared.open(url)
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
             } catch {
                 showAlert = AlertItem.error
             }
