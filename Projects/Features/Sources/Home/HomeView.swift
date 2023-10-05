@@ -45,7 +45,8 @@ public struct HomeView: View {
                                         keyword: questionsStat.keyword,
                                         averageScore: Float(questionsStat.avgScore ?? 0.0),
                                         myScore: 0 // 임시로 채워놓은 값. 구조상 쩔수없음..
-                                    ))))
+                                    )), 
+                                questionText: questionsStat.title))
                         }
                         .overlay {
                             LinearGradient(

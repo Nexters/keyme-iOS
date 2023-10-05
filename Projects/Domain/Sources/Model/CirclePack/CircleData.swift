@@ -125,7 +125,7 @@ public extension CircleData.NetworkResult {
             
             let metadata = CircleMetadata(
                 ownerId: data.memberId,
-                questionId: questionStatistic.questionId,
+                questionId: questionStatistic.questionId, 
                 iconURL: URL(string: category.iconUrl),
                 keyword: questionStatistic.keyword,
                 averageScore: Float(questionStatistic.avgScore),

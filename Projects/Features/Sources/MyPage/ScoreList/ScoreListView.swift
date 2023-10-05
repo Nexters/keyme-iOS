@@ -22,14 +22,12 @@ struct ScoreListView: View {
     private let ownerId: Int
     private let questionId: Int
     private let nickname: String
-    private let keyword: String
     private let store: StoreOf<ScoreListFeature>
     
     init(
         ownerId: Int,
         questionId: Int,
         nickname: String,
-        keyword: String,
         store: StoreOf<ScoreListFeature>
     ) {
         self.formatter = RelativeDateTimeFormatter()
@@ -39,7 +37,6 @@ struct ScoreListView: View {
         self.ownerId = ownerId
         self.questionId = questionId
         self.nickname = nickname
-        self.keyword = keyword
         self.store = store
     }
     
@@ -60,18 +57,22 @@ struct ScoreListView: View {
                 }
                 .padding(.horizontal, 17)
             }
-            .onAppear { loadScores(for: viewStore) }
+            .onAppear { initializeInformation(using: viewStore) }
             .onDisappear { viewStore.send(.clear) }
             .animation(Animation.customInteractiveSpring(), value: viewStore.nowFetching)
         }
     }
     
     // MARK: - Subviews
-    
     private func headerView(using viewStore: ViewStoreOf<ScoreListFeature>) -> some View {
         VStack(alignment: .leading) {
-            Text.keyme("\(nickname)님의 \(keyword) 정도는?", font: .body1)
-                .foregroundColor(keymeWhite)
+            if let questionText = viewStore.questionText {
+                Text.keyme(nickname + questionText, font: .body1)
+                    .foregroundColor(keymeWhite)
+            } else {
+                Text("")
+            }
+            
             Text.keyme("응답자 수 \(viewStore.state.totalCount ?? 0)명", font: .body3Regular)
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor.opacity(0.6))
         }
@@ -118,9 +119,10 @@ struct ScoreListView: View {
     
     // MARK: - Helpers
     
-    private func loadScores(for viewStore: ViewStoreOf<ScoreListFeature>) {
+    private func initializeInformation(using viewStore: ViewStoreOf<ScoreListFeature>) {
         guard !viewStore.nowFetching else { return }
         viewStore.send(.loadScores(ownerId: ownerId, questionId: questionId, limit: scoreFetchLimit))
+        viewStore.send(.loadQuestionInformation(ownerId: ownerId, questionId: questionId))
     }
     
     private func checkForInfiniteScrolling(scoreData: CharacterScore, with viewStore: ViewStoreOf<ScoreListFeature>) {

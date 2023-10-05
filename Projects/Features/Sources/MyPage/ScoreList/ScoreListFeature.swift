@@ -15,9 +15,14 @@ public struct ScoreListFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
     public struct State: Equatable {
+        var activeNetworkCallCount = 0
+        
         var hasNext = true
-        var nowFetching = false
+        var nowFetching: Bool {
+            activeNetworkCallCount != 0
+        }
         var totalCount: Int?
+        var questionText: String?
         var scores: [CharacterScore]
         
         public init(totalCount: Int? = nil, scores: [CharacterScore] = []) {
@@ -26,6 +31,8 @@ public struct ScoreListFeature: Reducer {
     }
     
     public enum Action: Equatable {
+        case loadQuestionInformation(ownerId: Int, questionId: Int)
+        case saveQuestionInformation(text: String)
         case loadScores(ownerId: Int, questionId: Int, limit: Int)
         case saveScores(totalCount: Int, scores: [CharacterScore], hasNext: Bool)
         case clear
@@ -34,8 +41,24 @@ public struct ScoreListFeature: Reducer {
     public var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .loadQuestionInformation(let ownerId, let questionId):
+                state.activeNetworkCallCount += 1
+                
+                return .run { send in
+                    let response = try await network.request(
+                        .question(.statistics(ownerId: ownerId, questionId: questionId)),
+                        object: QuestionStatisticsDTO.self
+                    ).data
+                    
+                    await send(.saveQuestionInformation(text: response.title))
+                }
+                
+            case .saveQuestionInformation(let questionText):
+                state.questionText = questionText
+                state.activeNetworkCallCount -= 1
+                
             case let .loadScores(ownerId, questionId, limit):
-                state.nowFetching = true
+                state.activeNetworkCallCount += 1
 
                 return .run { send in
                     let response = try await network.request(
@@ -56,7 +79,7 @@ public struct ScoreListFeature: Reducer {
                 state.totalCount = totalCount
                 state.scores.append(contentsOf: data)
                 state.hasNext = hasNext
-                state.nowFetching = false
+                state.activeNetworkCallCount -= 1
                 
             case .clear:
                 state = .init()

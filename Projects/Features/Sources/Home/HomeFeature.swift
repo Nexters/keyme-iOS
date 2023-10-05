@@ -52,7 +52,7 @@ public struct HomeFeature: Reducer {
         case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
         case showTestResultView(testData: KeymeTestsModel)
-        case showScoreList(circleData: CircleData)
+        case showScoreList(circleData: CircleData, questionText: String)
         case showErrorAlert(HomeFeatureError)
 
         case alert(PresentationAction<Alert>)
@@ -135,8 +135,8 @@ public struct HomeFeature: Reducer {
                     testData: testData
                 )
                 
-            case .showScoreList(let circleData):
-                state.scoreListState = CircleAndScoreListFeature.State(circleData: circleData)
+            case .showScoreList(let circleData, let questionText):
+                state.scoreListState = CircleAndScoreListFeature.State(circleData: circleData, questionText: questionText)
                 
             case .showErrorAlert(let error):
                 if case .network = error {

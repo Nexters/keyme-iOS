@@ -175,7 +175,6 @@ private extension MyPageView {
                     ownerId: viewStore.userId,
                     questionId: data.metadata.questionId,
                     nickname: viewStore.nickname,
-                    keyword: data.metadata.keyword,
                     store: scoreListStore)
             })
         .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)

@@ -19,14 +19,16 @@ public struct CircleAndScoreListFeature: Reducer {
     public struct State: Equatable {
         var scoreListState: ScoreListFeature.State
         
+        let questionText: String
         var circleData: CircleData
         var nickname: String {
             @Dependency(\.commonVariable) var commonVariable
             return commonVariable.nickname
         }
         
-        init(circleData: CircleData) {
+        init(circleData: CircleData, questionText: String) {
             self.scoreListState = .init()
+            self.questionText = questionText
             self.circleData = circleData
         }
     }
@@ -100,7 +102,6 @@ struct CircleAndScoreListView: View {
                     ownerId: metaData.ownerId,
                     questionId: metaData.questionId,
                     nickname: viewStore.nickname,
-                    keyword: metaData.keyword,
                     store:  scoreListStore
                 )
             }
