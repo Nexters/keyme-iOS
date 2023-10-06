@@ -12,12 +12,13 @@ import Network
 
 public struct TestResultModel: Equatable, Hashable {
     public let title: String
-    public let nickname: String = "키미" // TODO: 추후에 수정
+    public let keyword: String
     public let score: Int
     public let icon: IconModel
     
     public static let EMPTY: TestResultModel = .init(
         title: "",
+        keyword: "",
         score: 0,
         icon: IconModel.EMPTY)
 }
@@ -25,7 +26,8 @@ public struct TestResultModel: Equatable, Hashable {
 public extension ResultDTO {
     func toModel() -> TestResultModel {
         return TestResultModel(
-            title: keyword,
+            title: title,
+            keyword: keyword,
             score: score,
             icon: IconModel(imageURL: category.iconUrl,
                             color: Color.hex(category.color))

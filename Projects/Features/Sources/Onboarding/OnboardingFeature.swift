@@ -120,7 +120,8 @@ public struct OnboardingFeature: Reducer {
             case .showResult(data: let data):
                 state.testResultState = TestResultFeature.State(
                     testResultId: data.testResultId,
-                    testId: state.testId
+                    testId: state.testId,
+                    nickname: state.nickname
                 )
                 
             case .succeeded, .failed:

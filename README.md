@@ -4,7 +4,7 @@
 </div>
 
 <div align="center">
-    <h3>지금 Keyme를 만나보세요 🚀</h3>
+    <h4>지금 Keyme를 만나보세요</h4>
     <br>
     <a href="https://apps.apple.com/your-app-link" target="_blank">
         <img src="Assets/appstore.png" height="60">
@@ -26,7 +26,7 @@
 #### 👀 친구들과 함께풀기
 성격테스트를 친구들과 공유하고, 당신의 첫인상과 새로운 모습에 대해 알아보세요.
 
-#### 🎨 성격 공유하기
+#### 🎨 자랑하기
 **Keyme**의 성격 그래프를 SNS에 공유해 당신의 유니크한 성격을 자랑해보세요.
 
 ## :computer: Environment

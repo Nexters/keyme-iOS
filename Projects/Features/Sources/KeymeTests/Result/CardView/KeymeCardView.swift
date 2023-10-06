@@ -14,9 +14,11 @@ import DSKit
 import Domain
 
 public struct KeymeCardView: View {
+    private let nickname: String
     private let testResult: TestResultModel
     
-    public init(testResult: TestResultModel) {
+    public init(nickname: String, testResult: TestResultModel) {
+        self.nickname = nickname
         self.testResult = testResult
     }
     
@@ -49,13 +51,13 @@ public struct KeymeCardView: View {
     // 카드 상단 뷰 (키워드, 타이틀, 점수)
     func cardTopView() -> some View {
         VStack(alignment: .leading) {
-            Text.keyme(testResult.title, font: .body4)
+            Text.keyme(testResult.keyword, font: .body4)
                 .foregroundColor(.white.opacity(0.3))
             
             Spacer()
                 .frame(height: 8)
             
-            Text.keyme("\(testResult.nickname)의 \(testResult.title) 정도는?", font: .heading1)
+            Text.keyme(nickname + testResult.title, font: .heading1)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
             

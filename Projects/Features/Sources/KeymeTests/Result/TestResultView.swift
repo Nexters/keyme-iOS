@@ -77,11 +77,13 @@ public struct TestResultView: View {
     }
     
     // 결과 확인 카드 뷰
-    @MainActor func resultCardView(_ viewStore: ViewStore<TestResultFeature.State, TestResultFeature.Action>) -> some View {
+    @MainActor func resultCardView(
+        _ viewStore: ViewStore<TestResultFeature.State, TestResultFeature.Action>
+    ) -> some View {
         ZStack {
             TabView(selection: viewStore.$testResult) {
                 ForEach(viewStore.testResults, id:\.self) {
-                    KeymeCardView(testResult: $0)
+                    KeymeCardView(nickname: viewStore.nickname, testResult: $0)
                         .tag($0)
                 }
             }
