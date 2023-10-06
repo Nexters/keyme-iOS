@@ -120,7 +120,6 @@ public struct TestResultView: View {
             Task {
                 // TODO: url 주석단거로 바꾸기
                 let url = "https://keyme-frontend.vercel.app/test/\(17)"
-//                let url = "https://keyme-frontend.vercel.app/test/5"
                 let shortURL = try await shortURLManager.request(
                     .shortenURL(longURL: url),
                     object: BitlyResponse.self).link
