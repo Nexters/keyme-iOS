@@ -53,7 +53,11 @@ public extension StatisticsData {
     }
 }
 
-extension QuestionsStatisticsData: Equatable, Hashable {
+extension QuestionsStatisticsData: Equatable, Hashable, Identifiable {
+    public var id: Int {
+        questionId
+    }
+    
     public static func == (lhs: TestStatisticsDTO.QuestionsStatisticsData, rhs: TestStatisticsDTO.QuestionsStatisticsData) -> Bool {
         lhs.questionId == rhs.questionId
     }

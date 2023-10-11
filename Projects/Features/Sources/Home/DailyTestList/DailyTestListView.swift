@@ -108,7 +108,7 @@ struct DailyTestListView: View {
         onItemTapped: @escaping (QuestionsStatisticsData) -> Void
     ) -> some View {
         LazyVStack(spacing: 12) {
-            ForEach(dailyStatistics.questionsStatistics, id: \.self) { questionsStat in
+            ForEach(dailyStatistics.questionsStatistics) { questionsStat in
                 VStack(alignment: .leading, spacing: 7.5) {
                     HStack(spacing: 12) {
                         ZStack {
