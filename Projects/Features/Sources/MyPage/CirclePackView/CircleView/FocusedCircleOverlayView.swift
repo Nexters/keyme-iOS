@@ -11,90 +11,64 @@ import DSKit
 import Domain
 import SwiftUI
 
-final class FocusedCircleOverlayViewAction {
-    var onDismiss: () -> Void
-    var onDragChanged: (DragGesture.Value) -> Void
-    var onDragEnded: (DragGesture.Value) -> Void
+struct FocusedCircleDetailView<DetailView: View>: View {
+    @Namespace var namespace
+    @State var isPersonalityCirclePressed = false
+    @State private var currentSheet: SheetPosition = .middle
+    @State private var currentSheetOffset: CGFloat = 0
+    @State private var doneDragging = true
+
+    let maxSheetOffset: CGFloat = 200
+    let idealSheetHeight: CGFloat = 400
+    
+    let focusedCircleData: CircleData
+    let detailViewBuilder: (CircleData) -> DetailView
     
     init(
-        onDismiss: @escaping () -> Void = {},
+        focusedCircle: CircleData,
+        detailViewBuilder: @escaping (CircleData) -> DetailView,
         onDragChanged: @escaping (DragGesture.Value) -> Void = { _ in },
         onDragEnded: @escaping (DragGesture.Value) -> Void = { _ in }
     ) {
-        self.onDismiss = onDismiss
-        self.onDragChanged = onDragChanged
-        self.onDragEnded = onDragEnded
-    }
-}
-
-final class FocusedCircleOverlayViewOption {
-    var showTopBar: Bool
-    var backgroundColor: Color
-    
-    init(
-        showTopBar: Bool = false,
-        backgroundColor: Color = DSKitAsset.Color.keymeBottom.swiftUIColor
-    ) {
-        self.showTopBar = showTopBar
-        self.backgroundColor = backgroundColor
-    }
-}
-
-struct FocusedCircleOverlayView<DetailView: View>: View {
-    @Namespace private var namespace
-    
-    private let magnifiedCircleRatio: CGFloat = 0.9
-    
-    @State private var doneDragging: Bool = false
-    
-    @State private var currentSheet: SheetPosition = .middle
-    @State private var currentSheetOffset: CGFloat = 0
-    @State private var idealSheetHeight: CGFloat = 400
-    
-    private let focusedCircle: CircleData
-    private var action: FocusedCircleOverlayViewAction
-    private var option: FocusedCircleOverlayViewOption
-
-    private let maxShrinkageDistance: CGFloat
-    var detailViewBuilder: () -> DetailView
-    
-    internal init(
-        focusedCircle: CircleData,
-        maxShrinkageDistance: CGFloat,
-        option: FocusedCircleOverlayViewOption = .init(),
-        action: FocusedCircleOverlayViewAction = .init(),
-        @ViewBuilder detailViewBuilder: @escaping () -> DetailView
-    ) {
-        self.focusedCircle = focusedCircle
-        self.action = action
-        self.option = option
-
-        self.maxShrinkageDistance = maxShrinkageDistance
+        self.focusedCircleData = focusedCircle
         self.detailViewBuilder = detailViewBuilder
     }
-    
+
     var body: some View {
-        VStack(alignment: .center) {
-            if option.showTopBar {
-                topBar
-                    .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-                    .padding(.horizontal, 17)
+        VStack {
+            Group {
+                if isPersonalityCirclePressed {
+                    ScoreAndPersonalityView(
+                        title: "나의 점수",
+                        score: focusedCircleData.metadata.myScore)
+                } else {
+                    ScoreAndPersonalityView(
+                        circleData: focusedCircleData)
+                }
             }
+            .transition(.move(edge: .top).combined(with: .opacity))
             
             FocusedCircleView(
                 namespace: namespace,
                 shrinkageDistance: currentSheetOffset,
-                maxShrinkageDistance: maxShrinkageDistance,
-                outboundLength: UIScreen.main.bounds.width * magnifiedCircleRatio,
+                maxShrinkageDistance: maxSheetOffset,
+                outboundLength: UIScreen.main.bounds.width * 0.9,
                 blinkCircle: false,
-                circleData: focusedCircle)
+                circleData: focusedCircleData)
             .onDragChanged(self.onDragChanged)
             .onDragEnded(self.onDragEnded)
-            .padding(.top, 20)
-
+            .onLongPressStarted {
+                isPersonalityCirclePressed = true
+            }
+            .onLongPressEnded {
+                isPersonalityCirclePressed = false
+            }
+            .transition(.offset(x: 1, y: 1).combined(with: .opacity))
+            .padding(.vertical, 12)
+            
             VStack {
                 BottomSheetWrapperView {
-                    detailViewBuilder()
+                    detailViewBuilder(focusedCircleData)
                 }
                 .onDragChanged(self.onDragChanged)
                 .onDragEnded(self.onDragEnded)
@@ -102,66 +76,31 @@ struct FocusedCircleOverlayView<DetailView: View>: View {
             .frame(
                 minWidth: UIScreen.main.bounds.width,
                 maxWidth: UIScreen.main.bounds.width,
-                idealHeight: idealSheetHeight)
+                idealHeight: idealSheetHeight
+            )
             .cornerRadius(16, corners: [.topLeft, .topRight])
+            .transition(.move(edge: .bottom))
         }
-        .frame(width: UIScreen.main.bounds.width)
-        .background(option.backgroundColor)
-        .ignoresSafeArea(edges: [.bottom])
         .animation(
-            customInteractiveSpringAnimation,
+            Animation.customInteractiveSpring(),
+            value: isPersonalityCirclePressed)
+        .animation(
+            Animation.customInteractiveSpring(),
+            value: focusedCircleData)
+        .animation(
+            Animation.customInteractiveSpring(),
             value: doneDragging)
-    }
-    
-    enum SheetPosition: CaseIterable {
-        case dismiss
-        case middle
-        case high
-        
-        var position: CGFloat {
-            switch self {
-            case .high:
-                return -200
-            case .middle:
-                return 0
-            case .dismiss:
-                return 0
-            }
-        }
-    }
-    
-    var customInteractiveSpringAnimation: Animation {
-        .timingCurve(0.175, 0.885, 0.32, 1.05, duration: 0.5)
+        .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
     }
 }
 
-extension FocusedCircleOverlayView {
-    var topBar: some View {
-        ZStack(alignment: .center) {
-            Text("내 성격 더 보기")
-                .font(.Keyme.body3Semibold)
-            
-            HStack {
-                Spacer()
-                
-                Button(action: action.onDismiss) {
-                    Image(systemName: "xmark")
-                        .resizable()
-                        .frame(width: 24, height: 24)
-                        .scaledToFit()
-                }
-            }
-        }
-    }
-}
-
-private extension FocusedCircleOverlayView {
+private extension FocusedCircleDetailView {
     func onDragChanged(_ value: DragGesture.Value) {
         doneDragging = false
         currentSheetOffset =
             currentSheet.position + value.translation.height.between(
-                min: -maxShrinkageDistance,
-                max: maxShrinkageDistance)
+                min: -maxSheetOffset,
+                max: maxSheetOffset)
     }
     
     func onDragEnded(_ value: DragGesture.Value) {
@@ -182,24 +121,22 @@ private extension FocusedCircleOverlayView {
         
         currentSheetOffset = currentSheet.position
         doneDragging = true
+    }
+    
+    enum SheetPosition: CaseIterable {
+        case dismiss
+        case middle
+        case high
         
-        if case .dismiss = currentSheet { action.onDismiss() }
-    }
-}
-
-extension FocusedCircleOverlayView {
-    func showTopBar(_ show: Bool) -> FocusedCircleOverlayView {
-        self.option.showTopBar = show
-        return self
-    }
-    
-    func backgroundColor(_ color: Color) -> FocusedCircleOverlayView {
-        self.option.backgroundColor = color
-        return self
-    }
-    
-    func onDismiss(_ action: @escaping () -> Void) -> FocusedCircleOverlayView {
-        self.action.onDismiss = action
-        return self
+        var position: CGFloat {
+            switch self {
+            case .high:
+                return -200
+            case .middle:
+                return 0
+            case .dismiss:
+                return 0
+            }
+        }
     }
 }

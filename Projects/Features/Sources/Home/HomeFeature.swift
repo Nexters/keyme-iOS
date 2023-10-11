@@ -11,6 +11,7 @@ import Domain
 import Network
 import Foundation
 
+// MARK: MMVP에 한해서 Daily 테스트를 Onboarding 테스트로 대체합니다.
 public struct HomeFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
     
@@ -19,6 +20,8 @@ public struct HomeFeature: Reducer {
         @PresentationState var alertState: AlertState<Action.Alert>?
         @PresentationState var startTestState: StartTestFeature.State?
         @PresentationState var dailyTestListState: DailyTestListFeature.State?
+        @PresentationState var scoreListState: CircleAndScoreListFeature.State?
+        
         var authorizationToken: String? {
             @Dependency(\.keymeAPIManager.authorizationToken) var authorizationToken
             return authorizationToken
@@ -26,14 +29,17 @@ public struct HomeFeature: Reducer {
         var view: View
         
         struct View: Equatable {
-            let nickname: String
-            var dailyTestId: Int?
-            var isSolvedDailyTest: Bool = false
-            var testId: Int?
+            var nickname: String {
+                @Dependency(\.commonVariable) var commonVariable
+                return commonVariable.nickname
+            }
+            let userId: Int
+            var testId: Int
+            var isSolvedDailyTest: Bool?
         }
         
-        public init(nickname: String) {
-            self.view = View(nickname: nickname)
+        public init(userId: Int, testId: Int) {
+            self.view = View(userId: userId, testId: testId)
         }
     }
     
@@ -46,11 +52,13 @@ public struct HomeFeature: Reducer {
         case saveTestId(Int)
         case showTestStartView(testData: KeymeTestsModel)
         case showTestResultView(testData: KeymeTestsModel)
+        case showScoreList(circleData: CircleData, questionText: String)
         case showErrorAlert(HomeFeatureError)
 
         case alert(PresentationAction<Alert>)
         case startTest(PresentationAction<StartTestFeature.Action>)
         case dailyTestList(PresentationAction<DailyTestListFeature.Action>)
+        case circleAndScoreList(PresentationAction<CircleAndScoreListFeature.Action>)
         
         enum View {}
         
@@ -85,7 +93,8 @@ public struct HomeFeature: Reducer {
             switch action {
             case .fetchDailyTests:
                 return .run { send in
-                    let fetchedTest = try await network.request(.test(.daily), object: KeymeTestsDTO.self)
+                    // MARK: 나중에 daily로 변경
+                    let fetchedTest = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
                     
                     let testData = fetchedTest.toKeymeTestsModel()
                     
@@ -108,20 +117,17 @@ public struct HomeFeature: Reducer {
                 state.view.testId = testId
                 
             case .showTestStartView(let testData):
-                state.view.dailyTestId = testData.testId
                 guard let authorizationToken = state.authorizationToken else {
                     return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
                 }
                 
                 state.startTestState = StartTestFeature.State(
-                    nickname: state.view.nickname,
                     testData: testData,
                     authorizationToken: authorizationToken
                 )
 
             case .showTestResultView(let testData):
-                state.view.dailyTestId = testData.testId
-                guard let authorizationToken = state.authorizationToken else {
+                guard state.authorizationToken != nil else {
                     return .send(.showErrorAlert(.cannotGetAuthorizationInformation))
                 }
                 
@@ -129,19 +135,23 @@ public struct HomeFeature: Reducer {
                     testData: testData
                 )
                 
+            case .showScoreList(let circleData, let questionText):
+                state.scoreListState = CircleAndScoreListFeature.State(circleData: circleData, questionText: questionText)
+                
             case .showErrorAlert(let error):
                 if case .network = error {
                     state.alertState = .errorWhileNetworking
                     return .none
                 }
                 
-                state.alertState = AlertState.errorWithMessage(
+                state.alertState = .errorWithMessage(
                     error.localizedDescription,
                     actions: {
                         ButtonState(action: .error(.cannotGetAuthorizationInformation), label: { TextState("닫기") })
                     })
                 return .none
                 
+            // MARK: Child stores
             case .alert(.presented(.error(let error))):
                 if case .cannotGetAuthorizationInformation = error {
                     return .send(.requestLogout)
@@ -160,6 +170,9 @@ public struct HomeFeature: Reducer {
         }
         .ifLet(\.$dailyTestListState, action: /Action.dailyTestList) {
             DailyTestListFeature()
+        }
+        .ifLet(\.$scoreListState, action: /Action.circleAndScoreList) {
+            CircleAndScoreListFeature()._printChanges()
         }
     }
 }

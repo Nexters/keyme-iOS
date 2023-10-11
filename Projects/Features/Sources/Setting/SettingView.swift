@@ -30,6 +30,7 @@ struct SettingView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 30) {
                         section(title: "개인정보") {
+                            changeProfileButton(action: { viewStore.send(.changeProfile) })
                             logoutButton(action: { viewStore.send(.logout) })
                             withdrawlButton(action: { viewStore.send(.withdrawal) })
                         }
@@ -49,19 +50,41 @@ struct SettingView: View {
                     .padding(.horizontal, 34)
                     .padding(.top, 40)
                 }
+                .addCommonNavigationBar()
                 .alert("앗!", isPresented: $showAlert, presenting: alertItem) { item in
                     Button("취소", role: .cancel) { }
                     Button(item.actionButtonName) { item.action() }
                 } message: { item in
                     Text(item.message)
                 }
+                .fullscreenProgressView(isShown: viewStore.needToShowProgressView)
+                .animation(Animation.customInteractiveSpring(), value: viewStore.needToShowProgressView)
             }
+        }
+        .navigationDestination(store: store.scope(
+            state: \.$changeProfileState,
+            action: SettingFeature.Action.changeProfileAction)
+        ) { store in
+            RegistrationView(store: store)
+                .addCommonNavigationBar()
+                .background {
+                    DSKitAsset.Color.keymeBlack.swiftUIColor
+                        .ignoresSafeArea()
+                }
         }
     }
 }
 
 private extension SettingView {
-    func logoutButton(action: @escaping () -> Void) -> some View {
+    typealias Action = () -> Void
+    
+    func changeProfileButton(action: @escaping Action) -> some View {
+        Button(action: action) {
+            item(text: "프로필 정보 변경").frame(minWidth: 0, maxWidth: .infinity)
+        }
+    }
+    
+    func logoutButton(action: @escaping Action) -> some View {
         Button(action: {
             showAlert = true
             alertItem = AlertItem(
@@ -74,7 +97,7 @@ private extension SettingView {
         }
     }
     
-    func withdrawlButton(action: @escaping () -> Void) -> some View {
+    func withdrawlButton(action: @escaping Action) -> some View {
         Button(action: {
             showAlert = true
             alertItem = AlertItem(
@@ -94,6 +117,7 @@ private extension SettingView {
             Spacer()
             
             Toggle("", isOn: binding)
+                .tint(DSKitAsset.Color.keymeSkyblue.swiftUIColor)
         }
     }
     

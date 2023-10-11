@@ -19,6 +19,7 @@ public struct CirclePackView<DetailView: View>: View {
     
     // 애니메이션 관련
     @State private var doneDragging = true
+    @State private var firstFetch = true
     
     @State private var currentSheet: SheetPosition = .middle
     @State private var currentSheetOffset: CGFloat = 0
@@ -46,7 +47,6 @@ public struct CirclePackView<DetailView: View>: View {
         rotationAngle: Angle = .degrees(45),
         @ViewBuilder detailViewBuilder: @escaping (CircleData) -> DetailView
     ) {
-        print("init CirclePackView")
         self.option = .init()
         self.namespace = namespace
         self.circleData = data.rotate(degree: rotationAngle)
@@ -66,27 +66,34 @@ public struct CirclePackView<DetailView: View>: View {
             
             // Circle pack 메인 뷰
             ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                ZStack(alignment: .center) {
-                    Color.clear.id(0) // Center position
-                    
-                    ForEach(circleData) { data in
-                        if data == focusedCircleData {
-                            Circle().fill(.clear)
-                        } else {
-                            SubCircleView(
-                                namespace: namespace,
-                                outboundLength: option.outboundLength,
-                                circleData: data,
-                                onTapGesture: {
-                                    guard animationEnded else { return }
-                                    option.onCircleTappedHandler(data)
-                                    focusedCircleData = data
-                                })
+                ScrollViewReader { proxy in
+                    ZStack(alignment: .center) {
+                        Color.clear.id(0) // Center position
+                        
+                        ForEach(circleData) { data in
+                            if data == focusedCircleData {
+                                Circle().fill(.clear)
+                            } else {
+                                SubCircleView(
+                                    namespace: namespace,
+                                    outboundLength: option.outboundLength,
+                                    circleData: data,
+                                    onTapGesture: {
+                                        guard animationEnded else { return }
+                                        guard option.enableTapOnSubCircles else { return }
+                                        
+                                        option.onCircleTappedHandler(data)
+                                        focusedCircleData = data
+                                    })
+                            }
                         }
                     }
-                    .frame(width: option.outboundLength, height: option.outboundLength)
-                    .padding(option.framePadding)
-                    .scaleEffect(option.scale)
+                    .onAppear {
+                        guard firstFetch else { return }
+                        
+                        proxy.scrollTo(0)
+                        firstFetch = false
+                    }
                 }
                 .frame(width: option.outboundLength, height: option.outboundLength)
                 .scaleEffect(graphScale)
@@ -181,17 +188,17 @@ public struct CirclePackView<DetailView: View>: View {
             }
         }
         .fullScreenCover(isPresented: $showMorePersonalitySheet) {
-            FocusedCircleOverlayView(
-                focusedCircle: CircleData.emptyCircle(radius: 0.9),
-                maxShrinkageDistance: maxSheetOffset,
-                detailViewBuilder: {
-                    MorePersonalityView(store: morePersonalitystore)
-                })
-            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-            .showTopBar(true)
-            .onDismiss {
-                self.showMorePersonalitySheet = false
-            }
+//            FocusedCircleOverlayView( // use `FocusedCircleDetailView`
+//                focusedCircle: CircleData.emptyCircle( radius: 0.9),
+//                maxShrinkageDistance: maxSheetOffset,
+//                detailViewBuilder: {
+//                    MorePersonalityView(store: morePersonalitystore)
+//                })
+//            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
+//            .showTopBar(true)
+//            .onDismiss {
+//                self.showMorePersonalitySheet = false
+//            }
         }
     }
 }
@@ -330,6 +337,11 @@ extension CirclePackView {
     /// 기본값은 당연히 1입니다.
     func graphScale(_ factor: CGFloat) -> CirclePackView {
         self.option.scale = factor
+        return self
+    }
+    
+    func enableTapOnSubCircles(_ enabled: Bool) -> CirclePackView {
+        self.option.enableTapOnSubCircles = enabled
         return self
     }
     

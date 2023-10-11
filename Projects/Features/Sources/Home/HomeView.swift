@@ -9,13 +9,14 @@
 import SwiftUI
 
 import ComposableArchitecture
-
+import Core
 import DSKit
 import Domain
 import Network
 
 public struct HomeView: View {
     @State var sharedURL: ActivityViewController.SharedURL?
+    @State var needToShowProgressView = false
     
     public var store: StoreOf<HomeFeature>
     
@@ -25,32 +26,77 @@ public struct HomeView: View {
     
     public var body: some View {
         WithViewStore(store, observe: { $0.view }) { viewStore in
-            ZStack(alignment: .center) {
+            ZStack {
                 DSKitAsset.Color.keymeBlack.swiftUIColor.ignoresSafeArea()
                 
-                if(viewStore.dailyTestId != nil) {
-                    VStack {
-                        if(viewStore.isSolvedDailyTest) {
-                            dailyTestListView
-                        } else {
-                            startTestView
+                if let isSolvedTest = viewStore.isSolvedDailyTest {
+                    if isSolvedTest {
+                        dailyTestListView { questionsStat in
+                            viewStore.send(.showScoreList(
+                                circleData: CircleData(
+                                    color: Color.hex(questionsStat.category.color),
+                                    xPoint: 0,
+                                    yPoint: 0,
+                                    radius: 0.8,
+                                    metadata: CircleMetadata(
+                                        ownerId: viewStore.userId,
+                                        questionId: questionsStat.questionId,
+                                        iconURL: URL(string: questionsStat.category.iconUrl),
+                                        keyword: questionsStat.keyword,
+                                        averageScore: Float(questionsStat.avgScore ?? 0.0),
+                                        myScore: 0 // 임시로 채워놓은 값. 구조상 쩔수없음..
+                                    )), 
+                                questionText: questionsStat.title))
                         }
-                        
-                        Spacer()
-                        
-                        bottomButton(viewStore)
-                        
-                        Spacer()
-                            .frame(height: 26)
+                        .overlay {
+                            LinearGradient(
+                                colors: [.black.opacity(0), .black],
+                                startPoint: .init(x: 0.5, y: 0.75),
+                                endPoint: .bottom)
+                            .allowsHitTesting(false)
+                        }
+                    } else {
+                        startTestView
                     }
+                    
+                    VStack {
+                        Spacer()
+                        bottomButton(isSolved: isSolvedTest) {
+                            HapticManager.shared.boong()
+                            
+                            @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
+                            needToShowProgressView = true
+                            
+                            if isSolvedTest {
+                                let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                                let shortURL = try await shortURLAPIManager.request(
+                                    .shortenURL(longURL: url),
+                                    object: BitlyResponse.self).link
+                                
+                                sharedURL = ActivityViewController.SharedURL(shortURL)
+                            } else {
+                                viewStore.send(.startTest(.presented(.startButtonDidTap)))
+                            }
+                        }
+                    }
+                    .padding(.bottom, 26)
                 }
             }
             .onAppear {
-                if viewStore.dailyTestId == nil {
+                if viewStore.isSolvedDailyTest == nil {
                     viewStore.send(.fetchDailyTests)
                 }
             }
+            .animation(Animation.customInteractiveSpring(), value: viewStore.isSolvedDailyTest)
+            .animation(Animation.customInteractiveSpring(), value: needToShowProgressView)
+            .fullscreenProgressView(isShown: needToShowProgressView)
         }
+        .navigationDestination(
+            store: store.scope(
+                state: \.$scoreListState,
+                action: HomeFeature.Action.circleAndScoreList),
+            destination: { CircleAndScoreListView(store: $0) }
+        )
         .alert(store: store.scope(state: \.$alertState, action: HomeFeature.Action.alert))
     }
 }
@@ -72,51 +118,38 @@ extension HomeView {
         }
     }
     
-    var dailyTestListView: some View {
+    func dailyTestListView(
+        _ onItemTapped: @escaping (QuestionsStatisticsData) -> Void
+    ) -> some View {
         let dailyTestListStore = store.scope(
             state: \.$dailyTestListState,
             action: HomeFeature.Action.dailyTestList
         )
         
         return IfLetStore(dailyTestListStore) { store in
-            DailyTestListView(store: store)
+            return DailyTestListView(store: store, onItemTapped: onItemTapped)
         }
     }
 }
 
 extension HomeView {
+    typealias AsyncThrowClosure = @Sendable () async throws -> Void
+    
     // 하단 버튼 (시작하기 / 공유하기)
-    func bottomButton(_ viewStore: ViewStore<HomeFeature.State.View, HomeFeature.Action>) -> some View {
-        @Dependency(\.shortUrlAPIManager) var shortURLAPIManager
-        
+    func bottomButton(isSolved: Bool, action: @escaping AsyncThrowClosure) -> some View {
         return ZStack {
             Rectangle()
                 .cornerRadius(16)
                 .foregroundColor(DSKitAsset.Color.keymeWhite.swiftUIColor)
-
-            Text(viewStore.isSolvedDailyTest ? "친구에게 공유하기" : "시작하기")
-                .font(Font(DSKitFontFamily.Pretendard.bold.font(size: 18)))
+            
+            Text.keyme(isSolved ? "테스트 공유하기" : "시작하기", font: .body2)
                 .foregroundColor(.black)
         }
-        .padding([.leading, .trailing], 16)
+        .padding(.horizontal, 16)
         .frame(height: 60)
         .onTapGesture {
             Task {
-                guard let testId = viewStore.testId else {
-                    viewStore.send(.showErrorAlert(.cannotGenerateTestLink))
-                    return
-                }
-                
-                if viewStore.isSolvedDailyTest {
-                    let url = "https://keyme-frontend.vercel.app/test/\(testId)"
-                    let shortURL = try await shortURLAPIManager.request(
-                        .shortenURL(longURL: url),
-                        object: BitlyResponse.self).link
-
-                    sharedURL = ActivityViewController.SharedURL(shortURL)
-                } else {
-                    viewStore.send(.startTest(.presented(.startButtonDidTap)))
-                }
+                try await action()
             }
         }
         .sheet(item: $sharedURL) { item in
@@ -125,6 +158,9 @@ extension HomeView {
                     get: { sharedURL != nil },
                     set: { if !$0 { sharedURL = nil } }),
                 activityItems: [item.sharedURL])
+            .onAppear {
+                needToShowProgressView = false
+            }
         }
     }
 }

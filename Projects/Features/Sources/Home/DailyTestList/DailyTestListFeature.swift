@@ -15,8 +15,12 @@ public struct DailyTestListFeature: Reducer {
     @Dependency(\.keymeAPIManager) private var network
 
     public struct State: Equatable {
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
+        }
         let testData: KeymeTestsModel
-        var dailyStatistics: DailyStatisticsModel = .EMPTY
+        var dailyStatistics: StatisticsData?
         
         init(testData: KeymeTestsModel) {
             self.testData = testData
@@ -27,7 +31,7 @@ public struct DailyTestListFeature: Reducer {
         case onAppear
         case onDisappear
         case fetchDailyStatistics
-        case saveDailyStatistics(DailyStatisticsModel)
+        case saveDailyStatistics(StatisticsData)
         case shareButtonDidTap
     }
     
@@ -45,10 +49,13 @@ public struct DailyTestListFeature: Reducer {
                 return .cancel(id: CancelID.dailyTestList)
                 
             case .fetchDailyStatistics:
+                state.dailyStatistics = nil
+                
                 return .run { [testId = state.testData.testId] send in
-                    let dailyStatisticsData = try await network.request(.test(.statistics(testId)), object: StatisticsDTO.self)
-                    let dailyStatistics = dailyStatisticsData.toDailyStatisticsModel()
-                    await send(.saveDailyStatistics(dailyStatistics))
+                    let dailyStatisticsData = try await network.request(
+                        .test(.statistics(testId)), object: TestStatisticsDTO.self
+                    ).data
+                    await send(.saveDailyStatistics(dailyStatisticsData))
                 }
                 .cancellable(id: CancelID.dailyTestList)
         

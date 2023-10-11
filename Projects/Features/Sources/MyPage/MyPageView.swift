@@ -18,8 +18,8 @@ struct MyPageView: View {
     
     private let store: StoreOf<MyPageFeature>
     private let exportModeScale = 0.7
-    private let imageSaver = ImageSaver()
     
+    @State private var needToShowProgressView = false
     @State private var tempImage: ScreenImage?
     @State private var screenshotFired: Bool = false
 
@@ -37,162 +37,116 @@ struct MyPageView: View {
                 DSKitAsset.Color.keymeBlack.swiftUIColor
                     .ignoresSafeArea()
                 
-                switch viewStore.nowFetching {
-                case true:
-                    ProgressView()
+                if viewStore.nowFetching {
+                    loadingView()
+                } else if viewStore.shownCircleDatalist.isEmpty {
+                    topBar(viewStore, showExportImageButton: false)
+                        .padding(.top, 10)
+                        .padding(.horizontal, 24)
                     
-                case false:
-                    if viewStore.shownCircleDatalist.isEmpty {
-                        topBar(viewStore, showExportImageButton: false)
-                            .padding(.top, 10)
-                            .padding(.horizontal, 24)
+                    emptyCircleView(shareButtonAction: {
+                        HapticManager.shared.boong()
                         
-                        emptyCircleView(shareButtonAction: {
-                            viewStore.send(.requestTestURL)
+                        needToShowProgressView = true
+                        viewStore.send(.requestTestURL)
+                    })
+                } else {
+                    // Content에 있는 뷰를 캡처하는 래퍼 뷰
+                    Screenshotter(
+                        isTakingScreenshot: $screenshotFired,
+                        content: {
+                            circlePackGraphView(viewStore)
+                        },
+                        onScreenshotTaken: {
+                            saveScreenShotWith(
+                                graphImage: $0,
+                                title: viewStore.selectedSegment.title,
+                                nickname: viewStore.nickname)
                         })
-                        
-                    } else {
-                        // Content에 있는 뷰를 캡처하는 래퍼 뷰
-                        Screenshotter(
-                            isTakingScreenshot: $screenshotFired,
-                            content: {
-                                circlePackGraphView(viewStore).ignoresSafeArea(.container, edges: .bottom)
-                            },
-                            onScreenshotTaken: {
-                                saveScreenShotWith(
-                                    graphImage: $0,
-                                    title: viewStore.selectedSegment.title,
-                                    nickname: viewStore.nickname)
-                            })
-                        
-                        // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
-                        // 탑 바, 탭 바, top5, bottom5 등
-                        if !viewStore.circleShown && !viewStore.imageExportMode {
-                            VStack(alignment: .leading, spacing: 0) {
-                                topBar(viewStore, showExportImageButton: true)
-                                    .padding(.top, 10)
-                                    .padding(.horizontal, 24)
-                                
-                                SegmentControlView(
-                                    segments: MyPageSegment.allCases,
-                                    selected: viewStore.binding(
-                                        get: \.selectedSegment,
-                                        send: { .selectSegement($0) })
-                                ) { segment in
-                                    Text.keyme(segment.title, font: .body3Semibold)
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 8)
-                                }
-                                .frame(height: 50)
-                                .padding(.horizontal, 17)
-                                .padding(.top, 25)
-                                
-                                Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
-                                    .padding(17)
-                                    .transition(.opacity)
+                    .ignoresSafeArea(.container, edges: .vertical)
+                    
+                    // 개별 원이 보이거나 사진 export 모드가 아닌 경우에만 보여주는 부분
+                    // 탑 바, 탭 바, top5, bottom5 등
+                    if !viewStore.circleShown && !viewStore.imageExportMode {
+                        VStack(alignment: .leading, spacing: 0) {
+                            topBar(viewStore, showExportImageButton: true)
+                                .padding(.top, 10)
+                                .padding(.horizontal, 24)
+                            
+                            SegmentControlView(
+                                segments: MyPageSegment.allCases,
+                                selected: viewStore.binding(
+                                    get: \.selectedSegment,
+                                    send: { .selectSegement($0) })
+                            ) { segment in
+                                Text.keyme(segment.title, font: .body3Semibold)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
                             }
-                            .foregroundColor(.white)
-                            .transition(.opacity)
+                            .frame(height: 50)
+                            .padding(.horizontal, 17)
+                            .padding(.top, 25)
+                            
+                            Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
+                                .padding(17)
+                                .transition(.opacity)
                         }
-                        
-                        // Export 모드에 진입합니다
-                        IfLetStore(store.scope(
-                            state: \.imageExportModeState,
-                            action: MyPageFeature.Action.imageExportModeAction)
-                        ) {
-                            ImageExportOverlayView(
-                                store: $0,
-                                angle: $graphRotationAngle,
-                                captureAction: {
-                                    screenshotFired = true
-                                    viewStore.send(.captureImage)
-                                },
-                                dismissAction: {
-                                    graphScale /= exportModeScale
-                                }
-                            )
-                        }
-                        .transition(
-                            .opacity.combined(with: .scale(scale: 1.5))
-                            .animation(Animation.customInteractiveSpring()))
-                        .zIndex(ViewZIndex.high.rawValue)
+                        .foregroundColor(.white)
+                        .transition(.opacity)
                     }
+                    
+                    // Export 모드에 진입합니다
+                    IfLetStore(store.scope(
+                        state: \.imageExportModeState,
+                        action: MyPageFeature.Action.imageExportModeAction)
+                    ) {
+                        ImageExportOverlayView(
+                            store: $0,
+                            angle: $graphRotationAngle,
+                            captureAction: {
+                                screenshotFired = true
+                                viewStore.send(.captureImage)
+                            },
+                            dismissAction: {
+                                graphScale /= exportModeScale
+                            }
+                        )
+                    }
+                    .transition(
+                        .opacity.combined(with: .scale(scale: 1.5))
+                        .animation(Animation.customInteractiveSpring()))
+                    .zIndex(ViewZIndex.high.rawValue)
+                    
                 }
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)
-            .navigationDestination(
-                store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
-                destination: { SettingView(store: $0) })
             .alert(store: store.scope(state: \.$alertState, action: MyPageFeature.Action.alert))
             .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
             .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
+            .animation(Animation.customInteractiveSpring(), value: viewStore.nowFetching)
             .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
-            .redacted(reason: viewStore.nowFetching ? .placeholder : [])
+            .fullscreenProgressView(isShown: needToShowProgressView)
         }
+        .navigationDestination(
+            store: store.scope(state: \.$settingViewState, action: MyPageFeature.Action.setting),
+            destination: { SettingView(store: $0) })
         .sheet(item: $tempImage, content: { image in
-            // FIXME: 디자인 나오기 전 임시
-            ZStack {
-                DSKitAsset.Color.keymeBlack.swiftUIColor
-                Image(uiImage: image.image)
-                    .resizable()
-                    .scaledToFit()
-                    .fullFrame()
-                
-                VStack {
-                    Spacer()
-                    HStack {
-                        Button(action: {
-                            let image = image.image
-
-                            if let storiesUrl = URL(string: "instagram-stories://share?source_application=969563760790586") {
-                                if UIApplication.shared.canOpenURL(storiesUrl) {
-                                    guard let imageData = image.pngData() else { return }
-                                    let pasteboardItems: [String: Any] = [
-                                        "com.instagram.sharedSticker.stickerImage": imageData,
-                                        "com.instagram.sharedSticker.backgroundTopColor": "#171717",
-                                        "com.instagram.sharedSticker.backgroundBottomColor": "#171717"
-                                    ]
-                                    let pasteboardOptions = [
-                                        UIPasteboard.OptionsKey.expirationDate:
-                                            Date().addingTimeInterval(300)
-                                    ]
-                                    UIPasteboard.general.setItems([pasteboardItems], options:
-                                                                    pasteboardOptions)
-                                    UIApplication.shared.open(storiesUrl, options: [:],
-                                                              completionHandler: nil)
-                                } else {
-                                    print("Sorry the application is not installed")
-                                }
-                            }
-                            
-                            
-                        }) {
-                            Text("스토리")
-                        }
-                        
-                        Button(action: { imageSaver.save(image.image) { error in
-                            // TODO: Show alert
-                        } }) {
-                            Text("앨범에 저장하기")
-                        }
-                        
-                        ShareLink(item: Image(uiImage: image.image), preview: SharePreview("Keyme - 나의 성격", image: Image(uiImage: image.image)))
-                    }
-                }
-            }
+            MypageImageExportPreviewView(image: image, onDismissButtonTapped: {
+                tempImage = nil
+            })
         })
         .sheet(
             store: store.scope(
                 state: \.$shareSheetState,
                 action: MyPageFeature.Action.shareSheet)
         ) { store in
-            ActivityViewController(store: store)
+            ActivityViewController(store: store).onAppear {
+                needToShowProgressView = false
+            }
         }
         .onAppear {
             store.send(.requestCircle(.top5))
             store.send(.requestCircle(.low5))
-            
-            store.send(.view(.selectSegement(.similar)))
         }
     }
     
@@ -221,11 +175,11 @@ private extension MyPageView {
                     ownerId: viewStore.userId,
                     questionId: data.metadata.questionId,
                     nickname: viewStore.nickname,
-                    keyword: data.metadata.keyword,
                     store: scoreListStore)
             })
         .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
         .activateCircleBlink(viewStore.state.shownFirstTime)
+        .enableTapOnSubCircles(!viewStore.state.imageExportMode)
         .onCircleTapped { _ in
             viewStore.send(.circleTapped)
         }
@@ -252,12 +206,11 @@ private extension MyPageView {
                 .foregroundColor(DSKitAsset.Color.keymeMediumgray.swiftUIColor)
                 .padding(.bottom, 45)
             
-            // TODO: change
             Button(action: shareButtonAction) {
                 HStack {
                     Spacer()
                     
-                    Text.keyme("친구에게 공유하기", font: .mypage).frame(height: 60)
+                    Text.keyme("테스트 공유하기", font: .body2).frame(height: 60)
                     
                     Spacer()
                 }
@@ -273,12 +226,12 @@ private extension MyPageView {
     }
     
     func topBar(
-        _ viewStore: ViewStore<MyPageFeature.State.View, MyPageFeature.Action.View>,
+        _ viewStore: ViewStore<MyPageFeature.State.View, MyPageFeature.Action.View>?,
         showExportImageButton: Bool
     ) -> some View {
         HStack(spacing: 4) {
             Button(action: {
-                viewStore.send(.enableImageExportMode)
+                viewStore?.send(.enableImageExportMode)
                 graphScale *= exportModeScale
             }) {
                 DSKitAsset.Image.photoExport.swiftUIImage
@@ -290,14 +243,10 @@ private extension MyPageView {
             Spacer()
             
             Text.keyme("마이", font: .body3Semibold)
-            Image(systemName: "info.circle")
-                .resizable()
-                .frame(width: 16, height: 16)
-                .scaledToFit()
             
             Spacer()
             
-            Button(action: { viewStore.send(.prepareSettingView) }) {
+            Button(action: { viewStore?.send(.prepareSettingView) }) {
                 DSKitAsset.Image.setting.swiftUIImage
                     .resizable()
                     .frame(width: 24, height: 24)
@@ -305,15 +254,25 @@ private extension MyPageView {
         }
         .foregroundColor(.white)
     }
+    
+    func loadingView() -> some View {
+        VStack {
+            topBar(nil, showExportImageButton: false)
+                .padding(.top, 10)
+                .padding(.horizontal, 24)
+            
+            Spacer()
+            CustomProgressView()
+            Spacer()
+            
+            HStack { Spacer() }
+        }
+        .fullFrame()
+    }
 }
 
 // MARK: - Tools
 private extension MyPageView {
-    struct ScreenImage: Identifiable {
-        let id = UUID()
-        let image: UIImage
-    }
-
     @MainActor func saveScreenShotWith(graphImage image: UIImage?, title: String, nickname: String) {
         guard let image else {
             // TODO: Show alert
@@ -326,7 +285,7 @@ private extension MyPageView {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .scaleEffect(1.0 / 0.81)
+                    .scaleEffect(1.0 / 0.7) // 여기로 캡처 스케일 조정하면 됨
             }
         }
         .frame(width: 310, height: 570) // Image size

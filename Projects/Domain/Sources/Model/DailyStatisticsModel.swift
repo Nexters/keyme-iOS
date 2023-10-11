@@ -20,12 +20,13 @@ public struct TestsStatisticsModel: Hashable, Equatable {
     public let avarageScore: Double?
 }
 
-public extension StatisticsDTO {
+public extension TestStatisticsDTO {
     func toDailyStatisticsModel() -> DailyStatisticsModel {
         let testsStatistics = data.questionsStatistics.map {
             TestsStatisticsModel(
                 keymeTests: KeymeTestsInfoModel(
                     keyword: $0.keyword,
+                    title: $0.title,
                     icon: IconModel(
                         imageURL: $0.category.iconUrl,
                         color: Color.hex($0.category.color)

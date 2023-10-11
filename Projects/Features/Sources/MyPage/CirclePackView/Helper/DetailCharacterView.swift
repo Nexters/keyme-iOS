@@ -111,11 +111,11 @@ private extension DetailCharacterView {
 struct DetailCharacterView_Previews: PreviewProvider {
     static var previews: some View {
         let scores = [
-            CharacterScore(score: 4, date: Date()),
-            CharacterScore(score: 5, date: Date()),
-            CharacterScore(score: 3, date: Date()),
-            CharacterScore(score: 1, date: Date()),
-            CharacterScore(score: 2, date: Date())
+            CharacterScore(score: 4, date: Date().toString()),
+            CharacterScore(score: 5, date: Date().toString()),
+            CharacterScore(score: 3, date: Date().toString()),
+            CharacterScore(score: 1, date: Date().toString()),
+            CharacterScore(score: 2, date: Date().toString())
         ]
         
         DetailCharacterView(title: "키미님의 애정도", subtitle: "서브타이틀", scores: scores)

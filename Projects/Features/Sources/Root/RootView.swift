@@ -59,7 +59,7 @@ public struct RootView: View {
                     }
                     .zIndex(ViewZIndex.registration.rawValue)
                     .transition(.opacity.animation(Animation.customInteractiveSpring()))
-
+                    
                 case .needOnboarding:
                     CaseLet(
                         /RootFeature.State.needOnboarding,
@@ -69,7 +69,7 @@ public struct RootView: View {
                     }
                     .zIndex(ViewZIndex.onboarding.rawValue)
                     .transition(.opacity.animation(Animation.customInteractiveSpring()))
-
+                    
                 case .canUseApp:
                     CaseLet(
                         /RootFeature.State.canUseApp,
@@ -79,7 +79,7 @@ public struct RootView: View {
                     }
                     .zIndex(ViewZIndex.main.rawValue)
                     .transition(.opacity.animation(Animation.customInteractiveSpring()))
-
+                    
                 default:
                     Text("")
                 }

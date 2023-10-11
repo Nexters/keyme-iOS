@@ -41,9 +41,7 @@ public struct OnboardingView: View {
                                 KeymeTestsView(store: store)
                                     .ignoresSafeArea(.all)
                                     .environmentObject(webViewSetup)
-                                    .transition(
-                                        .scale.combined(with: .opacity)
-                                        .animation(Animation.customInteractiveSpring(duration: 1)))
+                                    .transition(.opacity.animation(Animation.customInteractiveSpring(duration: 1)))
                             },
                             else: {
                                 splashLottieView(viewStore)
@@ -81,7 +79,7 @@ public struct OnboardingView: View {
             splashFrontView(viewStore)
         }
         .transition(
-            .asymmetric(insertion: .identity, removal: .scale)
+            .asymmetric(insertion: .identity, removal: .scale(scale: 2))
             .animation(Animation.customInteractiveSpring(duration: 1)))
     }
     

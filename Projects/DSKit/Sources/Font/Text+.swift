@@ -14,4 +14,11 @@ public extension Text {
             .font(font.value)
             .kerning(font.size * (font.kerning / 100))
     }
+    
+    func lineHeight(_ percentageLineHeight: CGFloat, forFont font: Font.App) -> some View {
+        let absoluteLineHeight = font.size * (percentageLineHeight / 100.0)
+        let lineSpacingValue = absoluteLineHeight - font.size
+        
+        return self.lineSpacing(lineSpacingValue)
+    }
 }

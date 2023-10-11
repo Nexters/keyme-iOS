@@ -65,6 +65,18 @@ public extension CircleData {
         let code: Int
         let data: ResponseData
     }
+    
+    func withUpdatedMyScore(_ newScore: Float) -> CircleData {
+        let updatedMetadata = self.metadata.withUpdatedMyScore(newScore)
+        return CircleData(
+            isEmptyCircle: self.isEmptyCircle,
+            color: self.color,
+            xPoint: self.xPoint,
+            yPoint: self.yPoint,
+            radius: self.radius,
+            metadata: updatedMetadata
+        )
+    }
 }
 
 extension CircleData.NetworkResult {
@@ -112,7 +124,8 @@ public extension CircleData.NetworkResult {
             let color = Color.hex(category.color)
             
             let metadata = CircleMetadata(
-                questionId: questionStatistic.questionId,
+                ownerId: data.memberId,
+                questionId: questionStatistic.questionId, 
                 iconURL: URL(string: category.iconUrl),
                 keyword: questionStatistic.keyword,
                 averageScore: Float(questionStatistic.avgScore),
@@ -141,7 +154,6 @@ extension CircleData: Identifiable {
         metadata.animationId
     }
 }
-
 
 public extension Array where Element == CircleData {
     func rotate(degree: Angle) -> [CircleData] {

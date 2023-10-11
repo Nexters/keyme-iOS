@@ -17,48 +17,93 @@ import UserNotifications
 import Network
 
 public final class PushNotificationManager: NSObject {
-    public private(set) var isPushNotificationGranted: Bool = false
+    @Dependency(\.userStorage) var userStorage
+    @Dependency(\.keymeAPIManager) var network
+    
+    public var isPushNotificationGranted: Bool {
+        userStorage.pushNotificationEnabled ?? true
+    }
+    
     private let userNotificationCenter = UNUserNotificationCenter.current()
-    private var application: UIApplication = .shared
+    private let application: UIApplication = .shared
     
     private var fcmToken: String?
-    private let tokenSemaphore = DispatchSemaphore(value: 0)
+    private var isRegistrationInProgress: Bool = false
+    private var tokenSemaphore = DispatchSemaphore(value: 0)
+    
+    override init() {
+        super.init()
+        
+        if isPushNotificationGranted {
+            Task { try await registerPushNotification() }
+        }
+    }
     
     /// 쓰레드 블로킹이라 웬만하면 비동기로 처리하세요. 까딱하다 앱 작살남
-    public func registerPushNotification() async -> String? {
+    public func registerPushNotification() async throws {
+        guard isRegistrationInProgress == false else {
+            return
+        }
+        
         userNotificationCenter.delegate = self
-        Messaging.messaging().delegate = self
+        isRegistrationInProgress = true
+        defer {
+            isRegistrationInProgress = false
+        }
 
         do {
-            isPushNotificationGranted = try await userNotificationCenter.requestAuthorization(
-                options: [.alert, .badge, .sound])
-            
-            guard isPushNotificationGranted else {
-                return nil
-            }
-            
+            try await userNotificationCenter.requestAuthorization(options: [.alert, .badge, .sound])
+
             // 푸시토큰 애플 서버에 등록하기
             let settings = await userNotificationCenter.notificationSettings()
             guard settings.authorizationStatus == .authorized else {
-                isPushNotificationGranted = false
-                return nil
+                userStorage.pushNotificationEnabled = false
+                return
             }
             
-            return await waitForToken(for: application)
+            await application.registerForRemoteNotifications()
+
+            // FCM 토큰 올 때까지 쓰레드 막고 기다리고 있을 것임
+            guard let fcmToken = await waitForToken(for: application) else {
+                userStorage.pushNotificationEnabled = false
+                return
+            }
+            
+            userStorage.pushNotificationEnabled = true
+            try await registerPushTokenToKeymeServer(with: fcmToken)
+            print("[KEYME]: Push notification is registered with FCM token \(fcmToken)")
         } catch {
-            return nil
+            userStorage.pushNotificationEnabled = false
         }
     }
     
-    public func unregisterPushNotification() {
-        DispatchQueue.main.async {
-            self.application.unregisterForRemoteNotifications()
+    public func unregisterPushNotification() async {
+        await application.unregisterForRemoteNotifications()
+        
+        userStorage.pushNotificationEnabled = false
+        tokenSemaphore = DispatchSemaphore(value: 0)
+        fcmToken = nil
+        
+        if let fcmToken {
+            try? await unregisterPushTokenToKeymeServer(with: fcmToken)
         }
     }
+    
+    public func passFCMToken(_ token: String) {
+        self.fcmToken = token
+        tokenSemaphore.signal()
+    }
 
+    // MARK: - Private
+    private func registerPushTokenToKeymeServer(with token: String) async throws {
+        _ = try await network.request(.pushToken(.register(token)))
+    }
+    
+    private func unregisterPushTokenToKeymeServer(with token: String) async throws {
+        _ = try await network.request(.pushToken(.delete(token)))
+    }
+    
     private func waitForToken(for application: UIApplication) async -> String? {
-        await application.registerForRemoteNotifications()
-        
         return await withCheckedContinuation { continuation in
             // If the token has already been received before this method was called
             if let token = self.fcmToken {
@@ -67,7 +112,7 @@ public final class PushNotificationManager: NSObject {
             }
             
             // Wait for the token to be received
-            DispatchQueue.global().async {
+            DispatchQueue.global(qos: .utility).async {
                 _ = self.tokenSemaphore.wait(timeout: .now() + 10)
                 if let token = self.fcmToken {
                     continuation.resume(returning: token)
@@ -80,17 +125,6 @@ public final class PushNotificationManager: NSObject {
 }
 
 extension PushNotificationManager: UNUserNotificationCenterDelegate {}
-
-extension PushNotificationManager: MessagingDelegate {
-    public func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        guard let token = fcmToken else {
-            return
-        }
-        
-        self.fcmToken = token
-        tokenSemaphore.signal()
-    }
-}
 
 extension PushNotificationManager: DependencyKey {
     public static var liveValue = PushNotificationManager()

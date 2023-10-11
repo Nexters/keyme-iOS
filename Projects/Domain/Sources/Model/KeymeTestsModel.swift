@@ -20,6 +20,7 @@ public struct KeymeTestsModel: Equatable {
 
 public struct KeymeTestsInfoModel: Hashable, Equatable {
     public let keyword: String
+    public let title: String
     public let icon: IconModel
 }
 
@@ -35,6 +36,7 @@ public extension KeymeTestsDTO {
         let tests = data.questions.map {
             KeymeTestsInfoModel(
                 keyword: $0.keyword,
+                title: $0.title,
                 icon: IconModel(
                     imageURL: $0.category.iconUrl,
                     color: Color.hex($0.category.color)

@@ -11,19 +11,37 @@ import ComposableArchitecture
 import DSKit
 import SwiftUI
 
+struct ScreenImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 public struct ImageExportOverlayFeature: Reducer {
     public struct State: Equatable {
         let title: String
-        let nickname: String
+        var nickname: String {
+            @Dependency(\.commonVariable) var commonVariable
+            return commonVariable.nickname
+        }
+        var isEditMode = true
     }
     
     public enum Action: Equatable {
         case dismissImageExportMode
+        case enableEditMode(Bool)
         case captureImage
     }
     
     public var body: some ReducerOf<Self> {
-        Reduce { _, _ in
+        Reduce { state, action in
+            switch action {
+            case .enableEditMode(let enabled):
+                state.isEditMode = enabled
+                
+            default:
+                break
+            }
+            
             return .none
         }
     }
@@ -63,6 +81,7 @@ extension MyPageView {
                         Spacer()
                         
                         photoCaptureButton(action: {
+                            HapticManager.shared.boong()
                             viewStore.send(.captureImage)
                             captureAction()
                         })
@@ -76,11 +95,17 @@ extension MyPageView {
                         nickname: viewStore.nickname)
                     .allowsHitTesting(false)
                     
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.white)
-                        Slider(value: $rotationAngle.degrees, in: -Double.pi...Double.pi, step: 0.01)
-                            .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
+                    Group {
+                        if viewStore.isEditMode {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .foregroundColor(.white)
+                                
+                                CustomSlider(value: $rotationAngle.degrees, range: -Double.pi...Double.pi)
+                            }
+                        } else {
+                            Text("Something")
+                        }
                     }
                     .padding(20)
                     .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
@@ -116,17 +141,17 @@ extension MyPageView {
         
         private func photoCaptureButton(action: @escaping Action) -> some View {
             Button(action: action) {
-                HStack {
-                    Image(systemName: "photo")
+                HStack(spacing: 4) {
+                    DSKitAsset.Image.bragging.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
                         .scaledToFit()
-                    Text.keyme("이미지 저장", font: .body4)
+                    Text.keyme("자랑하기", font: .body4)
                 }
             }
             .foregroundColor(.white)
-            .padding(.vertical, 7)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 15)
             .overlay { Capsule().stroke(DSKitAsset.Color.keymeMediumgray.swiftUIColor) }
         }
         

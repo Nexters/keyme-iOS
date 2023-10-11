@@ -10,6 +10,7 @@ import SwiftUI
 import Foundation
 
 public struct CircleMetadata {
+    public let ownerId: Int
     public let questionId: Int
     public let animationId: Int
     public let iconURL: URL?
@@ -18,6 +19,7 @@ public struct CircleMetadata {
     public let myScore: Float
     
     public init(
+        ownerId: Int,
         questionId: Int,
         animationId: Int = Int.random(in: 0...99999),
         iconURL: URL?,
@@ -25,6 +27,7 @@ public struct CircleMetadata {
         averageScore: Float,
         myScore: Float
     ) {
+        self.ownerId = ownerId
         self.questionId = questionId
         self.animationId = animationId
         self.iconURL = iconURL
@@ -32,8 +35,23 @@ public struct CircleMetadata {
         self.averageScore = averageScore
         self.myScore = myScore
     }
+}
+
+public extension CircleMetadata {
+    static var emptyData: CircleMetadata {
+       return  CircleMetadata(
+           ownerId: -1, questionId: -1, animationId: -1, iconURL: URL(string: "temp"), keyword: "", averageScore: 0.0, myScore: 0.0)
+   }
     
-    public static var emptyData: CircleMetadata {
-        return  CircleMetadata(questionId: -1, animationId: -1, iconURL: URL(string: "temp"), keyword: "", averageScore: 0.0, myScore: 0.0)
+    func withUpdatedMyScore(_ newScore: Float) -> CircleMetadata {
+        return CircleMetadata(
+            ownerId: self.ownerId,
+            questionId: self.questionId,
+            animationId: self.animationId,
+            iconURL: self.iconURL,
+            keyword: self.keyword,
+            averageScore: self.averageScore,
+            myScore: newScore
+        )
     }
 }

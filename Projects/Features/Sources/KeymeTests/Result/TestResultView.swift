@@ -64,7 +64,7 @@ public struct TestResultView: View {
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding(Padding.insets(trailing: 17))
             .onTapGesture {
-                viewStore.send(.closeButtonDidTap)
+                viewStore.send(.closeButtonDidTap(testId: viewStore.testId))
             }
     }
     
@@ -77,11 +77,13 @@ public struct TestResultView: View {
     }
     
     // 결과 확인 카드 뷰
-    @MainActor func resultCardView(_ viewStore: ViewStore<TestResultFeature.State, TestResultFeature.Action>) -> some View {
+    @MainActor func resultCardView(
+        _ viewStore: ViewStore<TestResultFeature.State, TestResultFeature.Action>
+    ) -> some View {
         ZStack {
             TabView(selection: viewStore.$testResult) {
                 ForEach(viewStore.testResults, id:\.self) {
-                    KeymeCardView(testResult: $0)
+                    KeymeCardView(nickname: viewStore.nickname, testResult: $0)
                         .tag($0)
                 }
             }
@@ -120,7 +122,6 @@ public struct TestResultView: View {
             Task {
                 // TODO: url 주석단거로 바꾸기
                 let url = "https://keyme-frontend.vercel.app/test/\(17)"
-//                let url = "https://keyme-frontend.vercel.app/test/5"
                 let shortURL = try await shortURLManager.request(
                     .shortenURL(longURL: url),
                     object: BitlyResponse.self).link

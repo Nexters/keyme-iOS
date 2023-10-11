@@ -30,8 +30,8 @@ public struct KeymeTestsDTO: Codable {
     public struct Question: Codable {
         public let category: Category
         public let keyword: String
+        public let title: String
         let questionId: Int
-        let title: String
     }
     
     public var isSolved: Bool {
@@ -39,7 +39,7 @@ public struct KeymeTestsDTO: Codable {
     }
 }
 
-public struct Category: Codable {
+public struct Category: Codable, Hashable {
     public let color: String
     public let iconUrl: String
     let name: String
