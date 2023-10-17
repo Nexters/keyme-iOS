@@ -178,7 +178,6 @@ private extension MyPageView {
                     nickname: viewStore.nickname,
                     store: scoreListStore)
             })
-        .graphFrame(length: 750)
         .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
         .activateCircleBlink(viewStore.state.shownFirstTime)
         .enableTapOnSubCircles(!viewStore.state.imageExportMode)
