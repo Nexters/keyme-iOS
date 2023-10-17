@@ -187,10 +187,11 @@ public struct MyPageImageExportView<Content: View>: View {
             content
             
             VStack(alignment: .leading, spacing: 8) {
-                Text.keyme(title, font: .body5)
-                    .foregroundColor(.white.opacity(0.3))
+//                Text.keyme(title, font: .body5)
+//                    .foregroundColor(.white.opacity(0.3))
                 
-                Text.keyme("친구들이 생각하는\n\(nickname)님의 성격은?", font: .heading1)
+                Text.keyme("친구들이 생각하는\n\(nickname)님의" +
+                           "\n\(title) 성격은?", font: .heading1)
                     .foregroundColor(.white)
                 
                 Spacer()

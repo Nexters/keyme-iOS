@@ -87,7 +87,8 @@ struct MyPageView: View {
                             .padding(.horizontal, 17)
                             .padding(.top, 25)
                             
-                            Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의 성격은?", font: .heading1)
+                            Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의" +
+                                       "\n\(viewStore.selectedSegment.title) 성격은?", font: .heading1)
                                 .padding(17)
                                 .transition(.opacity)
                         }
@@ -95,7 +96,7 @@ struct MyPageView: View {
                         .transition(.opacity)
                     }
                     
-                    // Export 모드에 진입합니다
+                    // Export 모드에 진입합니다 
                     IfLetStore(store.scope(
                         state: \.imageExportModeState,
                         action: MyPageFeature.Action.imageExportModeAction)
@@ -177,6 +178,7 @@ private extension MyPageView {
                     nickname: viewStore.nickname,
                     store: scoreListStore)
             })
+        .graphFrame(length: 750)
         .graphBackgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
         .activateCircleBlink(viewStore.state.shownFirstTime)
         .enableTapOnSubCircles(!viewStore.state.imageExportMode)
