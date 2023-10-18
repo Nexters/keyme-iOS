@@ -9,7 +9,9 @@ public extension Project {
                            internalDependencies: [TargetDependency] = [],
                            externalDependencies: [TargetDependency] = [],
                            isDynamicFramework: Bool = false,
-                           hasTestTarget: Bool = true
+                           hasResource: Bool = false,
+                           hasTestTarget: Bool = true,
+                           resourceSynthesizers: [ResourceSynthesizer] = []
     ) -> Project {
         var targets: [Target] = [ ]
         
@@ -19,12 +21,11 @@ public extension Project {
             product: isDynamicFramework ? .framework : .staticFramework,
             bundleId: "\(Environment.organizationName).\(name)",
             deploymentTarget: Environment.deploymentTarget,
-            infoPlist: .default,
+            infoPlist: .extendingDefault(with: Project.baseUrlInfoPlist),
             sources: ["Sources/**"],
-            resources: [],
+            resources: hasResource ? [.glob(pattern: "Resources/**", excluding: [])] : [],
             dependencies: internalDependencies + externalDependencies,
             settings: .settings(base: .baseSettings, configurations: XCConfig.framework)
-
         )
         targets.append(target)
         
@@ -39,7 +40,7 @@ public extension Project {
                 resources: [.glob(pattern: "Tests/Resources/**", excluding: [])],
                 dependencies: [.target(name: name)],
                 settings: .settings(base: .baseSettings, configurations: XCConfig.tests)
-
+                
             )
             targets.append(testTarget)
         }
@@ -49,7 +50,8 @@ public extension Project {
                        settings: .settings(configurations: XCConfig.project),
                        targets: targets,
                        schemes: [Scheme.makeScheme(configs: "DEV", name: "\(name)"),
-                                 Scheme.makeScheme(configs: "PROD", name: "\(name)")])
+                                 Scheme.makeScheme(configs: "PROD", name: "\(name)")],
+                       resourceSynthesizers: resourceSynthesizers)
     }
 }
 

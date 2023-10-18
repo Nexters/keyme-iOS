@@ -6,12 +6,14 @@ disabled_rules:
   - nesting
   - type_body_length
   - no_fallthrough_only
+  - multiple_closures_with_trailing_closure
+  - identifier_name
 
 analyzer_rules:
   - explicit_self
 
 included:
-  - Targets
+  - Projects
 
 # If true, SwiftLint will not fail if no lintable files are found.
 allow_zero_lintable_files: false

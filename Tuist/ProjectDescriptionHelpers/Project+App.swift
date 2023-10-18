@@ -27,7 +27,7 @@ extension Project {
             sources: ["Sources/**"],
             resources: [.glob(pattern: "Resources/**", excluding: [])],
             entitlements: .relativeToRoot("Keyme.entitlements"),
-            scripts: Project.script,
+            scripts: Project.lintScript + Project.encryptionScript,
             dependencies: internalDependencies + externalDependencies,
             settings: .settings(base: .baseSettings, configurations: XCConfig.project)
         )

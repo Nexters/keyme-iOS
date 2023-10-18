@@ -1,54 +1,57 @@
 import SwiftUI
 import UserNotifications
 
+import Core
+import ComposableArchitecture
 import FirebaseCore
 import FirebaseMessaging
 
+import Features
 import Network
+
+import KakaoSDKCommon
+import KakaoSDKAuth
 
 @main
 struct KeymeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .onOpenURL { url in
+                    if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                        AuthController.handleOpenUrl(url: url)
+                    }
+                }
         }
     }
 }
 
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        @Dependency(\.notificationManager) var notificationManager
+
+        Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token {
+                notificationManager.passFCMToken(token)
+            }
+        }
+    }
+    
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        if let kakaoAPIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_API_KEY") as? String {
+            KakaoSDK.initSDK(appKey: kakaoAPIKey)
+        }
+        
         FirebaseApp.configure()
-        Messaging.messaging().delegate = self
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            guard granted else { return }
-            
-            // 푸시토큰 애플 서버에 등록하기
-            self.getNotificationSettings()
-        }
         return true
-    }
-}
-
-extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        // Do something
-        print(messaging, fcmToken as Any)
-    }
-}
-
-extension AppDelegate {
-    private func getNotificationSettings() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            guard settings.authorizationStatus == .authorized else { return }
-            DispatchQueue.main.async {
-                UIApplication.shared.registerForRemoteNotifications()
-            }
-        }
     }
 }

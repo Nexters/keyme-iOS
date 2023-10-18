@@ -11,6 +11,7 @@ import ProjectDescriptionHelpers
 let project = Project.makeModule(
     name: "Features",
     internalDependencies: [
-        .Domain
+        .Domain,
+        .DSKit
     ]
 )

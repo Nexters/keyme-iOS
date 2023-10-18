@@ -16,6 +16,8 @@ public extension TargetDependency {
     
     static let Network = project(target: "Network", path: Path.network)
     
+    static let DSKit = project(target: "DSKit", path: Path.dskit)
+    
     static let Core = project(target: "Core", path: Path.core)
     
     static let Util = project(target: "Util", path: Path.relativeToCore("Util"))
