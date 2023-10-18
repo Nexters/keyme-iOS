@@ -69,11 +69,13 @@ public struct HomeView: View {
                             
                             if isSolvedTest {
                                 let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
-                                let shortURL = try await shortURLAPIManager.request(
-                                    .shortenURL(longURL: url),
-                                    object: BitlyResponse.self).link
-                                
-                                sharedURL = ActivityViewController.SharedURL(shortURL)
+                                sharedURL = ActivityViewController.SharedURL(url)
+                                // API 할당량 넘치면 여기서 응답을 안 주고 막혀버림;; 아나
+//                                let shortURL = try await shortURLAPIManager.request(
+//                                    .shortenURL(longURL: url),
+//                                    object: BitlyResponse.self).link
+//
+//                                sharedURL = ActivityViewController.SharedURL(shortURL)
                             } else {
                                 viewStore.send(.startTest(.presented(.startButtonDidTap)))
                             }

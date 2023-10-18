@@ -197,13 +197,16 @@ public struct MyPageFeature: Reducer {
             case .view(.requestTestURL):
                 return .run { [testURL = state.view.testURL] send in
                     do {
-                        
-                        let shortURL = try await shortURLManager.request(
-                            .shortenURL(longURL: testURL),
-                            object: BitlyResponse.self).link
-                        
-                        guard let url = URL(string: shortURL) else {
-                            await send(.showAlert(message: "링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                        // API 할당량 넘치면 여기서 응답을 안 주고 막혀버림;; 아나
+//                        let shortURL = try await shortURLManager.request(
+//                            .shortenURL(longURL: testURL),
+//                            object: BitlyResponse.self).link
+//                        
+//                        guard let url = URL(string: shortURL) else {
+//                            await send(.showAlert(message: "링크 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+//                            return
+//                        }
+                        guard let url = URL(string: testURL) else {
                             return
                         }
                         
