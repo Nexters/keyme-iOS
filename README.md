@@ -6,7 +6,7 @@
 <div align="center">
     <h4>지금 Keyme를 만나보세요</h4>
     <br>
-    <a href="https://apps.apple.com/your-app-link" target="_blank">
+    <a href="https://apps.apple.com/kr/app/keyme/id6458787411" target="_blank">
         <img src="Assets/appstore.png" height="60">
     </a>
     <a href="https://play.google.com/store/apps/details?id=your-app-id" target="_blank">
