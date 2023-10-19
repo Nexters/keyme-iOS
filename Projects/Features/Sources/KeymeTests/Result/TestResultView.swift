@@ -44,7 +44,7 @@ public struct TestResultView: View {
                 Spacer()
                 Spacer()
                 
-                bottomButton(viewStore)
+//                bottomButton(viewStore)
                 
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)

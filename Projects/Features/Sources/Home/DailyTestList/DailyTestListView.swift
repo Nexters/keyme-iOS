@@ -119,7 +119,7 @@ struct DailyTestListView: View {
                         }
                         .frame(width: 40, height: 40)
                         
-                        Text.keyme("\(nickname)님은 \(questionsStat.title)", font: .body3Semibold)
+                        Text.keyme("\(nickname)\(questionsStat.title)", font: .body3Semibold)
                             .lineHeight(140, forFont: .body3Semibold)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .truncationMode(.tail)

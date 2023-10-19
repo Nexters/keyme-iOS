@@ -41,13 +41,13 @@ public struct RegistrationView: View {
                     .padding(.bottom, 24)
                 
                 // 프로필 이미지를 등록하는 Circle
+                /*
                 PhotosPicker(selection: $selectedImage, matching: .images, photoLibrary: .shared()) {
                     profileImage(imageData: selectedImageData)
                 }
                 .onChange(of: selectedImage) { newImage in
                     Task(priority: .utility) {
                         guard let imageData = try await newImage?.loadTransferable(type: Data.self) else {
-                            // TODO: Throw error and show alert
                             return
                         }
                         
@@ -57,6 +57,7 @@ public struct RegistrationView: View {
                 }
                 
                 Spacer().frame(height: 59)
+                */
                 
                 HStack(alignment: .center, spacing: 4) {
                     Text.keyme("닉네임", font: .body3Regular)
@@ -147,9 +148,15 @@ public struct RegistrationView: View {
             .padding(.horizontal, 16)
             .onAppear {
                 nickname = viewStore.nicknameTextFieldString
+                beforeNickname = viewStore.nicknameTextFieldString
             }
             .onChange(of: nickname) { newValue in
-                guard 1 <= newValue.count, newValue.count <= 6 else {
+                guard nickname != beforeNickname else {
+                    isShake = false
+                    return
+                }
+                
+                guard 2 <= newValue.count, newValue.count <= 6 else {
                     if newValue.count > 6 {  // 최대 글자 수를 넘겼으므로 Shake Start
                         isShake = true
                         nickname = beforeNickname // 최대 글자 수를 넘기기 전에 입력한 닉네임으로 고정
