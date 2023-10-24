@@ -12,4 +12,10 @@ public struct KeymeWebViewModel: Codable, Equatable {
     public let matchRate: Float
     public let resultCode: String?
     public let testResultId: Int
+    
+    public init(matchRate: Float, resultCode: String?, testResultId: Int) {
+        self.matchRate = matchRate
+        self.resultCode = resultCode
+        self.testResultId = testResultId
+    }
 }
