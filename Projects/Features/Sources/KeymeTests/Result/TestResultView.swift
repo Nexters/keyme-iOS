@@ -42,15 +42,15 @@ public struct TestResultView: View {
                 indexDisplay(viewStore)
                 
                 Spacer()
-                Spacer()
                 
 //                bottomButton(viewStore)
                 
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
-            .padding(Padding.insets(top: 58, bottom: 54))
+            .padding(.vertical, 15)
             .onAppear {
                 viewStore.send(.viewWillAppear)
+                HapticManager.shared.unexpectedDelight()
             }
         }
     }

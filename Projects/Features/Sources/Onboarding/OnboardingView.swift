@@ -25,7 +25,7 @@ public struct OnboardingView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
                 IfLetStore(
-                    self.store.scope(
+                    store.scope(
                         state: \.testResultState,
                         action: { .testResult($0) }
                     ), then: {
@@ -33,25 +33,28 @@ public struct OnboardingView: View {
                             .transition(.opacity)
                     }, else: {
                         IfLetStore(
-                            self.store.scope(
+                            store.scope(
                                 state: \.$keymeTestsState,
                                 action: OnboardingFeature.Action.keymeTests
                             ),
                             then: { store in
-                                KeymeTestsView(store: store)
-                                    .ignoresSafeArea(.all)
-                                    .environmentObject(webViewSetup)
-                                    .transition(.opacity.animation(Animation.customInteractiveSpring(duration: 1)))
+                                NativeTestView(store: store)
+                                    .transition(
+                                        .opacity
+                                        .animation(Animation.customInteractiveSpring(duration: 1)))
                             },
                             else: {
                                 splashLottieView(viewStore)
+                                    .ignoresSafeArea()
+                                    .transition(
+                                        .asymmetric(insertion: .identity, removal: .scale(scale: 2))
+                                        .animation(Animation.customInteractiveSpring(duration: 1)))
                             }
                         )
                     }
                 )
             }
             .background(DSKitAsset.Color.keymeBlack.swiftUIColor)
-            .ignoresSafeArea()
         }
     }
     
@@ -78,9 +81,6 @@ public struct OnboardingView: View {
             
             splashFrontView(viewStore)
         }
-        .transition(
-            .asymmetric(insertion: .identity, removal: .scale(scale: 2))
-            .animation(Animation.customInteractiveSpring(duration: 1)))
     }
     
     func splashFrontView(_ viewStore: ViewStore<OnboardingFeature.State, OnboardingFeature.Action>) -> some View {
@@ -106,6 +106,7 @@ public struct OnboardingView: View {
                 .onTapGesture {
                     HapticManager.shared.boong()
                     viewStore.send(
+//                        .startButtonDidTap
                         viewStore.lottieType == .question ? .startButtonDidTap : .nextButtonDidTap
                     )
                 }

@@ -12,6 +12,8 @@ import ComposableArchitecture
 import DSKit
 import Domain
 
+import Network
+
 public enum LottieType: CaseIterable {
     case splash1
     case splash2
@@ -40,7 +42,7 @@ public enum LottieType: CaseIterable {
         case .splash3:
             return ""
         case .question:
-            return "환영해요 키미님!\n이제 문제를 풀어볼까요?" // FIXME: fixme
+            return "환영해요!\n이제 문제를 풀어볼까요?"
         }
     }
 }
@@ -53,11 +55,11 @@ public struct OnboardingFeature: Reducer {
     }
     
     public struct State: Equatable {
-        @PresentationState public var keymeTestsState: KeymeTestsFeature.State?
+        @PresentationState public var keymeTestsState: NativeTestFeature.State?
         public var testResultState: TestResultFeature.State?
         public var status: Status = .notDetermined
         
-        public var testId: Int
+        public var testData: TestData
         public var lottieType: LottieType = .splash1
         public var isButtonShown: Bool = false
         public var isLoop: Bool = false
@@ -66,21 +68,21 @@ public struct OnboardingFeature: Reducer {
         
         let authorizationToken: String
         let nickname: String
-        public init(authorizationToken: String, nickname: String, testId: Int) {
+        public init(authorizationToken: String, nickname: String, testData: TestData) {
             self.authorizationToken = authorizationToken
             self.nickname = nickname
-            self.testId = testId
+            self.testData = testData
         }
     }
     
     public enum Action: Equatable {
-        case keymeTests(PresentationAction<KeymeTestsFeature.Action>)
+        case keymeTests(PresentationAction<NativeTestFeature.Action>)
         case testResult(TestResultFeature.Action)
         case nextButtonDidTap
         case lottieEnded
         case startButtonDidTap
         
-        case showResult(data: KeymeWebViewModel)
+        case showResult(data: TestResult)
         case succeeded
         case failed
     }
@@ -111,16 +113,22 @@ public struct OnboardingFeature: Reducer {
                 }
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(state.testId)"
-                state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
+                let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
+                state.keymeTestsState = NativeTestFeature.State(
+                    testId: state.testData.testId,
+                    nickname: state.nickname,
+                    url: url,
+                    authorizationToken: state.authorizationToken,
+                    questions: state.testData.questions
+                )
                 
-            case .keymeTests(.presented(.view(.showResult(let data)))):
+            case .keymeTests(.presented(.showResult(let data))):
                 return .send(.showResult(data: data))
                 
             case .showResult(data: let data):
                 state.testResultState = TestResultFeature.State(
                     testResultId: data.testResultId,
-                    testId: state.testId,
+                    testId: state.testData.testId,
                     nickname: state.nickname
                 )
                 
@@ -143,7 +151,7 @@ public struct OnboardingFeature: Reducer {
             return .none
         }
         .ifLet(\.$keymeTestsState, action: /Action.keymeTests) {
-            KeymeTestsFeature()
+            NativeTestFeature()
         }
         .ifLet(\.testResultState, action: /Action.testResult) {
             TestResultFeature()

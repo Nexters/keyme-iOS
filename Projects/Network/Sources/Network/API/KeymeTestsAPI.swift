@@ -16,9 +16,15 @@ public enum KeymeTestsAPI {
     case statistics(Int)
     case result(Int)
     case register(String)
+    case submit(testId: Int, [(questionId: Int, score: Int)])
 }
 
 extension KeymeTestsAPI: BaseAPI {
+    private struct QuestionSubmitForm: Encodable {
+        let questionId: Int
+        let score: Int
+    }
+    
     public var path: String {
         switch self {
         case .onboarding:
@@ -31,12 +37,14 @@ extension KeymeTestsAPI: BaseAPI {
             return "tests/result/\(testResultId)"
         case .register:
             return "tests/result/register"
+        case .submit(let testId, _):
+            return "tests/\(testId)/submit"
         }
     }
     
     public var method: Moya.Method {
         switch self {
-        case .register:
+        case .register, .submit:
             return .post
         default:
             return .get
@@ -47,6 +55,9 @@ extension KeymeTestsAPI: BaseAPI {
         switch self {
         case .register(let resultCode):
             return .requestParameters(parameters: ["resultCode": resultCode], encoding: JSONEncoding.default)
+        case .submit(_, let rawResults):
+            let results = rawResults.map { QuestionSubmitForm(questionId: $0.questionId, score: $0.score) }
+            return .requestJSONEncodable(["results": results])
         default:
             return .requestPlain
         }
