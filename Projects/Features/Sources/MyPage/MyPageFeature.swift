@@ -41,7 +41,7 @@ public struct MyPageFeature: Reducer {
                 return commonVariable.nickname
             }
             let testId: Int
-            var testURL: String { "https://keyme-frontend.vercel.app/test/\(testId)" }
+            var testURL: String { CommonVariable.testPageURLString(testId: testId) }
             
             var imageExportMode = false
             
@@ -80,6 +80,7 @@ public struct MyPageFeature: Reducer {
             case prepareSettingView
             case selectSegement(MyPageSegment)
             case enableImageExportMode
+            case disableImageExportMode
             case captureImage
             case requestTestURL
         }
@@ -191,6 +192,11 @@ public struct MyPageFeature: Reducer {
                 
             case .view(.enableImageExportMode):
                 state.imageExportModeState = ImageExportOverlayFeature.State(title: state.view.selectedSegment.title)
+                
+                return .none
+                
+            case .view(.disableImageExportMode):
+                state.imageExportModeState = nil
                 
                 return .none
                 

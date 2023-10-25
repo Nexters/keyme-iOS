@@ -27,6 +27,7 @@ public struct NativeTestFeature: Reducer {
         let questions: [Question]
         
         var questionsWithScore: [QuestionWithScore]
+        var needToShowProgress: Bool = false
         
         @PresentationState var alertState: AlertState<Action.Alert>?
         
@@ -58,6 +59,7 @@ public struct NativeTestFeature: Reducer {
         case view(View)
         case alert(PresentationAction<Alert>)
         
+        case showProgress(enabled: Bool)
         case showErrorAlert(message: String)
         
         public enum View: Equatable {
@@ -104,6 +106,8 @@ public struct NativeTestFeature: Reducer {
                 })
                 
             case .view(.postResult):
+                state.needToShowProgress = true
+                
                 return .run { [state] send in
                     do {
                         let response = try await self.network.request(
@@ -113,9 +117,10 @@ public struct NativeTestFeature: Reducer {
                             object: SubmitResponseDTO.self)
                         
                         await send(.showResult(response.data))
+                        await send(.showProgress(enabled: false))
                     } catch {
-                        print(error)
                         await send(.showErrorAlert(message: "오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                        await send(.showProgress(enabled: false))
                     }
                 }
                 
@@ -128,7 +133,12 @@ public struct NativeTestFeature: Reducer {
             case .submit:
                 return .none
                 
+            case .showProgress(let enabled):
+                state.needToShowProgress = enabled
+                return .none
+                
             case .showErrorAlert(let message):
+                state.needToShowProgress = false
                 state.alertState = AlertState.errorWithMessage(message)
                 
             case .alert(.presented(.closeTest)):
@@ -221,6 +231,7 @@ public struct NativeTestView: View {
                 .toolbar(.hidden, for: .navigationBar)
                 .alert(store: store.scope(state: \.$alertState, action: NativeTestFeature.Action.alert))
             }
+            .fullscreenProgressView(isShown: viewStore.needToShowProgress)
         }
         .transition(.opacity.animation(Animation.customInteractiveSpring(duration: 1)))
     }

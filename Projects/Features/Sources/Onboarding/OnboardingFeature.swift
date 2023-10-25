@@ -113,7 +113,7 @@ public struct OnboardingFeature: Reducer {
                 }
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
+                let url = CommonVariable.testPageURLString(testId: state.testData.testId) 
                 state.keymeTestsState = NativeTestFeature.State(
                     testId: state.testData.testId,
                     nickname: state.nickname,

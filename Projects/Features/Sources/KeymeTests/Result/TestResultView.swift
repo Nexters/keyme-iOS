@@ -120,8 +120,7 @@ public struct TestResultView: View {
         .frame(height: 60)
         .onTapGesture {
             Task {
-                // TODO: url 주석단거로 바꾸기
-                let url = "https://keyme-frontend.vercel.app/test/\(17)"
+                let url = CommonVariable.testPageURLString(testId: viewStore.testId)
                 let shortURL = try await shortURLManager.request(
                     .shortenURL(longURL: url),
                     object: BitlyResponse.self).link

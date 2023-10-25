@@ -68,7 +68,7 @@ public struct HomeView: View {
                             needToShowProgressView = true
                             
                             if isSolvedTest {
-                                let url = "https://keyme-frontend.vercel.app/test/\(viewStore.testId)"
+                                let url = CommonVariable.testPageURLString(testId: viewStore.testId)
                                 sharedURL = ActivityViewController.SharedURL(url)
                                 // API 할당량 넘치면 여기서 응답을 안 주고 막혀버림;; 아나
 //                                let shortURL = try await shortURLAPIManager.request(
