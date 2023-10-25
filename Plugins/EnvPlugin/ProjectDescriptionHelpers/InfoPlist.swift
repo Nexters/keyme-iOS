@@ -9,7 +9,7 @@ import ProjectDescription
 
 public extension Project {
     static let infoPlist: [String: InfoPlist.Value] =  [
-        "CFBundleShortVersionString": "1.0.1",
+        "CFBundleShortVersionString": "1.0.2",
         "CFBundleVersion": "1",
         "UIMainStoryboardFile": "",
         "UILaunchStoryboardName": "LaunchScreen",
