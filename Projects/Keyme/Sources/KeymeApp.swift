@@ -31,7 +31,7 @@ struct KeymeApp: App {
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         @Dependency(\.notificationManager) var notificationManager
-
+        
         Messaging.messaging().apnsToken = deviceToken
         Messaging.messaging().token { token, error in
             if let error = error {
@@ -46,6 +46,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        @Dependency(\.notificationManager) var notificationManager
+        Task { try await notificationManager.registerPushNotification() }
+    
         if let kakaoAPIKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_API_KEY") as? String {
             KakaoSDK.initSDK(appKey: kakaoAPIKey)
         }

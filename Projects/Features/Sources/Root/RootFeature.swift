@@ -95,7 +95,7 @@ public struct RootFeature: Reducer {
                                         .needOnboarding(OnboardingFeature.State(
                                             authorizationToken: accessToken,
                                             nickname: nickname,
-                                            testId: try await onboardingTestId))))
+                                            testData: try await onboardingTest))))
                             } else {
                                 // 온보딩 진행한 유저로서 메인페이지 이동
                                 await send(
@@ -189,6 +189,13 @@ private extension RootFeature {
     var logout: Effect<RootFeature.Action> {
         userStorage.accessToken = nil
         return .send(.updateState(.needSignIn(SignInFeature.State())))
+    }
+    
+    var onboardingTest: TestData {
+        get async throws {
+            let testIdObject = try await network.request(.test(.onboarding), object: KeymeTestsDTO.self)
+            return testIdObject.data
+        }
     }
     
     var onboardingTestId: Int {
