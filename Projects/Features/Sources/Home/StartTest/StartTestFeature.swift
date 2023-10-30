@@ -79,7 +79,7 @@ public struct StartTestFeature: Reducer {
                 state.icon = icon
                 
             case .startButtonDidTap:
-                let url = "https://keyme-frontend.vercel.app/test/\(state.testData.testId)"
+                let url = CommonVariable.testPageURLString(testId: state.testData.testId)
                 state.keymeTestsState = KeymeTestsFeature.State(url: url, authorizationToken: state.authorizationToken)
                 
             case .keymeTests(.presented(.close)):

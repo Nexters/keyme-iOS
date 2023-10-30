@@ -291,7 +291,7 @@ private extension NativeTestContentView {
                             VStack {
                                 Spacer().frame(height: 25 * 2)
                                 TestContentCircle(
-                                    question: questionsWithScore[min(questionIndexBuffer + 2, limit)].question,
+                                    question: questionsWithScore[min(questionIndexBuffer + 2, limit - 1)].question,
                                     circleRadius: calculateRadius(score: 3, width: proxy.size.width),
                                     color: .white
                                 )

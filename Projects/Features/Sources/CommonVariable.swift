@@ -11,6 +11,9 @@ import ComposableArchitecture
 public final class CommonVariable {
     var userId: Int!
     var nickname: String!
+    static func testPageURLString(testId: Int) -> String {
+        return "https://web.keyme.space/test/\(testId)"
+    }
 }
 
 extension CommonVariable: DependencyKey {

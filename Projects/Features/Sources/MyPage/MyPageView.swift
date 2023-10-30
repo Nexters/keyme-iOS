@@ -96,7 +96,7 @@ struct MyPageView: View {
                         .transition(.opacity)
                     }
                     
-                    // Export 모드에 진입합니다 
+                    // Export 모드에 진입합니다
                     IfLetStore(store.scope(
                         state: \.imageExportModeState,
                         action: MyPageFeature.Action.imageExportModeAction)
@@ -115,17 +115,21 @@ struct MyPageView: View {
                     }
                     .transition(
                         .opacity.combined(with: .scale(scale: 1.5))
-                        .animation(Animation.customInteractiveSpring()))
+                        .animation(Animation.customInteractiveSpring(duration: 0.5)))
                     .zIndex(ViewZIndex.high.rawValue)
-                    
                 }
             }
             .toolbar(viewStore.imageExportMode ? .hidden : .visible, for: .tabBar)
+//            .onDisappear {
+//                viewStore.send(.disableImageExportMode)
+//                graphScale /= exportModeScale
+//            }
+            .fullFrame()
+            .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
             .alert(store: store.scope(state: \.$alertState, action: MyPageFeature.Action.alert))
             .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.circleShown)
-            .animation(Animation.customInteractiveSpring(), value: viewStore.imageExportMode)
-            .animation(Animation.customInteractiveSpring(), value: viewStore.nowFetching)
-            .border(DSKitAsset.Color.keymeBlack.swiftUIColor, width: viewStore.imageExportMode ? 5 : 0)
+            .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.imageExportMode)
+            .animation(Animation.customInteractiveSpring(duration: 0.5), value: viewStore.nowFetching)
             .fullscreenProgressView(isShown: needToShowProgressView)
         }
         .navigationDestination(
