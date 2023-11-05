@@ -87,10 +87,24 @@ struct MyPageView: View {
                             .padding(.horizontal, 17)
                             .padding(.top, 25)
                             
-                            Text.keyme("친구들이 생각하는\n\(viewStore.nickname)님의" +
-                                       "\n\(viewStore.selectedSegment.title) 성격은?", font: .heading1)
-                                .padding(17)
-                                .transition(.opacity)
+                            Group {
+                                if viewStore.nickname.count > 3 {
+                                    Text.keyme("친구들이 생각하는" +
+                                               "\n" +
+                                               "\(viewStore.nickname)님과 " +
+                                               "\n" +
+                                               "\(viewStore.selectedSegment.title) 성격은?", 
+                                               font: .heading1)
+                                } else {
+                                    Text.keyme("친구들이 생각하는" +
+                                               "\n" +
+                                               "\(viewStore.nickname)님과 \(viewStore.selectedSegment.title) 성격은?", 
+                                               font: .heading1)
+                                }
+                            }
+                            .lineSpacing(4)
+                            .padding(17)
+                            .transition(.opacity)
                         }
                         .foregroundColor(.white)
                         .transition(.opacity)

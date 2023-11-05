@@ -18,7 +18,9 @@ public struct CharacterScore: Identifiable, Equatable {
     
     public init(score: Int, date: String) {
         globalDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        globalDateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        let kstTimeZone = TimeZone(identifier: "Asia/Seoul")
+        globalDateFormatter.timeZone = kstTimeZone
         
         self.score = score
         self.date = globalDateFormatter.date(from: date) ?? Date()
