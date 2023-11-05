@@ -48,6 +48,7 @@ struct ScoreListView: View {
                         .redacted(reason: viewStore.nowFetching ? .placeholder : [])
                     
                     Divider().overlay(keymeWhite.opacity(0.1))
+                        .padding(.vertical, 4)
                     
                     if viewStore.nowFetching {
                         scoreListLoading()
@@ -65,9 +66,10 @@ struct ScoreListView: View {
     
     // MARK: - Subviews
     private func headerView(using viewStore: ViewStoreOf<ScoreListFeature>) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 8) {
             if let questionText = viewStore.questionText {
                 Text.keyme(nickname + questionText, font: .body1)
+                    .lineSpacing(3)
                     .foregroundColor(keymeWhite)
             } else {
                 Text("")

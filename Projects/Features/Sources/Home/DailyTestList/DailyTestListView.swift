@@ -120,7 +120,7 @@ struct DailyTestListView: View {
                         .frame(width: 40, height: 40)
                         
                         Text.keyme("\(nickname)\(questionsStat.title)", font: .body3Semibold)
-                            .lineHeight(140, forFont: .body3Semibold)
+                            .lineHeight(120, forFont: .body3Semibold)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .truncationMode(.tail)
                             .foregroundColor(.white)       

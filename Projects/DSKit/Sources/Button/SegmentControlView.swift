@@ -54,7 +54,6 @@ public struct SegmentControlView<SegmentType: Identifiable, Content: View>: View
             .animation(Animation.customInteractiveSpring(), value: selected)
         }
         .padding(4)
-
         .background {
             BackgroundBlurringView(style: .systemChromeMaterialDark)
                 .cornerRadius(16)
@@ -95,7 +94,7 @@ extension SegmentControlView {
         
         @ViewBuilder private var buttonBackground: some View {
             if selectedId.id == id.id {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
                     .fill(bgColor)
                     .matchedGeometryEffect(id: "SelectedTab", in: namespace)
             }

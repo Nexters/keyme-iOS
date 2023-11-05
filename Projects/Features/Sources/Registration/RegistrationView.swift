@@ -76,6 +76,8 @@ public struct RegistrationView: View {
                 
                 // 닉네임을 입력하는 TextField
                 TextField("Nickname", text: $nickname)
+                    .font(Font(DSKitFontFamily.Pretendard.semiBold.font(size: 16)))
+                    .kerning(16 * (-3 / 100))
                     .focused($isTextFieldFocused)
                     .placeholder(when: nickname.isEmpty, placeholder: {
                         Text.keyme("닉네임을 입력해주세요.", font: .body3Regular)
@@ -113,7 +115,8 @@ public struct RegistrationView: View {
                         .cornerRadius(8)
                         .overlay(
                             Text.keyme("친구들이 원활하게 문제를 풀 수 있도록, 나를 가장 잘 나타내는 닉네임으로 설정해주세요.", font: .body4)
-                                .lineSpacing(10)
+                                .lineSpacing(8)
+                                .padding(.horizontal, 16)
                                 .foregroundColor(.white)
                         )
                         .padding(.bottom, 64)
