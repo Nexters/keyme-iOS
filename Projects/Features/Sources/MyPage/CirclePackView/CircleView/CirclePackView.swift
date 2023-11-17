@@ -15,6 +15,8 @@ import Foundation
 
 public struct CirclePackView<DetailView: View>: View {
     private let namespace: Namespace.ID
+    private let lowestZIndex: CGFloat = 0
+    
     @Binding private var graphScale: CGFloat
     
     // 애니메이션 관련
@@ -36,10 +38,6 @@ public struct CirclePackView<DetailView: View>: View {
     private let option: CirclePackViewOption<DetailView>
     private let detailViewBuilder: (CircleData) -> DetailView
     
-    private let morePersonalitystore = Store(initialState: MorePersonalityFeature.State()) {
-        MorePersonalityFeature()
-    }
-
     public init(
         namespace: Namespace.ID,
         data: [CircleData],
@@ -50,8 +48,7 @@ public struct CirclePackView<DetailView: View>: View {
         self.option = .init()
         self.namespace = namespace
         self.circleData = data.rotate(degree: rotationAngle)
-        
-        self.morePersonalitystore.send(.loadPersonality) // 나중에 수정
+
         self.detailViewBuilder = detailViewBuilder
         
         self._graphScale = scale
@@ -62,111 +59,27 @@ public struct CirclePackView<DetailView: View>: View {
             // 백그라운드에 깔리는 배경색
             option.background
                 .ignoresSafeArea()
-                .zIndex(0)
+                .zIndex(lowestZIndex)
             
             // Circle pack 메인 뷰
-            ScrollView([.horizontal, .vertical], showsIndicators: false) {
-                ScrollViewReader { proxy in
-                    ZStack(alignment: .center) {
-                        Color.clear.id(0) // Center position
-                        
-                        ForEach(circleData) { data in
-                            if data == focusedCircleData {
-                                Circle().fill(.clear)
-                            } else {
-                                SubCircleView(
-                                    namespace: namespace,
-                                    outboundLength: option.outboundLength,
-                                    circleData: data,
-                                    onTapGesture: {
-                                        guard animationEnded else { return }
-                                        guard option.enableTapOnSubCircles else { return }
-                                        
-                                        option.onCircleTappedHandler(data)
-                                        focusedCircleData = data
-                                    })
-                            }
-                        }
-                    }
-                    .onAppear {
-                        guard firstFetch else { return }
-                        
-                        proxy.scrollTo(0)
-                        firstFetch = false
-                    }
-                }
-                .frame(width: option.outboundLength, height: option.outboundLength)
-                .scaleEffect(graphScale)
-                .padding(option.framePadding)
-                .pinchZooming(with: $graphScale)
-                .zIndex(1)
-            }
+            mainView
+                .zIndex(lowestZIndex + 1)
             
             // 아래에 깔린 뷰 블러시키는 특수 뷰
             // `opacity`를 이용해서 visibility 조절함
             BackgroundBlurringView(style: .dark)
                 .ignoresSafeArea()
-                .zIndex(1.5)
                 .opacity(focusedCircleData == nil ? 0 : 1)
                 .onTapGesture(perform: onDismiss)
+                .zIndex(lowestZIndex + 2)
             
             // 개별보기
-            VStack(alignment: .center, spacing: 0) {
-                if let focusedCircleData {
-                    Group {
-                        if isPersonalityCirclePressed {
-                            ScoreAndPersonalityView(
-                                title: "나의 점수",
-                                score: focusedCircleData.metadata.myScore)
-                        } else {
-                            ScoreAndPersonalityView(
-                                circleData: focusedCircleData)
-                        }
-                    }
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    
-                    FocusedCircleView(
-                        namespace: namespace,
-                        shrinkageDistance: currentSheetOffset,
-                        maxShrinkageDistance: maxSheetOffset,
-                        outboundLength: UIScreen.main.bounds.width * option.magnifiedCircleRatio,
-                        blinkCircle: option.activateCircleBlink,
-                        circleData: focusedCircleData)
-                    .onDragChanged(self.onDragChanged)
-                    .onDragEnded(self.onDragEnded)
-                    .onLongPressStarted {
-                        isPersonalityCirclePressed = true
-                    }
-                    .onLongPressEnded {
-                        isPersonalityCirclePressed = false
-                    }
-                    .transition(.offset(x: 1, y: 1).combined(with: .opacity))
-                    .padding(.vertical, 12)
-                    
-                    VStack {
-                        BottomSheetWrapperView {
-                            detailViewBuilder(focusedCircleData)
-                        }
-                        .onDragChanged(self.onDragChanged)
-                        .onDragEnded(self.onDragEnded)
-                    }
-                    .frame(
-                        minWidth: UIScreen.main.bounds.width,
-                        maxWidth: UIScreen.main.bounds.width,
-                        idealHeight: idealSheetHeight
-                    )
-                    .cornerRadius(16, corners: [.topLeft, .topRight])
-                    .transition(.move(edge: .bottom))
-                }
+            if let focusedCircleData {
+                individualCircleView(of: focusedCircleData)
+                    .frame(width: UIScreen.main.bounds.width)
+                    .ignoresSafeArea(edges: [.bottom])
+                    .zIndex(lowestZIndex + 3)
             }
-            .frame(width: UIScreen.main.bounds.width)
-            .ignoresSafeArea(edges: [.bottom])
-            .zIndex(2)
-            
-            // 성격 더보기
-//            morePersonalityButton
-//                .zIndex(2.5)
-//                .opacity(focusedCircleData == nil ? 1 : 0)
         }
         .animation(
             Animation.customInteractiveSpring(),
@@ -182,64 +95,97 @@ public struct CirclePackView<DetailView: View>: View {
             value: doneDragging)
         .onChange(of: focusedCircleData) { _ in
             animationEnded = false
-            // 애니메이션 끝나는 타이밍 잡기 귀찮아서 대충 시간 계산해서 적어놨는데 나중에 들어내겠음(과연..?)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
                 self.animationEnded = true
             }
         }
-        .fullScreenCover(isPresented: $showMorePersonalitySheet) {
-//            FocusedCircleOverlayView( // use `FocusedCircleDetailView`
-//                focusedCircle: CircleData.emptyCircle( radius: 0.9),
-//                maxShrinkageDistance: maxSheetOffset,
-//                detailViewBuilder: {
-//                    MorePersonalityView(store: morePersonalitystore)
-//                })
-//            .backgroundColor(DSKitAsset.Color.keymeBlack.swiftUIColor)
-//            .showTopBar(true)
-//            .onDismiss {
-//                self.showMorePersonalitySheet = false
-//            }
+    }
+    
+    var mainView: some View {
+        ScrollView([.horizontal, .vertical], showsIndicators: false) {
+            ScrollViewReader { proxy in
+                ZStack(alignment: .center) {
+                    Color.clear.id(0) // Center position
+                    
+                    ForEach(circleData) { data in
+                        if data == focusedCircleData {
+                            Circle().fill(.clear)
+                        } else {
+                            SubCircleView(
+                                namespace: namespace,
+                                outboundLength: option.outboundLength,
+                                circleData: data,
+                                onTapGesture: {
+                                    guard animationEnded else { return }
+                                    guard option.enableTapOnSubCircles else { return }
+                                    
+                                    option.onCircleTappedHandler(data)
+                                    focusedCircleData = data
+                                })
+                        }
+                    }
+                }
+                .onAppear {
+                    guard firstFetch else { return }
+                    
+                    proxy.scrollTo(0) // Scroll to center on appear
+                    firstFetch = false
+                }
+            }
+            .frame(width: option.outboundLength, height: option.outboundLength)
+            .scaleEffect(graphScale)
+            .padding(option.framePadding)
+            .pinchZooming(with: $graphScale)
         }
     }
-}
-
-private extension CirclePackView {
-    /// 성격 더보기 (얘는 나중에 밖으로 분리)
-    var morePersonalityButton: some View {
-        VStack(alignment: .center) {
-            Spacer()
-            
-            HStack {
-                Spacer()
-                
-                Button(action: {
-                    showMorePersonalitySheet = true
-                    print("Tapped")
-                }) {
-                    VStack {
-                        Text.keyme("내 성격 더보기", font: .body3Semibold)
-                        
-                        UpArrowButton()
-                            .frame(width: 24, height: 24)
-                    }
-                    .frame(height: 52)
-                    .foregroundColor(.white)
+    
+    func individualCircleView(of focusedCircleData: CircleData) -> some View {
+        VStack(alignment: .center, spacing: 0) {
+            Group {
+                if isPersonalityCirclePressed {
+                    ScoreAndPersonalityView(
+                        title: "나의 점수",
+                        score: focusedCircleData.metadata.myScore)
+                } else {
+                    ScoreAndPersonalityView(
+                        circleData: focusedCircleData)
                 }
-                .frame(width: 135, height: 75)
-                .padding(.bottom, 18)
-                .contentShape(Rectangle())
-                
-                Spacer()
             }
+            .transition(.move(edge: .top).combined(with: .opacity))
+            
+            FocusedCircleView(
+                namespace: namespace,
+                shrinkageDistance: currentSheetOffset,
+                maxShrinkageDistance: maxSheetOffset,
+                outboundLength: UIScreen.main.bounds.width * option.magnifiedCircleRatio,
+                blinkCircle: option.activateCircleBlink,
+                circleData: focusedCircleData)
+            .onDragChanged(self.onDragChanged)
+            .onDragEnded(self.onDragEnded)
+            .onLongPressStarted {
+                isPersonalityCirclePressed = true
+            }
+            .onLongPressEnded {
+                isPersonalityCirclePressed = false
+            }
+            .transition(.offset(x: 1, y: 1).combined(with: .opacity))
+            .padding(.vertical, 12)
+            
+            VStack {
+                BottomSheetWrapperView {
+                    detailViewBuilder(focusedCircleData)
+                }
+                .onDragChanged(self.onDragChanged)
+                .onDragEnded(self.onDragEnded)
+            }
+            .frame(
+                minWidth: UIScreen.main.bounds.width,
+                maxWidth: UIScreen.main.bounds.width,
+                idealHeight: idealSheetHeight
+            )
+            .cornerRadius(16, corners: [.topLeft, .topRight])
+            .transition(.move(edge: .bottom))
         }
-        .fullFrame()
-//        .background(
-//            // 위에서 약 3/4 지점에서 시작하는 그래디언트
-//            LinearGradient(
-//                colors: [.clear, .black],
-//                startPoint: .init(x: 0, y: 0.7),
-//                endPoint: .init(x: 0, y: 1))
-//            .allowsHitTesting(false))
     }
 }
 
