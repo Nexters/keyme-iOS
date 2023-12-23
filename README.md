@@ -4,6 +4,11 @@
 </div>
 
 <div align="center">
+    <h4>SNS 무료 앱 인기차트 최고 27위 🏆</h4>
+    <img width="450" alt="스크린샷 2023-12-24 오전 7 49 00" src="https://github.com/Nexters/keyme-iOS/assets/46271447/62371f3c-3774-4ecb-b9db-4bb83f43f516">
+</div>
+
+<div align="center">
     <h4>지금 Keyme를 만나보세요</h4>
     <br>
     <a href="https://apps.apple.com/kr/app/keyme/id6458787411" target="_blank">
